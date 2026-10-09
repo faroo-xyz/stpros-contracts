@@ -1,0 +1,2980 @@
+{
+  "deployed": {
+    "mainnet/DefaultProxyAdmin": {
+      "address": "0x4238ea4adfa2bd6a5fc9b5e245dc1900cf0258aa",
+      "forbidden_opcodes_present": {},
+      "record": "deployments/mainnet/DefaultProxyAdmin.json",
+      "upgrade_path_selectors": [
+        "changeProxyAdmin(address,address)",
+        "renounceOwnership()",
+        "transferOwnership(address)",
+        "upgrade(address,address)",
+        "upgradeAndCall(address,address,bytes)"
+      ]
+    },
+    "mainnet/Oracle_Implementation": {
+      "address": "0x7746ef546d562b443ae4b4145541a3b1a3d75717",
+      "forbidden_opcodes_present": {},
+      "record": "deployments/mainnet/Oracle_Implementation.json",
+      "upgrade_path_selectors": [
+        "renounceOwnership()",
+        "transferOwnership(address)"
+      ]
+    },
+    "mainnet/StPROS_Implementation": {
+      "address": "0xc096f8e4b1cc222899752a5504fde557a147c57b",
+      "forbidden_opcodes_present": {
+        "DELEGATECALL": 1
+      },
+      "record": "deployments/mainnet/StPROS_Implementation.json",
+      "upgrade_path_selectors": [
+        "renounceOwnership()",
+        "transferOwnership(address)"
+      ]
+    },
+    "mainnet/StPROS_Proxy": {
+      "address": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "forbidden_opcodes_present": {
+        "DELEGATECALL": 2
+      },
+      "record": "deployments/mainnet/StPROS_Proxy.json",
+      "upgrade_path_selectors": [
+        "changeAdmin(address)",
+        "upgradeTo(address)",
+        "upgradeToAndCall(address,bytes)"
+      ]
+    },
+    "mainnet/YieldVault": {
+      "address": "0xba6f3053d3e1eab84a8237a46409df6c2d569ab9",
+      "forbidden_opcodes_present": {
+        "DELEGATECALL": 1
+      },
+      "record": "deployments/mainnet/YieldVault.json",
+      "upgrade_path_selectors": []
+    },
+    "mainnet/YieldVaultFactory_Implementation": {
+      "address": "0x772e27a320a60aeeb0b5c68dc6c8633460ef5706",
+      "forbidden_opcodes_present": {
+        "DELEGATECALL": 3
+      },
+      "record": "deployments/mainnet/YieldVaultFactory_Implementation.json",
+      "upgrade_path_selectors": [
+        "renounceOwnership()",
+        "transferOwnership(address)",
+        "upgradeBeaconTo(address)"
+      ]
+    },
+    "testnet/BridgeVault_Implementation": {
+      "address": "0xafe333e1035020f48226c4e2931efa68a0688e47",
+      "forbidden_opcodes_present": {},
+      "record": "deployments/testnet/BridgeVault_Implementation.json",
+      "upgrade_path_selectors": [
+        "renounceOwnership()",
+        "transferOwnership(address)"
+      ]
+    },
+    "testnet/Oracle_Implementation": {
+      "address": "0xf4caf6898a9316994b736cd03b3bfbe964e95384",
+      "forbidden_opcodes_present": {},
+      "record": "deployments/testnet/Oracle_Implementation.json",
+      "upgrade_path_selectors": [
+        "renounceOwnership()",
+        "transferOwnership(address)"
+      ]
+    },
+    "testnet/SlpDistributor_Implementation": {
+      "address": "0x6a3dd86669e24723ac0ef0e30c2dd9ad1a8c2a45",
+      "forbidden_opcodes_present": {},
+      "record": "deployments/testnet/SlpDistributor_Implementation.json",
+      "upgrade_path_selectors": [
+        "renounceOwnership()",
+        "transferOwnership(address)"
+      ]
+    },
+    "testnet/StPROS_Implementation": {
+      "address": "0x64dc1e8b5e9515de37b58b4d8629bf89bcd1f576",
+      "forbidden_opcodes_present": {
+        "DELEGATECALL": 1
+      },
+      "record": "deployments/testnet/StPROS_Implementation.json",
+      "upgrade_path_selectors": [
+        "renounceOwnership()",
+        "transferOwnership(address)"
+      ]
+    },
+    "testnet/YieldVault": {
+      "address": "0x2e388f1a9c0ca3529e82e46b2ce01fdfdf635984",
+      "forbidden_opcodes_present": {},
+      "record": "deployments/testnet/YieldVault.json",
+      "upgrade_path_selectors": []
+    },
+    "testnet/YieldVaultFactory_Implementation": {
+      "address": "0xf51f16d97c80db2c55291e1add00ddfd4e7420d1",
+      "forbidden_opcodes_present": {
+        "DELEGATECALL": 2
+      },
+      "record": "deployments/testnet/YieldVaultFactory_Implementation.json",
+      "upgrade_path_selectors": [
+        "renounceOwnership()",
+        "transferOwnership(address)",
+        "upgradeBeaconTo(address)"
+      ]
+    }
+  },
+  "head": {
+    "BridgeVault": {
+      "abstract": false,
+      "code_scan_default_profile": {
+        "forbidden_opcodes_present": {},
+        "upgrade_path_selectors": [
+          "renounceOwnership()",
+          "transferOwnership(address)"
+        ]
+      },
+      "code_scan_production_profile": {
+        "forbidden_opcodes_present": {},
+        "upgrade_path_selectors": [
+          "renounceOwnership()",
+          "transferOwnership(address)"
+        ]
+      },
+      "contract": "project/contracts/BridgeVault.sol:BridgeVault",
+      "functions": [
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "BridgeVault",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "emergencyWithdraw",
+          "nonReentrant": false,
+          "params": "address,address,uint256",
+          "pausable": false,
+          "selector": "0xe63ea408",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "BridgeVault",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getBalance",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0xf8b2cb4f",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "initializer-unauthenticated",
+          "body_references_sender": false,
+          "defined_in": "BridgeVault",
+          "kind": "function",
+          "modifiers": [
+            "initializer"
+          ],
+          "name": "initialize",
+          "nonReentrant": false,
+          "params": "address,address,bool",
+          "pausable": false,
+          "selector": "0xe4bbb5a8",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "BridgeVault",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isVTokenAddress",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0xf8d95313",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "OwnableUpgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "owner",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x8da5cb5b",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "BridgeVault",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "pause",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x8456cb59",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "PausableUpgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "paused",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x5c975abb",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "OwnableUpgradeable",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "renounceOwnership",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x715018a6",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "BridgeVault",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "setVToken",
+          "nonReentrant": false,
+          "params": "address,bool,bool",
+          "pausable": false,
+          "selector": "0xbcbe2967",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "OwnableUpgradeable",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "transferOwnership",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0xf2fde38b",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "BridgeVault",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "unpause",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x3f4ba83a",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "vtoken",
+          "body_references_sender": true,
+          "defined_in": "BridgeVault",
+          "kind": "function",
+          "modifiers": [
+            "onlyVToken",
+            "whenNotPaused",
+            "nonReentrant"
+          ],
+          "name": "withdrawToken",
+          "nonReentrant": true,
+          "params": "address,address,uint256",
+          "pausable": true,
+          "selector": "0x01e33667",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "receive",
+          "body_references_sender": false,
+          "defined_in": "BridgeVault",
+          "kind": "receive",
+          "modifiers": [],
+          "name": "receive",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": null,
+          "stateMutability": "payable"
+        }
+      ],
+      "unauthenticated_state_changing": [
+        "initialize(address,address,bool)"
+      ]
+    },
+    "Oracle": {
+      "abstract": false,
+      "code_scan_default_profile": {
+        "forbidden_opcodes_present": {},
+        "upgrade_path_selectors": [
+          "renounceOwnership()",
+          "transferOwnership(address)"
+        ]
+      },
+      "code_scan_production_profile": {
+        "forbidden_opcodes_present": {},
+        "upgrade_path_selectors": [
+          "renounceOwnership()",
+          "transferOwnership(address)"
+        ]
+      },
+      "contract": "project/contracts/Oracle.sol:Oracle",
+      "functions": [
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "Oracle",
+          "kind": "function",
+          "modifiers": [],
+          "name": "canUpdate",
+          "nonReentrant": false,
+          "params": "address,uint256",
+          "pausable": false,
+          "selector": "0x52acf69a",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "Oracle",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getTokenAmountByVToken",
+          "nonReentrant": false,
+          "params": "address,uint256,enum Math.Rounding",
+          "pausable": false,
+          "selector": "0xa71b35ab",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "Oracle",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getVTokenAmountByToken",
+          "nonReentrant": false,
+          "params": "address,uint256,enum Math.Rounding",
+          "pausable": false,
+          "selector": "0x98a90900",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "initializer-unauthenticated",
+          "body_references_sender": false,
+          "defined_in": "Oracle",
+          "kind": "function",
+          "modifiers": [
+            "initializer"
+          ],
+          "name": "initialize",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0xc4d66de8",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "initializer-unauthenticated",
+          "body_references_sender": false,
+          "defined_in": "Oracle",
+          "kind": "function",
+          "modifiers": [
+            "reinitializer(2)"
+          ],
+          "name": "initializeV2",
+          "nonReentrant": false,
+          "params": "address,address,uint256,uint256",
+          "pausable": false,
+          "selector": "0x5405712c",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "initializer-unauthenticated",
+          "body_references_sender": false,
+          "defined_in": "Oracle",
+          "kind": "function",
+          "modifiers": [
+            "reinitializer(3)"
+          ],
+          "name": "initializeV2AndV3",
+          "nonReentrant": false,
+          "params": "address,address,uint256,uint256,address,uint256,address[],address[]",
+          "pausable": false,
+          "selector": "0x9ca0db1b",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "initializer-unauthenticated",
+          "body_references_sender": false,
+          "defined_in": "Oracle",
+          "kind": "function",
+          "modifiers": [
+            "reinitializer(3)"
+          ],
+          "name": "initializeV3",
+          "nonReentrant": false,
+          "params": "address,uint256,address[],address[]",
+          "pausable": false,
+          "selector": "0x098cc6c6",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "public",
+          "body_references_sender": false,
+          "defined_in": "Oracle",
+          "kind": "function",
+          "modifiers": [
+            "whenNotPaused"
+          ],
+          "name": "onMint",
+          "nonReentrant": false,
+          "params": "address,uint256,uint256",
+          "pausable": true,
+          "selector": "0x4166dfa6",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "public",
+          "body_references_sender": false,
+          "defined_in": "Oracle",
+          "kind": "function",
+          "modifiers": [
+            "whenNotPaused"
+          ],
+          "name": "onRedeem",
+          "nonReentrant": false,
+          "params": "address,uint256,uint256",
+          "pausable": true,
+          "selector": "0xe99f78ce",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "OwnableUpgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "owner",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x8da5cb5b",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "Oracle",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "pause",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x8456cb59",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "PausableUpgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "paused",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x5c975abb",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "OwnableUpgradeable",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "renounceOwnership",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x715018a6",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "Oracle",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "setCommissionConfig",
+          "nonReentrant": false,
+          "params": "address,uint256",
+          "pausable": false,
+          "selector": "0x3a156cb1",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "Oracle",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "setCommissionVToken",
+          "nonReentrant": false,
+          "params": "address,address",
+          "pausable": false,
+          "selector": "0x8013522c",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "public",
+          "body_references_sender": false,
+          "defined_in": "Oracle",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setPoolInfo",
+          "nonReentrant": false,
+          "params": "address,uint256,uint256",
+          "pausable": false,
+          "selector": "0xc901b715",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "Oracle",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "setSlp",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0xe64dcf43",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "Oracle",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "setUpdateLimits",
+          "nonReentrant": false,
+          "params": "uint256,uint256",
+          "pausable": false,
+          "selector": "0x87f4655b",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "Oracle",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "setVToken",
+          "nonReentrant": false,
+          "params": "address,bool",
+          "pausable": false,
+          "selector": "0x3da7cd56",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "OwnableUpgradeable",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "transferOwnership",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0xf2fde38b",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "Oracle",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "unpause",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x3f4ba83a",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "inline-sender-check",
+          "body_references_sender": true,
+          "defined_in": "Oracle",
+          "kind": "function",
+          "modifiers": [
+            "whenNotPaused"
+          ],
+          "name": "update",
+          "nonReentrant": false,
+          "params": "address,uint256",
+          "pausable": true,
+          "selector": "0xa2d83b5e",
+          "stateMutability": "nonpayable"
+        }
+      ],
+      "unauthenticated_state_changing": [
+        "initialize(address)",
+        "initializeV2(address,address,uint256,uint256)",
+        "initializeV2AndV3(address,address,uint256,uint256,address,uint256,address[],address[])",
+        "initializeV3(address,uint256,address[],address[])",
+        "onMint(address,uint256,uint256)",
+        "onRedeem(address,uint256,uint256)",
+        "setPoolInfo(address,uint256,uint256)"
+      ]
+    },
+    "SlpDistributor": {
+      "abstract": false,
+      "code_scan_default_profile": {
+        "forbidden_opcodes_present": {},
+        "upgrade_path_selectors": [
+          "renounceOwnership()",
+          "transferOwnership(address)"
+        ]
+      },
+      "code_scan_production_profile": {
+        "forbidden_opcodes_present": {},
+        "upgrade_path_selectors": [
+          "renounceOwnership()",
+          "transferOwnership(address)"
+        ]
+      },
+      "contract": "project/contracts/SlpDistributor.sol:SlpDistributor",
+      "functions": [
+        {
+          "authority": "keeper",
+          "body_references_sender": false,
+          "defined_in": "SlpDistributor",
+          "kind": "function",
+          "modifiers": [
+            "onlyKeeper",
+            "nonReentrant"
+          ],
+          "name": "distribute",
+          "nonReentrant": true,
+          "params": "SlpDistributor.Distribution[]",
+          "pausable": false,
+          "selector": "0x1c378573",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "SlpDistributor",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getSlps",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0xf34d8c46",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "initializer-unauthenticated",
+          "body_references_sender": false,
+          "defined_in": "SlpDistributor",
+          "kind": "function",
+          "modifiers": [
+            "initializer"
+          ],
+          "name": "initialize",
+          "nonReentrant": false,
+          "params": "address,address,address[]",
+          "pausable": false,
+          "selector": "0x77a24f36",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "SlpDistributor",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isSlp",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0x73c4bdea",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "OwnableUpgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "owner",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x8da5cb5b",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "OwnableUpgradeable",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "renounceOwnership",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x715018a6",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "SlpDistributor",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "setKeeper",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0x748747e6",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "SlpDistributor",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "setSlps",
+          "nonReentrant": false,
+          "params": "address[],bool",
+          "pausable": false,
+          "selector": "0xc6e6184a",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "SlpDistributor",
+          "kind": "function",
+          "modifiers": [],
+          "name": "slpCount",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x40d690a6",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "OwnableUpgradeable",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "transferOwnership",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0xf2fde38b",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "receive (inline sender check)",
+          "body_references_sender": true,
+          "defined_in": "SlpDistributor",
+          "kind": "receive",
+          "modifiers": [],
+          "name": "receive",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": null,
+          "stateMutability": "payable"
+        }
+      ],
+      "unauthenticated_state_changing": [
+        "initialize(address,address,address[])"
+      ]
+    },
+    "StPROS": {
+      "abstract": false,
+      "code_scan_default_profile": {
+        "forbidden_opcodes_present": {},
+        "upgrade_path_selectors": [
+          "renounceOwnership()",
+          "transferOwnership(address)"
+        ]
+      },
+      "code_scan_production_profile": {
+        "forbidden_opcodes_present": {
+          "DELEGATECALL": 1
+        },
+        "upgrade_path_selectors": [
+          "renounceOwnership()",
+          "transferOwnership(address)"
+        ]
+      },
+      "contract": "project/contracts/StPROS.sol:StPROS",
+      "functions": [
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "allowance",
+          "nonReentrant": false,
+          "params": "address,address",
+          "pausable": false,
+          "selector": "0xdd62ed3e",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "inline-sender-check",
+          "body_references_sender": true,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "approve",
+          "nonReentrant": false,
+          "params": "address,uint256",
+          "pausable": false,
+          "selector": "0x095ea7b3",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "asset",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x38d52e0f",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "balanceOf",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0x70a08231",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [],
+          "name": "canWithdrawalAmount",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0x52a630b9",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "convertToAssets",
+          "nonReentrant": false,
+          "params": "uint256",
+          "pausable": false,
+          "selector": "0x07a2d13a",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "convertToShares",
+          "nonReentrant": false,
+          "params": "uint256",
+          "pausable": false,
+          "selector": "0xc6e6f592",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "decimals",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x313ce567",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "public",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "whenNotPaused"
+          ],
+          "name": "deposit",
+          "nonReentrant": false,
+          "params": "uint256,address",
+          "pausable": true,
+          "selector": "0x6e553f65",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "inline-sender-check",
+          "body_references_sender": true,
+          "defined_in": "StPROS",
+          "kind": "function",
+          "modifiers": [
+            "whenNotPaused",
+            "nonReentrant"
+          ],
+          "name": "depositWithPROS",
+          "nonReentrant": true,
+          "params": "",
+          "pausable": true,
+          "selector": "0xb4430b99",
+          "stateMutability": "payable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getTotalBalance",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x12b58349",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getWithdrawals",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0x3a2b643a",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "initializer-unauthenticated",
+          "body_references_sender": false,
+          "defined_in": "StPROS",
+          "kind": "function",
+          "modifiers": [
+            "initializer"
+          ],
+          "name": "initialize",
+          "nonReentrant": false,
+          "params": "IERC20,address,string,string",
+          "pausable": false,
+          "selector": "0x2016a0d2",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "initializer-unauthenticated",
+          "body_references_sender": false,
+          "defined_in": "StPROS",
+          "kind": "function",
+          "modifiers": [
+            "reinitializer(2)"
+          ],
+          "name": "initializeV2",
+          "nonReentrant": false,
+          "params": "address,address payable",
+          "pausable": false,
+          "selector": "0x0840ba72",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "maxDeposit",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0x402d267d",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "maxMint",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0xc63d75b6",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "maxRedeem",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0xd905777e",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "maxWithdraw",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0xce96cb77",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "public",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "whenNotPaused"
+          ],
+          "name": "mint",
+          "nonReentrant": false,
+          "params": "uint256,address",
+          "pausable": true,
+          "selector": "0x94bf804d",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "inline-sender-check",
+          "body_references_sender": true,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "whenNotPaused"
+          ],
+          "name": "mintCommission",
+          "nonReentrant": false,
+          "params": "address,uint256",
+          "pausable": true,
+          "selector": "0xadeb0ed8",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "name",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x06fdde03",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "OwnableUpgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "owner",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x8da5cb5b",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "pause",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x8456cb59",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "PausableUpgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "paused",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x5c975abb",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "previewDeposit",
+          "nonReentrant": false,
+          "params": "uint256",
+          "pausable": false,
+          "selector": "0xef8b30f7",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "previewMint",
+          "nonReentrant": false,
+          "params": "uint256",
+          "pausable": false,
+          "selector": "0xb3d7f6b9",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "previewRedeem",
+          "nonReentrant": false,
+          "params": "uint256",
+          "pausable": false,
+          "selector": "0x4cdad506",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "previewWithdraw",
+          "nonReentrant": false,
+          "params": "uint256",
+          "pausable": false,
+          "selector": "0x0a28a477",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "public",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "whenNotPaused"
+          ],
+          "name": "redeem",
+          "nonReentrant": false,
+          "params": "uint256,address,address",
+          "pausable": true,
+          "selector": "0xba087652",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "OwnableUpgradeable",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "renounceOwnership",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x715018a6",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "setBridgeVault",
+          "nonReentrant": false,
+          "params": "address payable",
+          "pausable": false,
+          "selector": "0xebcb0b7a",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "setMaxWithdrawCount",
+          "nonReentrant": false,
+          "params": "uint256",
+          "pausable": false,
+          "selector": "0x6d67d5d4",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "setOracle",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0x7adbf973",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "setSlp",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0xe64dcf43",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "setUnbondingPeriod",
+          "nonReentrant": false,
+          "params": "uint256",
+          "pausable": false,
+          "selector": "0x114eaf55",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsInterface",
+          "nonReentrant": false,
+          "params": "bytes4",
+          "pausable": false,
+          "selector": "0x01ffc9a7",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "symbol",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x95d89b41",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [],
+          "name": "totalAssets",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x01e1d114",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "totalSupply",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x18160ddd",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "inline-sender-check",
+          "body_references_sender": true,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "transfer",
+          "nonReentrant": false,
+          "params": "address,uint256",
+          "pausable": false,
+          "selector": "0xa9059cbb",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "inline-sender-check",
+          "body_references_sender": true,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "transferFrom",
+          "nonReentrant": false,
+          "params": "address,address,uint256",
+          "pausable": false,
+          "selector": "0x23b872dd",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "OwnableUpgradeable",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "transferOwnership",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0xf2fde38b",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "unpause",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x3f4ba83a",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "public",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "whenNotPaused"
+          ],
+          "name": "withdraw",
+          "nonReentrant": false,
+          "params": "uint256,address,address",
+          "pausable": true,
+          "selector": "0xb460af94",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "inline-sender-check",
+          "body_references_sender": true,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "nonReentrant"
+          ],
+          "name": "withdrawComplete",
+          "nonReentrant": true,
+          "params": "",
+          "pausable": false,
+          "selector": "0x266a3bce",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "receive (inline sender check)",
+          "body_references_sender": true,
+          "defined_in": "StPROS",
+          "kind": "receive",
+          "modifiers": [],
+          "name": "receive",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": null,
+          "stateMutability": "payable"
+        }
+      ],
+      "unauthenticated_state_changing": [
+        "deposit(uint256,address)",
+        "initialize(IERC20,address,string,string)",
+        "initializeV2(address,address payable)",
+        "mint(uint256,address)",
+        "redeem(uint256,address,address)",
+        "withdraw(uint256,address,address)"
+      ]
+    },
+    "VToken": {
+      "abstract": false,
+      "code_scan_default_profile": {
+        "forbidden_opcodes_present": {},
+        "upgrade_path_selectors": [
+          "renounceOwnership()",
+          "transferOwnership(address)"
+        ]
+      },
+      "code_scan_production_profile": {
+        "forbidden_opcodes_present": {
+          "DELEGATECALL": 1
+        },
+        "upgrade_path_selectors": [
+          "renounceOwnership()",
+          "transferOwnership(address)"
+        ]
+      },
+      "contract": "project/contracts/VToken.sol:VToken",
+      "functions": [
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "allowance",
+          "nonReentrant": false,
+          "params": "address,address",
+          "pausable": false,
+          "selector": "0xdd62ed3e",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "inline-sender-check",
+          "body_references_sender": true,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "approve",
+          "nonReentrant": false,
+          "params": "address,uint256",
+          "pausable": false,
+          "selector": "0x095ea7b3",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "asset",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x38d52e0f",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "balanceOf",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0x70a08231",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [],
+          "name": "canWithdrawalAmount",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0x52a630b9",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "convertToAssets",
+          "nonReentrant": false,
+          "params": "uint256",
+          "pausable": false,
+          "selector": "0x07a2d13a",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "convertToShares",
+          "nonReentrant": false,
+          "params": "uint256",
+          "pausable": false,
+          "selector": "0xc6e6f592",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "decimals",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x313ce567",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "public",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "whenNotPaused"
+          ],
+          "name": "deposit",
+          "nonReentrant": false,
+          "params": "uint256,address",
+          "pausable": true,
+          "selector": "0x6e553f65",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getTotalBalance",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x12b58349",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getWithdrawals",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0x3a2b643a",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "maxDeposit",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0x402d267d",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "maxMint",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0xc63d75b6",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "maxRedeem",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0xd905777e",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "maxWithdraw",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0xce96cb77",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "public",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "whenNotPaused"
+          ],
+          "name": "mint",
+          "nonReentrant": false,
+          "params": "uint256,address",
+          "pausable": true,
+          "selector": "0x94bf804d",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "inline-sender-check",
+          "body_references_sender": true,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "whenNotPaused"
+          ],
+          "name": "mintCommission",
+          "nonReentrant": false,
+          "params": "address,uint256",
+          "pausable": true,
+          "selector": "0xadeb0ed8",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "name",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x06fdde03",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "OwnableUpgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "owner",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x8da5cb5b",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "pause",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x8456cb59",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "PausableUpgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "paused",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x5c975abb",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "previewDeposit",
+          "nonReentrant": false,
+          "params": "uint256",
+          "pausable": false,
+          "selector": "0xef8b30f7",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "previewMint",
+          "nonReentrant": false,
+          "params": "uint256",
+          "pausable": false,
+          "selector": "0xb3d7f6b9",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "previewRedeem",
+          "nonReentrant": false,
+          "params": "uint256",
+          "pausable": false,
+          "selector": "0x4cdad506",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "previewWithdraw",
+          "nonReentrant": false,
+          "params": "uint256",
+          "pausable": false,
+          "selector": "0x0a28a477",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "public",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "whenNotPaused"
+          ],
+          "name": "redeem",
+          "nonReentrant": false,
+          "params": "uint256,address,address",
+          "pausable": true,
+          "selector": "0xba087652",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "OwnableUpgradeable",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "renounceOwnership",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x715018a6",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "setBridgeVault",
+          "nonReentrant": false,
+          "params": "address payable",
+          "pausable": false,
+          "selector": "0xebcb0b7a",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "setMaxWithdrawCount",
+          "nonReentrant": false,
+          "params": "uint256",
+          "pausable": false,
+          "selector": "0x6d67d5d4",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "setOracle",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0x7adbf973",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "setSlp",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0xe64dcf43",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "setUnbondingPeriod",
+          "nonReentrant": false,
+          "params": "uint256",
+          "pausable": false,
+          "selector": "0x114eaf55",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsInterface",
+          "nonReentrant": false,
+          "params": "bytes4",
+          "pausable": false,
+          "selector": "0x01ffc9a7",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "symbol",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x95d89b41",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [],
+          "name": "totalAssets",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x01e1d114",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "totalSupply",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x18160ddd",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "inline-sender-check",
+          "body_references_sender": true,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "transfer",
+          "nonReentrant": false,
+          "params": "address,uint256",
+          "pausable": false,
+          "selector": "0xa9059cbb",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "inline-sender-check",
+          "body_references_sender": true,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "transferFrom",
+          "nonReentrant": false,
+          "params": "address,address,uint256",
+          "pausable": false,
+          "selector": "0x23b872dd",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "OwnableUpgradeable",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "transferOwnership",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0xf2fde38b",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "unpause",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x3f4ba83a",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "public",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "whenNotPaused"
+          ],
+          "name": "withdraw",
+          "nonReentrant": false,
+          "params": "uint256,address,address",
+          "pausable": true,
+          "selector": "0xb460af94",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "inline-sender-check",
+          "body_references_sender": true,
+          "defined_in": "VToken",
+          "kind": "function",
+          "modifiers": [
+            "nonReentrant"
+          ],
+          "name": "withdrawComplete",
+          "nonReentrant": true,
+          "params": "",
+          "pausable": false,
+          "selector": "0x266a3bce",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "receive",
+          "body_references_sender": false,
+          "defined_in": "VToken",
+          "kind": "receive",
+          "modifiers": [],
+          "name": "receive",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": null,
+          "stateMutability": "payable"
+        }
+      ],
+      "unauthenticated_state_changing": [
+        "deposit(uint256,address)",
+        "mint(uint256,address)",
+        "redeem(uint256,address,address)",
+        "withdraw(uint256,address,address)"
+      ]
+    },
+    "YieldVault": {
+      "abstract": false,
+      "code_scan_default_profile": {
+        "forbidden_opcodes_present": {},
+        "upgrade_path_selectors": []
+      },
+      "code_scan_production_profile": {
+        "forbidden_opcodes_present": {
+          "DELEGATECALL": 1
+        },
+        "upgrade_path_selectors": []
+      },
+      "contract": "project/contracts/YieldVault.sol:YieldVault",
+      "functions": [
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "allowance",
+          "nonReentrant": false,
+          "params": "address,address",
+          "pausable": false,
+          "selector": "0xdd62ed3e",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "inline-sender-check",
+          "body_references_sender": true,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "approve",
+          "nonReentrant": false,
+          "params": "address,uint256",
+          "pausable": false,
+          "selector": "0x095ea7b3",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "asset",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x38d52e0f",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "balanceOf",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0x70a08231",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "role:DEFAULT_ADMIN_ROLE",
+          "body_references_sender": false,
+          "defined_in": "YieldVault",
+          "kind": "function",
+          "modifiers": [
+            "onlyRole(DEFAULT_ADMIN_ROLE)",
+            "nonReentrant"
+          ],
+          "name": "cancelProposedSettlement",
+          "nonReentrant": true,
+          "params": "",
+          "pausable": false,
+          "selector": "0xfec38a35",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "convertToAssets",
+          "nonReentrant": false,
+          "params": "uint256",
+          "pausable": false,
+          "selector": "0x07a2d13a",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "convertToShares",
+          "nonReentrant": false,
+          "params": "uint256",
+          "pausable": false,
+          "selector": "0xc6e6f592",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "decimals",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x313ce567",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "public",
+          "body_references_sender": false,
+          "defined_in": "YieldVault",
+          "kind": "function",
+          "modifiers": [
+            "whenFactoryNotPaused",
+            "nonReentrant"
+          ],
+          "name": "deposit",
+          "nonReentrant": true,
+          "params": "uint256,address",
+          "pausable": true,
+          "selector": "0x6e553f65",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "factory",
+          "body_references_sender": false,
+          "defined_in": "YieldVault",
+          "kind": "function",
+          "modifiers": [
+            "onlyFactory",
+            "nonReentrant"
+          ],
+          "name": "emergencyCancel",
+          "nonReentrant": true,
+          "params": "",
+          "pausable": false,
+          "selector": "0x2c4b2308",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "role:DEFAULT_ADMIN_ROLE",
+          "body_references_sender": false,
+          "defined_in": "YieldVault",
+          "kind": "function",
+          "modifiers": [
+            "onlyRole(DEFAULT_ADMIN_ROLE)"
+          ],
+          "name": "extendOpenPeriod",
+          "nonReentrant": false,
+          "params": "uint256",
+          "pausable": false,
+          "selector": "0x6311d5df",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "public",
+          "body_references_sender": false,
+          "defined_in": "YieldVault",
+          "kind": "function",
+          "modifiers": [
+            "nonReentrant"
+          ],
+          "name": "finalize",
+          "nonReentrant": true,
+          "params": "",
+          "pausable": false,
+          "selector": "0x4bb278f3",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "inline-sender-check",
+          "body_references_sender": true,
+          "defined_in": "YieldVault",
+          "kind": "function",
+          "modifiers": [
+            "whenFactoryNotPaused",
+            "nonReentrant"
+          ],
+          "name": "fundProfit",
+          "nonReentrant": true,
+          "params": "",
+          "pausable": true,
+          "selector": "0xb9de9493",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "AccessControlUpgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getRoleAdmin",
+          "nonReentrant": false,
+          "params": "bytes32",
+          "pausable": false,
+          "selector": "0x248a9ca3",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "role:getRoleAdmin(role)",
+          "body_references_sender": false,
+          "defined_in": "AccessControlUpgradeable",
+          "kind": "function",
+          "modifiers": [
+            "onlyRole(getRoleAdmin(role))"
+          ],
+          "name": "grantRole",
+          "nonReentrant": false,
+          "params": "bytes32,address",
+          "pausable": false,
+          "selector": "0x2f2ff15d",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "AccessControlUpgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "hasRole",
+          "nonReentrant": false,
+          "params": "bytes32,address",
+          "pausable": false,
+          "selector": "0x91d14854",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "initializer-unauthenticated",
+          "body_references_sender": false,
+          "defined_in": "YieldVault",
+          "kind": "function",
+          "modifiers": [
+            "initializer"
+          ],
+          "name": "initialize",
+          "nonReentrant": false,
+          "params": "YieldVault.InitParams",
+          "pausable": false,
+          "selector": "0xd6cf39b7",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "YieldVault",
+          "kind": "function",
+          "modifiers": [],
+          "name": "lockedAt",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0xb2163482",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "YieldVault",
+          "kind": "function",
+          "modifiers": [],
+          "name": "maxDeposit",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0x402d267d",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "YieldVault",
+          "kind": "function",
+          "modifiers": [],
+          "name": "maxMint",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0xc63d75b6",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "YieldVault",
+          "kind": "function",
+          "modifiers": [],
+          "name": "maxRedeem",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0xd905777e",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "YieldVault",
+          "kind": "function",
+          "modifiers": [],
+          "name": "maxWithdraw",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0xce96cb77",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "public",
+          "body_references_sender": false,
+          "defined_in": "YieldVault",
+          "kind": "function",
+          "modifiers": [
+            "whenFactoryNotPaused",
+            "nonReentrant"
+          ],
+          "name": "mint",
+          "nonReentrant": true,
+          "params": "uint256,address",
+          "pausable": true,
+          "selector": "0x94bf804d",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "name",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x06fdde03",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "role:DEFAULT_ADMIN_ROLE",
+          "body_references_sender": false,
+          "defined_in": "YieldVault",
+          "kind": "function",
+          "modifiers": [
+            "onlyRole(DEFAULT_ADMIN_ROLE)"
+          ],
+          "name": "openNextRound",
+          "nonReentrant": false,
+          "params": "YieldVault.RoundParams",
+          "pausable": false,
+          "selector": "0x19a0c3db",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "YieldVault",
+          "kind": "function",
+          "modifiers": [],
+          "name": "phase",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0xb1c9fe6e",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "previewDeposit",
+          "nonReentrant": false,
+          "params": "uint256",
+          "pausable": false,
+          "selector": "0xef8b30f7",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "previewMint",
+          "nonReentrant": false,
+          "params": "uint256",
+          "pausable": false,
+          "selector": "0xb3d7f6b9",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "previewRedeem",
+          "nonReentrant": false,
+          "params": "uint256",
+          "pausable": false,
+          "selector": "0x4cdad506",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC4626Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "previewWithdraw",
+          "nonReentrant": false,
+          "params": "uint256",
+          "pausable": false,
+          "selector": "0x0a28a477",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "role:DEFAULT_ADMIN_ROLE",
+          "body_references_sender": true,
+          "defined_in": "YieldVault",
+          "kind": "function",
+          "modifiers": [
+            "onlyRole(DEFAULT_ADMIN_ROLE)",
+            "nonReentrant"
+          ],
+          "name": "proposeSettlement",
+          "nonReentrant": true,
+          "params": "enum YieldVault.SettleMode,uint256,address",
+          "pausable": false,
+          "selector": "0x2d659a46",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "public",
+          "body_references_sender": false,
+          "defined_in": "YieldVault",
+          "kind": "function",
+          "modifiers": [
+            "nonReentrant"
+          ],
+          "name": "redeem",
+          "nonReentrant": true,
+          "params": "uint256,address,address",
+          "pausable": false,
+          "selector": "0xba087652",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "inline-sender-check",
+          "body_references_sender": true,
+          "defined_in": "AccessControlUpgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "renounceRole",
+          "nonReentrant": false,
+          "params": "bytes32,address",
+          "pausable": false,
+          "selector": "0x36568abe",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "role:getRoleAdmin(role)",
+          "body_references_sender": false,
+          "defined_in": "AccessControlUpgradeable",
+          "kind": "function",
+          "modifiers": [
+            "onlyRole(getRoleAdmin(role))"
+          ],
+          "name": "revokeRole",
+          "nonReentrant": false,
+          "params": "bytes32,address",
+          "pausable": false,
+          "selector": "0xd547741f",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "AccessControlUpgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsInterface",
+          "nonReentrant": false,
+          "params": "bytes4",
+          "pausable": false,
+          "selector": "0x01ffc9a7",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "symbol",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x95d89b41",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "YieldVault",
+          "kind": "function",
+          "modifiers": [],
+          "name": "totalAssets",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x01e1d114",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "totalSupply",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x18160ddd",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "inline-sender-check",
+          "body_references_sender": true,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "transfer",
+          "nonReentrant": false,
+          "params": "address,uint256",
+          "pausable": false,
+          "selector": "0xa9059cbb",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "inline-sender-check",
+          "body_references_sender": true,
+          "defined_in": "ERC20Upgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "transferFrom",
+          "nonReentrant": false,
+          "params": "address,address,uint256",
+          "pausable": false,
+          "selector": "0x23b872dd",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "public",
+          "body_references_sender": false,
+          "defined_in": "YieldVault",
+          "kind": "function",
+          "modifiers": [
+            "nonReentrant"
+          ],
+          "name": "withdraw",
+          "nonReentrant": true,
+          "params": "uint256,address,address",
+          "pausable": false,
+          "selector": "0xb460af94",
+          "stateMutability": "nonpayable"
+        }
+      ],
+      "unauthenticated_state_changing": [
+        "deposit(uint256,address)",
+        "finalize()",
+        "initialize(YieldVault.InitParams)",
+        "mint(uint256,address)",
+        "redeem(uint256,address,address)",
+        "withdraw(uint256,address,address)"
+      ]
+    },
+    "YieldVaultFactory": {
+      "abstract": false,
+      "code_scan_default_profile": {
+        "forbidden_opcodes_present": {
+          "DELEGATECALL": 2
+        },
+        "upgrade_path_selectors": [
+          "renounceOwnership()",
+          "transferOwnership(address)",
+          "upgradeBeaconTo(address)"
+        ]
+      },
+      "code_scan_production_profile": {
+        "forbidden_opcodes_present": {
+          "DELEGATECALL": 3
+        },
+        "upgrade_path_selectors": [
+          "renounceOwnership()",
+          "transferOwnership(address)",
+          "upgradeBeaconTo(address)"
+        ]
+      },
+      "contract": "project/contracts/YieldVaultFactory.sol:YieldVaultFactory",
+      "functions": [
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "YieldVaultFactory",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "addCounterpartyToWhitelist",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0xbb79305a",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": true,
+          "defined_in": "YieldVaultFactory",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner",
+            "whenNotPaused"
+          ],
+          "name": "createYieldVault",
+          "nonReentrant": false,
+          "params": "YieldVault.InitParams",
+          "pausable": true,
+          "selector": "0x235fba4c",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "YieldVaultFactory",
+          "kind": "function",
+          "modifiers": [],
+          "name": "currentImplementation",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0xd8bd5c29",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": true,
+          "defined_in": "YieldVaultFactory",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "emergencyCancel",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0x7b9480f7",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "YieldVaultFactory",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getAllProxies",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x883edfb8",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "initializer-unauthenticated",
+          "body_references_sender": false,
+          "defined_in": "YieldVaultFactory",
+          "kind": "function",
+          "modifiers": [
+            "initializer"
+          ],
+          "name": "initialize",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0xc4d66de8",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "OwnableUpgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "owner",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x8da5cb5b",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "YieldVaultFactory",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "pause",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x8456cb59",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "PausableUpgradeable",
+          "kind": "function",
+          "modifiers": [],
+          "name": "paused",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x5c975abb",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "YieldVaultFactory",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "removeCounterpartyFromWhitelist",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0x8e957d22",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "OwnableUpgradeable",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "renounceOwnership",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x715018a6",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "view",
+          "body_references_sender": false,
+          "defined_in": "YieldVaultFactory",
+          "kind": "function",
+          "modifiers": [],
+          "name": "totalProxies",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0xa30385d7",
+          "stateMutability": "view"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "OwnableUpgradeable",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "transferOwnership",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0xf2fde38b",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "YieldVaultFactory",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "unpause",
+          "nonReentrant": false,
+          "params": "",
+          "pausable": false,
+          "selector": "0x3f4ba83a",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "authority": "owner",
+          "body_references_sender": false,
+          "defined_in": "YieldVaultFactory",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "upgradeBeaconTo",
+          "nonReentrant": false,
+          "params": "address",
+          "pausable": false,
+          "selector": "0x2f11fdc3",
+          "stateMutability": "nonpayable"
+        }
+      ],
+      "unauthenticated_state_changing": [
+        "initialize(address)"
+      ]
+    }
+  }
+}

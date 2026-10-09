@@ -1,0 +1,198 @@
+{
+  "contract": "project/contracts/SlpDistributor.sol:SlpDistributor",
+  "errors": [
+    {
+      "selector": "0x3b182f55",
+      "signature": "EmptyDistribution()"
+    },
+    {
+      "selector": "0xcf479181",
+      "signature": "InsufficientBalance(uint256,uint256)"
+    },
+    {
+      "selector": "0xe6c4247b",
+      "signature": "InvalidAddress()"
+    },
+    {
+      "selector": "0xf92ee8a9",
+      "signature": "InvalidInitialization()"
+    },
+    {
+      "selector": "0xd7e6bcf8",
+      "signature": "NotInitializing()"
+    },
+    {
+      "selector": "0xccf79b67",
+      "signature": "NotKeeper(address)"
+    },
+    {
+      "selector": "0x1e4fbdf7",
+      "signature": "OwnableInvalidOwner(address)"
+    },
+    {
+      "selector": "0x118cdaa7",
+      "signature": "OwnableUnauthorizedAccount(address)"
+    },
+    {
+      "selector": "0x3ee5aeb5",
+      "signature": "ReentrancyGuardReentrantCall()"
+    },
+    {
+      "selector": "0xade29e32",
+      "signature": "SlpNotWhitelisted(address)"
+    },
+    {
+      "selector": "0x1c43b976",
+      "signature": "TransferFailed(address,uint256)"
+    },
+    {
+      "selector": "0x1f2a2005",
+      "signature": "ZeroAmount()"
+    }
+  ],
+  "events": [
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        false
+      ],
+      "signature": "Distributed(address,uint256)",
+      "topic0": "0xb649c98f58055c520df0dcb5709eff2e931217ff2fb1e21376130d31bbb1c0af"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        false
+      ],
+      "signature": "Initialized(uint64)",
+      "topic0": "0xc7f505b2f371ae2175ee4913f4499e1f2633a7b5936321eed1cdaeb6115181d2"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        true
+      ],
+      "signature": "KeeperChanged(address,address)",
+      "topic0": "0x068b48a2fe7f498b57ff6da64f075ae658fde8d77124b092e62b3dc58d91ce35"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        true
+      ],
+      "signature": "OwnershipTransferred(address,address)",
+      "topic0": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        false
+      ],
+      "signature": "PROSReceived(address,uint256)",
+      "topic0": "0x23414b42274fc6196bc27afef5bf7cc89d648c1d41837ba6733763b7c34e968e"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        false
+      ],
+      "signature": "SlpWhitelistUpdated(address,bool)",
+      "topic0": "0xf2f0bb1b882fdb8058cc980b745dee97d2f077e0c5d3e6aa7be3540f96df51e1"
+    }
+  ],
+  "functions": [
+    {
+      "outputs": [],
+      "selector": "0x1c378573",
+      "signature": "distribute((address,uint256)[])",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "address[]"
+      ],
+      "selector": "0xf34d8c46",
+      "signature": "getSlps()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [],
+      "selector": "0x77a24f36",
+      "signature": "initialize(address,address,address[])",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "bool"
+      ],
+      "selector": "0x73c4bdea",
+      "signature": "isSlp(address)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "address"
+      ],
+      "selector": "0xaced1661",
+      "signature": "keeper()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "address"
+      ],
+      "selector": "0x8da5cb5b",
+      "signature": "owner()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [],
+      "selector": "0x715018a6",
+      "signature": "renounceOwnership()",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [],
+      "selector": "0x748747e6",
+      "signature": "setKeeper(address)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [],
+      "selector": "0xc6e6184a",
+      "signature": "setSlps(address[],bool)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x40d690a6",
+      "signature": "slpCount()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [],
+      "selector": "0xf2fde38b",
+      "signature": "transferOwnership(address)",
+      "stateMutability": "nonpayable"
+    }
+  ],
+  "selector_collisions": [],
+  "source": "HEAD",
+  "special": [
+    {
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "stateMutability": "payable",
+      "type": "receive"
+    }
+  ]
+}

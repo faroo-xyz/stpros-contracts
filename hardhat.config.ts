@@ -8,6 +8,12 @@ import { appTasks } from "./tasks/index.js";
 export default defineConfig({
   plugins: [HardhatDeploy, hardhatToolboxViemPlugin],
   tasks: appTasks,
+  test: {
+    solidity: {
+      // Legacy bytecode fixtures and deployed-state snapshots are read-only test inputs.
+      fsPermissions: { readDirectory: ["./test/fixtures", "./snapshots/deployed"] },
+    },
+  },
   solidity: {
     profiles: {
       default: {

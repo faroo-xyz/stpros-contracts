@@ -1,0 +1,200 @@
+{
+  "compiler": "0.8.28",
+  "limits": {
+    "eip170_runtime": 24576,
+    "eip3860_initcode": 49152
+  },
+  "openzeppelin": {
+    "contracts": "5.6.1",
+    "contracts-upgradeable": "5.6.1"
+  },
+  "profiles": {
+    "default": {
+      "BridgeVault": {
+        "contract": "project/contracts/BridgeVault.sol:BridgeVault",
+        "eip170_headroom": 16185,
+        "eip3860_headroom": 40334,
+        "identical_except_metadata_to_recorded_deployments": [],
+        "identical_to_recorded_deployments": [],
+        "initcode_keccak256": "0xffc0a421a3d9616915dfc42d2673eb530bd5b28b4c3044d66a1493a964352856",
+        "initcode_size": 8818,
+        "runtime_keccak256": "0x88945d32c54da50c94cb6f0b27d2406ebcb27ce3c47636aaf867c160b9a14c74",
+        "runtime_keccak256_without_metadata": "0x59fd1dd2f9405d64e3c46f5bc490f076036df2eb3ca96fb960ba14b0f3c4d916",
+        "runtime_size": 8391
+      },
+      "Oracle": {
+        "contract": "project/contracts/Oracle.sol:Oracle",
+        "eip170_headroom": 11361,
+        "eip3860_headroom": 35510,
+        "identical_except_metadata_to_recorded_deployments": [
+          "deployments/testnet/Oracle_Implementation.json"
+        ],
+        "identical_to_recorded_deployments": [],
+        "initcode_keccak256": "0x0f06c25cdc29a7089f8aff32508da106f223cb6f362f706c1f293b042d21e7d8",
+        "initcode_size": 13642,
+        "runtime_keccak256": "0xe117e65d11f718c73b4da2c9a333c826073f6c400dca34f4445d4836f24164f0",
+        "runtime_keccak256_without_metadata": "0xcda6bac4c3e01b291ea1880aab7d959230756d5518cf19de505d1eea5bbb9c7c",
+        "runtime_size": 13215
+      },
+      "SlpDistributor": {
+        "contract": "project/contracts/SlpDistributor.sol:SlpDistributor",
+        "eip170_headroom": 18382,
+        "eip3860_headroom": 42531,
+        "identical_except_metadata_to_recorded_deployments": [],
+        "identical_to_recorded_deployments": [],
+        "initcode_keccak256": "0xe4ee3dcb036721bf716e69c57d910e819403f78446e6b2b284e9fc0ab2167edc",
+        "initcode_size": 6621,
+        "runtime_keccak256": "0xf12e179351687f159254c260277e383336b6c1cdf46061d82901162a517db857",
+        "runtime_keccak256_without_metadata": "0x5e7c44e93c595ea26b6a8bd1c1fe08e9ff7586801390557d7081aa68dcc0f505",
+        "runtime_size": 6194
+      },
+      "StPROS": {
+        "contract": "project/contracts/StPROS.sol:StPROS",
+        "eip170_headroom": 1671,
+        "eip3860_headroom": 25806,
+        "identical_except_metadata_to_recorded_deployments": [],
+        "identical_to_recorded_deployments": [],
+        "initcode_keccak256": "0x21db4461cc1e6c01b18b63be7c496fad83fa654dfb11db6dfac61c730bbc117e",
+        "initcode_size": 23346,
+        "runtime_keccak256": "0xcd8c7e9179a62018d3a0c2412f8a79b3d38a009ab648423978be1f2c57e08a71",
+        "runtime_keccak256_without_metadata": "0xe681a47c1fe9ffb4a03610369ffddbb71061875fb1264d8fc6b895828492f182",
+        "runtime_size": 22905
+      },
+      "VToken": {
+        "contract": "project/contracts/VToken.sol:VToken",
+        "eip170_headroom": 6295,
+        "eip3860_headroom": 30444,
+        "identical_except_metadata_to_recorded_deployments": [],
+        "identical_to_recorded_deployments": [],
+        "initcode_keccak256": "0xdfab86a0f3594bdaf1a4d141d14db493f7f3ee4f39de287da96567fc390c8f3b",
+        "initcode_size": 18708,
+        "runtime_keccak256": "0xaa1106d4a220cab445e7435f90f80baff8bc9765d7e1a3ae927034f668387608",
+        "runtime_keccak256_without_metadata": "0xc69787940d5c293de92d08f5b1c6f5b45b763c7d14f0df40604b34e23f68ae87",
+        "runtime_size": 18281
+      },
+      "YieldVault": {
+        "contract": "project/contracts/YieldVault.sol:YieldVault",
+        "eip170_headroom": 1269,
+        "eip3860_headroom": 25418,
+        "identical_except_metadata_to_recorded_deployments": [],
+        "identical_to_recorded_deployments": [],
+        "initcode_keccak256": "0xdb5a0dbb1d551062877887eb390bed5c4da40e88d06ba9fe5948f3752c645555",
+        "initcode_size": 23734,
+        "runtime_keccak256": "0xbfc85668e1fbb12a453c7b80f23fbc1d652e1ff5d41e115dc5bfe19718fbff16",
+        "runtime_keccak256_without_metadata": "0x61e36184c409455bfa002bf68ad6ab2eb424f849418c2b8939e5795d40c29f40",
+        "runtime_size": 23307
+      },
+      "YieldVaultFactory": {
+        "contract": "project/contracts/YieldVaultFactory.sol:YieldVaultFactory",
+        "eip170_headroom": -10979,
+        "eip3860_headroom": 13170,
+        "identical_except_metadata_to_recorded_deployments": [],
+        "identical_to_recorded_deployments": [],
+        "initcode_keccak256": "0xb519100e47dd05748312c9dac4f2ddae3094fc3e832b902d9a2619cfc1eb9733",
+        "initcode_size": 35982,
+        "runtime_keccak256": "0x36b9ce84b12e436856feada7b6b0068833257a37bd3ac03a47e82bac9f34cfff",
+        "runtime_keccak256_without_metadata": "0x71b4f4d9bb75d9a61dafe65a667223ee64422c371865c268a79145ba1b4a59bc",
+        "runtime_size": 35555
+      }
+    },
+    "production": {
+      "BridgeVault": {
+        "contract": "project/contracts/BridgeVault.sol:BridgeVault",
+        "eip170_headroom": 19945,
+        "eip3860_headroom": 44307,
+        "identical_except_metadata_to_recorded_deployments": [],
+        "identical_to_recorded_deployments": [],
+        "initcode_keccak256": "0xb0b288bec432719c5f83ac8f5f5cfa3716a653960b80bc693eeb2e1549a85916",
+        "initcode_size": 4845,
+        "runtime_keccak256": "0xd370121eafc45e1d3ad94bc7cc5818c402caa070468eadd4bfb1d93a78c6f41d",
+        "runtime_keccak256_without_metadata": "0x1d0a7a9e29a5491d5acb4049bce036b34851d74c71db4e2816a6e8c44e4f1b16",
+        "runtime_size": 4631
+      },
+      "Oracle": {
+        "contract": "project/contracts/Oracle.sol:Oracle",
+        "eip170_headroom": 16949,
+        "eip3860_headroom": 41311,
+        "identical_except_metadata_to_recorded_deployments": [],
+        "identical_to_recorded_deployments": [],
+        "initcode_keccak256": "0x73669e3406468a28e31370cdddd5b87e165163e2dc5ea39ad4a6859db5f0e7a6",
+        "initcode_size": 7841,
+        "runtime_keccak256": "0xbcaa18afa3ca6df5c2f61e48cf1c9fa4743831b6a3eb37e80157bab3e0997325",
+        "runtime_keccak256_without_metadata": "0xa33e35537b1baf2ef738ef6a34bae3ba2d42f8d6bb4ab4f4491d4913457fa7ba",
+        "runtime_size": 7627
+      },
+      "SlpDistributor": {
+        "contract": "project/contracts/SlpDistributor.sol:SlpDistributor",
+        "eip170_headroom": 20901,
+        "eip3860_headroom": 45263,
+        "identical_except_metadata_to_recorded_deployments": [],
+        "identical_to_recorded_deployments": [
+          "deployments/testnet/SlpDistributor.json",
+          "deployments/testnet/SlpDistributor_Implementation.json"
+        ],
+        "initcode_keccak256": "0x49a480a4494170f3cb0e7b1ad2cf484caecfb12f05e6fa2c9f5fab704fb90714",
+        "initcode_size": 3889,
+        "runtime_keccak256": "0xaaa648149c5496f70c0c36b7ef403f0199192afe48e8ba7853be335b1a6e586e",
+        "runtime_keccak256_without_metadata": "0xc5d65abf7fe867c37ef892b5e31bd18c88675c23f096d539ce8b4262e2405e9d",
+        "runtime_size": 3675
+      },
+      "StPROS": {
+        "contract": "project/contracts/StPROS.sol:StPROS",
+        "eip170_headroom": 11679,
+        "eip3860_headroom": 36035,
+        "identical_except_metadata_to_recorded_deployments": [],
+        "identical_to_recorded_deployments": [
+          "deployments/testnet/StPROS_Implementation.json"
+        ],
+        "initcode_keccak256": "0x1f73900fcb271a74fc23d220ea1d603a10881d52fc17043f8fce219f4d7c87e0",
+        "initcode_size": 13117,
+        "runtime_keccak256": "0x4e4031495d6c61dd405014ee650bed73ea8cf3c33008e80a5d0d56095d07fcfb",
+        "runtime_keccak256_without_metadata": "0x8de7f6ccb4e487d7faee5b00345cf83766d9a9c2dcb7e61f02e75063b6755438",
+        "runtime_size": 12897
+      },
+      "VToken": {
+        "contract": "project/contracts/VToken.sol:VToken",
+        "eip170_headroom": 14614,
+        "eip3860_headroom": 38976,
+        "identical_except_metadata_to_recorded_deployments": [],
+        "identical_to_recorded_deployments": [],
+        "initcode_keccak256": "0x03f668628edc872870e34d1aa13de1275c106e5da0d406055edceb25ee951f24",
+        "initcode_size": 10176,
+        "runtime_keccak256": "0x27e73905d898c268f9991f01a23ba3abc44802abaa62c899bb0575b05e04452b",
+        "runtime_keccak256_without_metadata": "0xe1204b5a011ea6855cec65be6bc1578571a23e7175204b8a5287f711ef84bee2",
+        "runtime_size": 9962
+      },
+      "YieldVault": {
+        "contract": "project/contracts/YieldVault.sol:YieldVault",
+        "eip170_headroom": 11271,
+        "eip3860_headroom": 35633,
+        "identical_except_metadata_to_recorded_deployments": [],
+        "identical_to_recorded_deployments": [
+          "deployments/mainnet/YieldVault.json",
+          "deployments/mainnet/YieldVault_test.json"
+        ],
+        "initcode_keccak256": "0x4f4d0ff3932920372978658b54a8ba41ff8665e6ca4521c8ef1890336a1b67ec",
+        "initcode_size": 13519,
+        "runtime_keccak256": "0x4fd0522ed130547360e0bd2cd9d970a79b557e40366684fc1dd2733f7b987bd9",
+        "runtime_keccak256_without_metadata": "0x41fe556dd53d27564d6a989c99e0ee4cd58b22b093a996eba8b74119deb0562a",
+        "runtime_size": 13305
+      },
+      "YieldVaultFactory": {
+        "contract": "project/contracts/YieldVaultFactory.sol:YieldVaultFactory",
+        "eip170_headroom": 4400,
+        "eip3860_headroom": 28762,
+        "identical_except_metadata_to_recorded_deployments": [],
+        "identical_to_recorded_deployments": [
+          "deployments/mainnet/YieldVaultFactory.json",
+          "deployments/mainnet/YieldVaultFactory_Implementation.json",
+          "deployments/mainnet/YieldVaultFactory_test.json",
+          "deployments/mainnet/YieldVaultFactory_test_Implementation.json"
+        ],
+        "initcode_keccak256": "0x89a6a4474e6dd3b4ff84a40d76e4efd472f73ec0c30e67f44800ff320a83b278",
+        "initcode_size": 20390,
+        "runtime_keccak256": "0x4f574b18d5a311d246b37b257146194fae508668b25a726c831ecff57c250dbf",
+        "runtime_keccak256_without_metadata": "0x049182a43b0b6cd86e3f93ea656f86d83db4dd206a04ec8a41a2fbb95aea7149",
+        "runtime_size": 20176
+      }
+    }
+  }
+}

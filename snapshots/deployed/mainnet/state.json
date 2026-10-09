@@ -1,0 +1,264 @@
+{
+  "beacons": {
+    "0x8618bfb59de57c6bff52638bf0c56f04cc58ed88": {
+      "beacon_code": {
+        "keccak256": "0xaacbda0835e8e4c373b191ed33cbbb14ea9ea23df937c9f2b5b455279757e014",
+        "size": 644
+      },
+      "implementation": "0xba6f3053d3e1eab84a8237a46409df6c2d569ab9",
+      "implementation_code": {
+        "keccak256": "0x4fd0522ed130547360e0bd2cd9d970a79b557e40366684fc1dd2733f7b987bd9",
+        "size": 13305
+      },
+      "implementation_code_matches_records": [
+        "deployments/mainnet/YieldVault.json",
+        "deployments/mainnet/YieldVault_test.json"
+      ],
+      "implementation_expected": "0xba6f3053d3e1eab84a8237a46409df6c2d569ab9",
+      "owner": "0xc9fb7dc52b0fb92c417d481442d2641637483881",
+      "owner_expected": "0xc9fb7dc52b0fb92c417d481442d2641637483881",
+      "role": "main beacon (Factory)"
+    },
+    "0xb20f0409e740fc3ee4cbef9162fd0f43ce8cac0e": {
+      "beacon_code": {
+        "keccak256": "0xaacbda0835e8e4c373b191ed33cbbb14ea9ea23df937c9f2b5b455279757e014",
+        "size": 644
+      },
+      "implementation": "0x2b2ef1f054661883238db53be83e277adf979dd3",
+      "implementation_code": {
+        "keccak256": "0x4fd0522ed130547360e0bd2cd9d970a79b557e40366684fc1dd2733f7b987bd9",
+        "size": 13305
+      },
+      "implementation_code_matches_records": [
+        "deployments/mainnet/YieldVault.json",
+        "deployments/mainnet/YieldVault_test.json"
+      ],
+      "implementation_expected": "0x2b2ef1f054661883238db53be83e277adf979dd3",
+      "owner": "0xbc3a9090bbf303d7c49ff8f3a7e9f48679b42d00",
+      "owner_expected": "0xbc3a9090bbf303d7c49ff8f3a7e9f48679b42d00",
+      "role": "beacon B2 (Factory_test)"
+    }
+  },
+  "block": 19774476,
+  "block_hash": "0xd9285ddf3631842a0197fcf0d8fb9b5e66b1f23704f33be6d972faf0bdbdd59f",
+  "chain": "mainnet",
+  "chain_id": 1672,
+  "factories": {
+    "0xbc3a9090bbf303d7c49ff8f3a7e9f48679b42d00": {
+      "beacon": "0xb20f0409e740fc3ee4cbef9162fd0f43ce8cac0e",
+      "owner": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+      "paused": false,
+      "vault_count": 1,
+      "vaults": [
+        {
+          "asset": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+          "asset_balance": "3938775510204081633",
+          "beacon_proxy_code": {
+            "keccak256": "0x0a89052e4b72bb071253a0d22f2f80e7f6416221c250b676d2175a0c0e22f15f",
+            "size": 283
+          },
+          "counterparty": "0xb29eaea575bd4bae7d9a301446e6204c3a23adf1",
+          "factory": "0xbc3a9090bbf303d7c49ff8f3a7e9f48679b42d00",
+          "feeRecipient": "0xb29eaea575bd4bae7d9a301446e6204c3a23adf1",
+          "index": 0,
+          "initialized_version": 1,
+          "phase": 1,
+          "roundIndex": 3,
+          "totalManagedAssets": "3938775510204081633",
+          "totalSupply": "3781842975206611570577958",
+          "vault": "0xc775dfaa7565f2aca5ddf5dd6837ceb846de591b"
+        }
+      ]
+    },
+    "0xc9fb7dc52b0fb92c417d481442d2641637483881": {
+      "beacon": "0x8618bfb59de57c6bff52638bf0c56f04cc58ed88",
+      "owner": "0x3658e00f5ddb9fa0c7e9820e8d16c3c17eab73ca",
+      "paused": false,
+      "vault_count": 1,
+      "vaults": [
+        {
+          "asset": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+          "asset_balance": "353243162594395440209658",
+          "beacon_proxy_code": {
+            "keccak256": "0x1fd95496ec80a3e23e5d90941ea7b4cff3201126533389f66f5d7f9a7f976742",
+            "size": 283
+          },
+          "counterparty": "0x3754fd5ec997c07ca528bb0bdcb0b4f5b93605df",
+          "factory": "0xc9fb7dc52b0fb92c417d481442d2641637483881",
+          "feeRecipient": "0x3754fd5ec997c07ca528bb0bdcb0b4f5b93605df",
+          "index": 0,
+          "initialized_version": 1,
+          "phase": 3,
+          "roundIndex": 8,
+          "totalManagedAssets": "353243162594395440209658",
+          "totalSupply": "342005731281275242319114071202",
+          "vault": "0x36f3d19dda7ed1428e3014ae6f2a75d70393b7e6"
+        }
+      ]
+    }
+  },
+  "proxies": {
+    "0x051713fd66845a13bf23baca008c5c22c27ccb58": {
+      "admin": "0x4238ea4adfa2bd6a5fc9b5e245dc1900cf0258aa",
+      "admin_is_proxy_admin": true,
+      "implementation": "0x7746ef546d562b443ae4b4145541a3b1a3d75717",
+      "implementation_code": {
+        "keccak256": "0xf51bf95f1aaa1e9f727b56b95fe1a0e6cda716f4ec3dd2dc9dd0b55ca8d3f70c",
+        "size": 4003
+      },
+      "implementation_code_matches_records": [
+        "deployments/mainnet/Oracle.json",
+        "deployments/mainnet/Oracle_Implementation.json"
+      ],
+      "implementation_expected": "0x7746ef546d562b443ae4b4145541a3b1a3d75717",
+      "implementation_is_expected": true,
+      "initialized_version": 1,
+      "initialized_version_expected": 1,
+      "name": "Oracle",
+      "owner": "0x3658e00f5ddb9fa0c7e9820e8d16c3c17eab73ca",
+      "paused": false,
+      "proxy_code": {
+        "keccak256": "0xe5e3693157141608a301682c8c228c0277eac7efc0b98b57f874ca49752b5fd8",
+        "size": 2739
+      }
+    },
+    "0x6b0a44c64190279f7034b77c13a566e914fe5ec4": {
+      "admin": "0x4238ea4adfa2bd6a5fc9b5e245dc1900cf0258aa",
+      "admin_is_proxy_admin": true,
+      "implementation": "0xc096f8e4b1cc222899752a5504fde557a147c57b",
+      "implementation_code": {
+        "keccak256": "0x2d1812cb63ed3c07e2b5bc194206a4f51c5fdfd42e2b5fef10f9fea548b0dace",
+        "size": 11026
+      },
+      "implementation_code_matches_records": [
+        "deployments/mainnet/StPROS_Implementation.json"
+      ],
+      "implementation_expected": "0xc096f8e4b1cc222899752a5504fde557a147c57b",
+      "implementation_is_expected": true,
+      "initialized_version": 1,
+      "initialized_version_expected": 1,
+      "name": "StPROS",
+      "owner": "0x3658e00f5ddb9fa0c7e9820e8d16c3c17eab73ca",
+      "paused": false,
+      "proxy_code": {
+        "keccak256": "0xe5e3693157141608a301682c8c228c0277eac7efc0b98b57f874ca49752b5fd8",
+        "size": 2739
+      }
+    },
+    "0xbc3a9090bbf303d7c49ff8f3a7e9f48679b42d00": {
+      "admin": "0x4238ea4adfa2bd6a5fc9b5e245dc1900cf0258aa",
+      "admin_is_proxy_admin": true,
+      "implementation": "0x9d40ca58ef5392a8fb161ab27c7f61de5dfbf0e2",
+      "implementation_code": {
+        "keccak256": "0x4f574b18d5a311d246b37b257146194fae508668b25a726c831ecff57c250dbf",
+        "size": 20176
+      },
+      "implementation_code_matches_records": [
+        "deployments/mainnet/YieldVaultFactory.json",
+        "deployments/mainnet/YieldVaultFactory_Implementation.json",
+        "deployments/mainnet/YieldVaultFactory_test.json",
+        "deployments/mainnet/YieldVaultFactory_test_Implementation.json"
+      ],
+      "implementation_expected": "0x9d40ca58ef5392a8fb161ab27c7f61de5dfbf0e2",
+      "implementation_is_expected": true,
+      "initialized_version": 1,
+      "initialized_version_expected": 1,
+      "name": "YieldVaultFactory_test",
+      "owner": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+      "paused": false,
+      "proxy_code": {
+        "keccak256": "0xe5e3693157141608a301682c8c228c0277eac7efc0b98b57f874ca49752b5fd8",
+        "size": 2739
+      }
+    },
+    "0xc9fb7dc52b0fb92c417d481442d2641637483881": {
+      "admin": "0x4238ea4adfa2bd6a5fc9b5e245dc1900cf0258aa",
+      "admin_is_proxy_admin": true,
+      "implementation": "0x772e27a320a60aeeb0b5c68dc6c8633460ef5706",
+      "implementation_code": {
+        "keccak256": "0x4f574b18d5a311d246b37b257146194fae508668b25a726c831ecff57c250dbf",
+        "size": 20176
+      },
+      "implementation_code_matches_records": [
+        "deployments/mainnet/YieldVaultFactory.json",
+        "deployments/mainnet/YieldVaultFactory_Implementation.json",
+        "deployments/mainnet/YieldVaultFactory_test.json",
+        "deployments/mainnet/YieldVaultFactory_test_Implementation.json"
+      ],
+      "implementation_expected": "0x772e27a320a60aeeb0b5c68dc6c8633460ef5706",
+      "implementation_is_expected": true,
+      "initialized_version": 1,
+      "initialized_version_expected": 1,
+      "name": "YieldVaultFactory",
+      "owner": "0x3658e00f5ddb9fa0c7e9820e8d16c3c17eab73ca",
+      "paused": false,
+      "proxy_code": {
+        "keccak256": "0xe5e3693157141608a301682c8c228c0277eac7efc0b98b57f874ca49752b5fd8",
+        "size": 2739
+      }
+    }
+  },
+  "proxy_admin": {
+    "address": "0x4238ea4adfa2bd6a5fc9b5e245dc1900cf0258aa",
+    "code": {
+      "keccak256": "0xfdb374f62c5df71a60c5965707d6653c4910b1e309693a88263492ade756df11",
+      "size": 2632
+    },
+    "code_matches_records": [
+      "deployments/mainnet/DefaultProxyAdmin.json",
+      "deployments/testnet/DefaultProxyAdmin.json"
+    ],
+    "owner": "0x3658e00f5ddb9fa0c7e9820e8d16c3c17eab73ca"
+  },
+  "safe": {
+    "address": "0x3658e00f5ddb9fa0c7e9820e8d16c3c17eab73ca",
+    "code": {
+      "keccak256": "0xd7d408ebcd99b2b70be43e20253d6d92a8ea8fab29bd3be7f55b10032331fb4c",
+      "size": 171
+    },
+    "guard": "0x0000000000000000000000000000000000000000",
+    "modules": [],
+    "nonce": 18,
+    "owners": [
+      "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+      "0xee27bbebce601c882d6778a3352ffff95289493f",
+      "0xb65e3faba1277bf5b9de6bebfe584457935384ac",
+      "0x976cf43c894ba43cf096da8c1427f6a51b724bb9",
+      "0x06d2ab1ed0c25b0629d277afd6fd928d232d41b2"
+    ],
+    "threshold": 3
+  },
+  "stpros": {
+    "C_completedWithdrawal": "1194321548206088996505832",
+    "E_escrow": "673309794035648617669",
+    "PRE4_relations": {
+      "E_ge_R": true,
+      "R_eq_Q_minus_C": true,
+      "W_minus_R_ge_S_minus_E": true,
+      "note": "PRE-4 is a mainnet V1 precondition; on testnet (V3) these are recorded for information only",
+      "pool_is_zero": true
+    },
+    "Q_queuedWithdrawal": "1194994858000124645123501",
+    "R_totalCanWithdrawAmount": "673309794035648617669",
+    "S_totalSupply": "975990840528587756883822",
+    "W_wprosBalance": "975990840528587756883822",
+    "maxWithdrawCount": 5,
+    "native_balance": "0",
+    "oracle": "0x051713fd66845a13bf23baca008c5c22c27ccb58",
+    "oracle_pool_wpros": [
+      "0",
+      "0"
+    ],
+    "tracked_slot9": "975990840528587756883822",
+    "unbondingPeriod": 604800
+  },
+  "timestamp": 1791527275,
+  "wpros": {
+    "address": "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0",
+    "code": {
+      "keccak256": "0x0896e7a43b7eddb23349f2e874fd51b547e22ad97ae931d7aca16d6990690677",
+      "size": 3249
+    },
+    "totalSupply": "23409262800574719986240958"
+  }
+}

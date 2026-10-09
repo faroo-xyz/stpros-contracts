@@ -1,0 +1,44 @@
+{
+  "address": "0x6a3dd86669e24723ac0ef0e30c2dd9ad1a8c2a45",
+  "linear": [
+    {
+      "bytes": 20,
+      "label": "keeper",
+      "offset": 0,
+      "slot": 0,
+      "type": "address"
+    },
+    {
+      "bytes": 64,
+      "label": "_slps",
+      "offset": 0,
+      "slot": 1,
+      "type": "struct EnumerableSet.AddressSet"
+    }
+  ],
+  "record": "deployments/testnet/SlpDistributor_Implementation.json",
+  "structs": {
+    "struct EnumerableSet.AddressSet": [
+      {
+        "label": "_inner",
+        "offset": 0,
+        "slot": 0,
+        "type": "struct EnumerableSet.Set"
+      }
+    ],
+    "struct EnumerableSet.Set": [
+      {
+        "label": "_values",
+        "offset": 0,
+        "slot": 0,
+        "type": "bytes32[]"
+      },
+      {
+        "label": "_positions",
+        "offset": 0,
+        "slot": 1,
+        "type": "mapping(bytes32 => uint256)"
+      }
+    ]
+  }
+}

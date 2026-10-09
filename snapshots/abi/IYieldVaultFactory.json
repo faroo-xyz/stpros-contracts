@@ -1,0 +1,18 @@
+{
+  "contract": "project/contracts/YieldVault.sol:IYieldVaultFactory",
+  "errors": [],
+  "events": [],
+  "functions": [
+    {
+      "outputs": [
+        "bool"
+      ],
+      "selector": "0x5c975abb",
+      "signature": "paused()",
+      "stateMutability": "view"
+    }
+  ],
+  "selector_collisions": [],
+  "source": "HEAD",
+  "special": []
+}

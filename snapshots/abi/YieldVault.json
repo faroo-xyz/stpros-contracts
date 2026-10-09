@@ -1,0 +1,825 @@
+{
+  "contract": "project/contracts/YieldVault.sol:YieldVault",
+  "errors": [
+    {
+      "selector": "0x6697b232",
+      "signature": "AccessControlBadConfirmation()"
+    },
+    {
+      "selector": "0xe2517d3f",
+      "signature": "AccessControlUnauthorizedAccount(address,bytes32)"
+    },
+    {
+      "selector": "0x0dbfaad6",
+      "signature": "BelowMinSubscription(uint256,uint256)"
+    },
+    {
+      "selector": "0xfb8f41b2",
+      "signature": "ERC20InsufficientAllowance(address,uint256,uint256)"
+    },
+    {
+      "selector": "0xe450d38c",
+      "signature": "ERC20InsufficientBalance(address,uint256,uint256)"
+    },
+    {
+      "selector": "0xe602df05",
+      "signature": "ERC20InvalidApprover(address)"
+    },
+    {
+      "selector": "0xec442f05",
+      "signature": "ERC20InvalidReceiver(address)"
+    },
+    {
+      "selector": "0x96c6fd1e",
+      "signature": "ERC20InvalidSender(address)"
+    },
+    {
+      "selector": "0x94280d62",
+      "signature": "ERC20InvalidSpender(address)"
+    },
+    {
+      "selector": "0x79012fb2",
+      "signature": "ERC4626ExceededMaxDeposit(address,uint256,uint256)"
+    },
+    {
+      "selector": "0x284ff667",
+      "signature": "ERC4626ExceededMaxMint(address,uint256,uint256)"
+    },
+    {
+      "selector": "0xb94abeec",
+      "signature": "ERC4626ExceededMaxRedeem(address,uint256,uint256)"
+    },
+    {
+      "selector": "0xfe9cceec",
+      "signature": "ERC4626ExceededMaxWithdraw(address,uint256,uint256)"
+    },
+    {
+      "selector": "0x68c2f226",
+      "signature": "FactoryPaused()"
+    },
+    {
+      "selector": "0xe6c4247b",
+      "signature": "InvalidAddress()"
+    },
+    {
+      "selector": "0xf92ee8a9",
+      "signature": "InvalidInitialization()"
+    },
+    {
+      "selector": "0xc288702c",
+      "signature": "InvalidPhase(uint8)"
+    },
+    {
+      "selector": "0x63e944ae",
+      "signature": "InvalidRoundParams()"
+    },
+    {
+      "selector": "0xf27f616f",
+      "signature": "InvalidSettleMode()"
+    },
+    {
+      "selector": "0xf88a1e03",
+      "signature": "InvalidSettlementInput()"
+    },
+    {
+      "selector": "0xef0854fa",
+      "signature": "LossExceedManaged(uint256,uint256)"
+    },
+    {
+      "selector": "0xd7e6bcf8",
+      "signature": "NotInitializing()"
+    },
+    {
+      "selector": "0xdb91f16c",
+      "signature": "ProfitAlreadyFunded()"
+    },
+    {
+      "selector": "0xda68ae5d",
+      "signature": "ProfitNotFunded()"
+    },
+    {
+      "selector": "0x3ee5aeb5",
+      "signature": "ReentrancyGuardReentrantCall()"
+    },
+    {
+      "selector": "0x5274afe7",
+      "signature": "SafeERC20FailedOperation(address)"
+    },
+    {
+      "selector": "0x96a5c631",
+      "signature": "TimelockNotExpired(uint256)"
+    },
+    {
+      "selector": "0xe9bbe5e7",
+      "signature": "VaultNotMatured()"
+    }
+  ],
+  "events": [
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        true,
+        false
+      ],
+      "signature": "Approval(address,address,uint256)",
+      "topic0": "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        false
+      ],
+      "signature": "CounterpartyProceedsPaid(address,uint256)",
+      "topic0": "0xfc5e8e3e393a9ebad565bb116088350f022b5071a3910033762828bf0f382e54"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        true,
+        false,
+        false
+      ],
+      "signature": "Deposit(address,address,uint256,uint256)",
+      "topic0": "0xdcbc1c05240f31ff3ad067ef1ee35ce4997762752e3a095284754544f4c709d7"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        false
+      ],
+      "signature": "EmergencyCancelled(uint256)",
+      "topic0": "0xa3b3cc0ffe2f92520bdc31fb4fc668b8a04b9ac89b908aa9ca3808db9e629cf7"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        false
+      ],
+      "signature": "Initialized(uint64)",
+      "topic0": "0xc7f505b2f371ae2175ee4913f4499e1f2633a7b5936321eed1cdaeb6115181d2"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        false,
+        false
+      ],
+      "signature": "OpenPeriodExtended(uint256,uint256,uint256)",
+      "topic0": "0x567e3ee6997f6d8152d70afc24ef7d37ef8a39e6f99d2b8bfb3ba7fb5399df07"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        false
+      ],
+      "signature": "ProfitFunded(address,uint256)",
+      "topic0": "0xa296f52130b2762824c166f034134066d2ba79899eb18e45f091b13cc007038e"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        false
+      ],
+      "signature": "ProfitRefunded(address,uint256)",
+      "topic0": "0x702a6335249d9dab52675a47c0c8ffe5a2e75b27d6d691bacce22ed3f44da0dc"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        true,
+        true
+      ],
+      "signature": "RoleAdminChanged(bytes32,bytes32,bytes32)",
+      "topic0": "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        true,
+        true
+      ],
+      "signature": "RoleGranted(bytes32,address,address)",
+      "topic0": "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        true,
+        true
+      ],
+      "signature": "RoleRevoked(bytes32,address,address)",
+      "topic0": "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        false,
+        false
+      ],
+      "signature": "RoundLocked(uint256,uint256,uint256)",
+      "topic0": "0x616f10eff85ee3ed06bb20aee4143d404ec17b7850f20352dd3b35cd782559e1"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        false,
+        false,
+        false
+      ],
+      "signature": "RoundOpened(uint256,uint256,uint256,uint256)",
+      "topic0": "0xc8410c58dcf5346660095e2f1d4190cbb555bcbe378514f769f40c2ec3a250eb"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        false
+      ],
+      "signature": "SettlementCancelled(uint256,uint256)",
+      "topic0": "0x6a1a3313b96eadc137de06ac890f75309d6495d541c1fe0df1d708a03a982022"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        true,
+        false,
+        false,
+        false,
+        false
+      ],
+      "signature": "SettlementFinalized(uint256,uint8,uint256,uint256,uint256,uint256)",
+      "topic0": "0x05af4d9318127b47ab5c9de5670cae4fe1e194d38c427c25b461658cda1107eb"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        true,
+        false,
+        false,
+        false,
+        true
+      ],
+      "signature": "SettlementProposed(uint256,uint8,uint256,uint256,bool,address)",
+      "topic0": "0xfd108d0429b2df0c92b711f348d14167bee0284d00a524a136441d255897add3"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        true,
+        false
+      ],
+      "signature": "Transfer(address,address,uint256)",
+      "topic0": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        true,
+        true,
+        false,
+        false
+      ],
+      "signature": "Withdraw(address,address,address,uint256,uint256)",
+      "topic0": "0xfbde797d201c681b91056529119e0b02407c7bb96a4a2c75c01fc9667232c8db"
+    }
+  ],
+  "functions": [
+    {
+      "outputs": [
+        "bytes32"
+      ],
+      "selector": "0xa217fddf",
+      "signature": "DEFAULT_ADMIN_ROLE()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0xa5b13538",
+      "signature": "MAX_OPEN_EXTENSION()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x70889165",
+      "signature": "MAX_PERFORMANCE_FEE_BPS()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x78b4330f",
+      "signature": "MIN_LOCK_DURATION()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0xa67cbb98",
+      "signature": "MIN_SETTLE_TIMELOCK()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0xdd62ed3e",
+      "signature": "allowance(address,address)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "bool"
+      ],
+      "selector": "0x095ea7b3",
+      "signature": "approve(address,uint256)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "address"
+      ],
+      "selector": "0x38d52e0f",
+      "signature": "asset()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x70a08231",
+      "signature": "balanceOf(address)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [],
+      "selector": "0xfec38a35",
+      "signature": "cancelProposedSettlement()",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x07a2d13a",
+      "signature": "convertToAssets(uint256)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0xc6e6f592",
+      "signature": "convertToShares(uint256)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "address"
+      ],
+      "selector": "0xc3df6546",
+      "signature": "counterparty()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint8"
+      ],
+      "selector": "0x313ce567",
+      "signature": "decimals()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x6e553f65",
+      "signature": "deposit(uint256,address)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [],
+      "selector": "0x2c4b2308",
+      "signature": "emergencyCancel()",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [],
+      "selector": "0x6311d5df",
+      "signature": "extendOpenPeriod(uint256)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "address"
+      ],
+      "selector": "0xc45a0155",
+      "signature": "factory()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "address"
+      ],
+      "selector": "0x46904840",
+      "signature": "feeRecipient()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [],
+      "selector": "0x4bb278f3",
+      "signature": "finalize()",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [],
+      "selector": "0xb9de9493",
+      "signature": "fundProfit()",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "bytes32"
+      ],
+      "selector": "0x248a9ca3",
+      "signature": "getRoleAdmin(bytes32)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [],
+      "selector": "0x2f2ff15d",
+      "signature": "grantRole(bytes32,address)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "bool"
+      ],
+      "selector": "0x91d14854",
+      "signature": "hasRole(bytes32,address)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [],
+      "selector": "0xd6cf39b7",
+      "signature": "initialize((address,address,address,address,address,string,string,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)))",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x04554443",
+      "signature": "lockDuration()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0xb2163482",
+      "signature": "lockedAt()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x402d267d",
+      "signature": "maxDeposit(address)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x3129c275",
+      "signature": "maxLossBps()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0xc63d75b6",
+      "signature": "maxMint(address)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0xd905777e",
+      "signature": "maxRedeem(address)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0xce96cb77",
+      "signature": "maxWithdraw(address)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x41be5f64",
+      "signature": "minSubscription()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x94bf804d",
+      "signature": "mint(uint256,address)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "string"
+      ],
+      "selector": "0x06fdde03",
+      "signature": "name()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x71aa5185",
+      "signature": "openDeadline()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [],
+      "selector": "0x19a0c3db",
+      "signature": "openNextRound((uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256))",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0xd0d529a7",
+      "signature": "openWindow()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x38930203",
+      "signature": "openedAt()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x47dd5172",
+      "signature": "perAddressCap()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0xb9d4e879",
+      "signature": "performanceFeeBps()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint8"
+      ],
+      "selector": "0xb1c9fe6e",
+      "signature": "phase()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0xef8b30f7",
+      "signature": "previewDeposit(uint256)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0xb3d7f6b9",
+      "signature": "previewMint(uint256)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x4cdad506",
+      "signature": "previewRedeem(uint256)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x0a28a477",
+      "signature": "previewWithdraw(uint256)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "bool"
+      ],
+      "selector": "0x0756e64e",
+      "signature": "profitFunded()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "address"
+      ],
+      "selector": "0x478a138e",
+      "signature": "profitFunder()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [],
+      "selector": "0x2d659a46",
+      "signature": "proposeSettlement(uint8,uint256,address)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0xba087652",
+      "signature": "redeem(uint256,address,address)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [],
+      "selector": "0x36568abe",
+      "signature": "renounceRole(bytes32,address)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [],
+      "selector": "0xd547741f",
+      "signature": "revokeRole(bytes32,address)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x9b8fdacc",
+      "signature": "roundCap()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x648036ae",
+      "signature": "roundIndex()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x9dbc637b",
+      "signature": "settleAmount()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint8"
+      ],
+      "selector": "0xff980538",
+      "signature": "settleMode()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x35a82cee",
+      "signature": "settleProposedAt()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x2bd9d06d",
+      "signature": "settleTimelockWindow()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0xa99a67e6",
+      "signature": "settledAt()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "bool"
+      ],
+      "selector": "0x01ffc9a7",
+      "signature": "supportsInterface(bytes4)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "string"
+      ],
+      "selector": "0x95d89b41",
+      "signature": "symbol()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x01e1d114",
+      "signature": "totalAssets()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x05b2bfb0",
+      "signature": "totalManagedAssets()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x18160ddd",
+      "signature": "totalSupply()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "bool"
+      ],
+      "selector": "0xa9059cbb",
+      "signature": "transfer(address,uint256)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "bool"
+      ],
+      "selector": "0x23b872dd",
+      "signature": "transferFrom(address,address,uint256)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0xb460af94",
+      "signature": "withdraw(uint256,address,address)",
+      "stateMutability": "nonpayable"
+    }
+  ],
+  "selector_collisions": [],
+  "source": "HEAD",
+  "special": [
+    {
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    }
+  ]
+}

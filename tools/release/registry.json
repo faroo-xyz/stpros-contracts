@@ -1,0 +1,55 @@
+{
+  "_comment": "Reviewed public facts used by B0 tooling. Sources: faroo-contracts-reserch/architecture-hardening/COMPATIBILITY-AND-MIGRATION.md section 1 and evidence/onchain-*-2026-10-09.txt. Addresses are lowercase. Vault lists are NOT hardcoded: they are discovered on-chain from factory.allProxies at the pinned block and cross-checked against YieldVaultCreated logs.",
+  "mainnet": {
+    "accounts": {
+      "0x3658e00f5ddb9fa0c7e9820e8d16c3c17eab73ca": "Safe (3/5), owner of ProxyAdmin, StPROS, Oracle, Factory",
+      "0x3754fd5ec997c07ca528bb0bdcb0b4f5b93605df": "Vault 001 counterparty and fee recipient (EOA)",
+      "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd": "Deployer EOA; Factory_test owner",
+      "0xb29eaea575bd4bae7d9a301446e6204c3a23adf1": "EOA; Factory_test vault admin, counterparty and fee recipient"
+    },
+    "chain_id": 1672,
+    "expected_beacons": {
+      "0x8618bfb59de57c6bff52638bf0c56f04cc58ed88": {"implementation": "0xba6f3053d3e1eab84a8237a46409df6c2d569ab9", "owner": "0xc9fb7dc52b0fb92c417d481442d2641637483881", "role": "main beacon (Factory)"},
+      "0xb20f0409e740fc3ee4cbef9162fd0f43ce8cac0e": {"implementation": "0x2b2ef1f054661883238db53be83e277adf979dd3", "owner": "0xbc3a9090bbf303d7c49ff8f3a7e9f48679b42d00", "role": "beacon B2 (Factory_test)"}
+    },
+    "expected_proxies": {
+      "0x051713fd66845a13bf23baca008c5c22c27ccb58": {"implementation": "0x7746ef546d562b443ae4b4145541a3b1a3d75717", "name": "Oracle", "version": 1},
+      "0x6b0a44c64190279f7034b77c13a566e914fe5ec4": {"implementation": "0xc096f8e4b1cc222899752a5504fde557a147c57b", "name": "StPROS", "version": 1},
+      "0xbc3a9090bbf303d7c49ff8f3a7e9f48679b42d00": {"implementation": "0x9d40ca58ef5392a8fb161ab27c7f61de5dfbf0e2", "name": "YieldVaultFactory_test", "version": 1},
+      "0xc9fb7dc52b0fb92c417d481442d2641637483881": {"implementation": "0x772e27a320a60aeeb0b5c68dc6c8633460ef5706", "name": "YieldVaultFactory", "version": 1}
+    },
+    "expected_vault_count": {
+      "0xbc3a9090bbf303d7c49ff8f3a7e9f48679b42d00": 1,
+      "0xc9fb7dc52b0fb92c417d481442d2641637483881": 1
+    },
+    "factories": ["0xc9fb7dc52b0fb92c417d481442d2641637483881", "0xbc3a9090bbf303d7c49ff8f3a7e9f48679b42d00"],
+    "proxy_admin": "0x4238ea4adfa2bd6a5fc9b5e245dc1900cf0258aa",
+    "stpros": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+    "wpros": "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0"
+  },
+  "testnet": {
+    "accounts": {
+      "0x464017cdc3c2af2b5b525fde03ac93f15172db43": "SLP contract",
+      "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd": "E1: owner of ProxyAdmin, StPROS, Oracle, BridgeVault, SlpDistributor; commission account",
+      "0xb29eaea575bd4bae7d9a301446e6204c3a23adf1": "E2: Factory owner; candidate admin of all vaults"
+    },
+    "chain_id": 688689,
+    "expected_beacons": {
+      "0xaa2f4320d36827a4a399ed8d0148d4e316ea5305": {"implementation": "0x2e388f1a9c0ca3529e82e46b2ce01fdfdf635984", "owner": "0x558de0e24956a634735914b1ea252c4c2214124c", "role": "beacon (Factory)"}
+    },
+    "expected_proxies": {
+      "0x008a7856fecf9a73f5011f77b020877f5d74a7f2": {"implementation": "0x6a3dd86669e24723ac0ef0e30c2dd9ad1a8c2a45", "name": "SlpDistributor", "version": 1},
+      "0x558de0e24956a634735914b1ea252c4c2214124c": {"implementation": "0xf51f16d97c80db2c55291e1add00ddfd4e7420d1", "name": "YieldVaultFactory", "version": 1},
+      "0x6bd39d03d2fbbf14aee362977a09c293b282b0bc": {"implementation": "0xf4caf6898a9316994b736cd03b3bfbe964e95384", "name": "Oracle", "version": 3},
+      "0xb1437aeea18189eb6d02dc46cd4d28613d582e9a": {"implementation": "0x64dc1e8b5e9515de37b58b4d8629bf89bcd1f576", "name": "StPROS", "version": 2},
+      "0xb79db65038a11fa8f5a361e5ff265842b3619ddc": {"implementation": "0xafe333e1035020f48226c4e2931efa68a0688e47", "name": "BridgeVault", "version": 1}
+    },
+    "expected_vault_count": {
+      "0x558de0e24956a634735914b1ea252c4c2214124c": 15
+    },
+    "factories": ["0x558de0e24956a634735914b1ea252c4c2214124c"],
+    "proxy_admin": "0x79d6028229f2d819a1a4bb52a05bc97f5f37d667",
+    "stpros": "0xb1437aeea18189eb6d02dc46cd4d28613d582e9a",
+    "wpros": "0x838800b758277cc111b2d48ab01e5e164f8e9471"
+  }
+}

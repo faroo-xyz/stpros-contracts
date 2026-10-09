@@ -1,0 +1,72 @@
+{
+  "contract": "project/contracts/interfaces/IOracle.sol:IOracle",
+  "errors": [],
+  "events": [],
+  "functions": [
+    {
+      "outputs": [
+        "bool"
+      ],
+      "selector": "0x52acf69a",
+      "signature": "canUpdate(address,uint256)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0xa71b35ab",
+      "signature": "getTokenAmountByVToken(address,uint256,uint8)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x98a90900",
+      "signature": "getVTokenAmountByToken(address,uint256,uint8)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x5668c2e8",
+      "signature": "lastUpdateAt(address)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x0e3d1144",
+      "signature": "maxUpdateAmount()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "address"
+      ],
+      "selector": "0x02824acc",
+      "signature": "slp()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [],
+      "selector": "0xa2d83b5e",
+      "signature": "update(address,uint256)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0xfd2c80ae",
+      "signature": "updateInterval()",
+      "stateMutability": "view"
+    }
+  ],
+  "selector_collisions": [],
+  "source": "HEAD",
+  "special": []
+}

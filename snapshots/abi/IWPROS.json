@@ -1,0 +1,91 @@
+{
+  "contract": "project/contracts/interfaces/IWPROS.sol:IWPROS",
+  "errors": [],
+  "events": [
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        true,
+        false
+      ],
+      "signature": "Approval(address,address,uint256)",
+      "topic0": "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        true,
+        false
+      ],
+      "signature": "Transfer(address,address,uint256)",
+      "topic0": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+    }
+  ],
+  "functions": [
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0xdd62ed3e",
+      "signature": "allowance(address,address)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "bool"
+      ],
+      "selector": "0x095ea7b3",
+      "signature": "approve(address,uint256)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x70a08231",
+      "signature": "balanceOf(address)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [],
+      "selector": "0xd0e30db0",
+      "signature": "deposit()",
+      "stateMutability": "payable"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x18160ddd",
+      "signature": "totalSupply()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "bool"
+      ],
+      "selector": "0xa9059cbb",
+      "signature": "transfer(address,uint256)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "bool"
+      ],
+      "selector": "0x23b872dd",
+      "signature": "transferFrom(address,address,uint256)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [],
+      "selector": "0x2e1a7d4d",
+      "signature": "withdraw(uint256)",
+      "stateMutability": "nonpayable"
+    }
+  ],
+  "selector_collisions": [],
+  "source": "HEAD",
+  "special": []
+}

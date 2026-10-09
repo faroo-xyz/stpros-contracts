@@ -1,0 +1,160 @@
+{
+  "address": "0x7746ef546d562b443ae4b4145541a3b1a3d75717",
+  "contract": "Oracle",
+  "errors": [
+    {
+      "selector": "0xd93c0665",
+      "signature": "EnforcedPause()"
+    },
+    {
+      "selector": "0x8dfc202b",
+      "signature": "ExpectedPause()"
+    },
+    {
+      "selector": "0xe6c4247b",
+      "signature": "InvalidAddress()"
+    },
+    {
+      "selector": "0xf92ee8a9",
+      "signature": "InvalidInitialization()"
+    },
+    {
+      "selector": "0xd7e6bcf8",
+      "signature": "NotInitializing()"
+    },
+    {
+      "selector": "0x1e4fbdf7",
+      "signature": "OwnableInvalidOwner(address)"
+    },
+    {
+      "selector": "0x118cdaa7",
+      "signature": "OwnableUnauthorizedAccount(address)"
+    }
+  ],
+  "events": [
+    {
+      "anonymous": false,
+      "indexed": [
+        false
+      ],
+      "signature": "Initialized(uint64)",
+      "topic0": "0xc7f505b2f371ae2175ee4913f4499e1f2633a7b5936321eed1cdaeb6115181d2"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        true
+      ],
+      "signature": "OwnershipTransferred(address,address)",
+      "topic0": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        false
+      ],
+      "signature": "Paused(address)",
+      "topic0": "0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        false,
+        false,
+        false
+      ],
+      "signature": "SetTokenAmount(address,uint256,uint256)",
+      "topic0": "0xbf7601980afda2e4bf4115242e175054a7d62775820027cc9e7ee868ec09d0de"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        false
+      ],
+      "signature": "Unpaused(address)",
+      "topic0": "0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa"
+    }
+  ],
+  "functions": [
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0xa71b35ab",
+      "signature": "getTokenAmountByVToken(address,uint256,uint8)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0x98a90900",
+      "signature": "getVTokenAmountByToken(address,uint256,uint8)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [],
+      "selector": "0xc4d66de8",
+      "signature": "initialize(address)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "address"
+      ],
+      "selector": "0x8da5cb5b",
+      "signature": "owner()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [],
+      "selector": "0x8456cb59",
+      "signature": "pause()",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "bool"
+      ],
+      "selector": "0x5c975abb",
+      "signature": "paused()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "uint256",
+        "uint256"
+      ],
+      "selector": "0x9a7b5f11",
+      "signature": "poolInfo(address)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [],
+      "selector": "0x715018a6",
+      "signature": "renounceOwnership()",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [],
+      "selector": "0xf2fde38b",
+      "signature": "transferOwnership(address)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [],
+      "selector": "0x3f4ba83a",
+      "signature": "unpause()",
+      "stateMutability": "nonpayable"
+    }
+  ],
+  "record": "deployments/mainnet/Oracle_Implementation.json",
+  "selector_collisions": [],
+  "special": [
+    {
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    }
+  ]
+}

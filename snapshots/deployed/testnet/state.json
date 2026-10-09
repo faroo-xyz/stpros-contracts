@@ -1,0 +1,471 @@
+{
+  "beacons": {
+    "0xaa2f4320d36827a4a399ed8d0148d4e316ea5305": {
+      "beacon_code": {
+        "keccak256": "0x686f79b182f234efb78b2bd61fc8eaed3573594347ecea46656ed1fe97d486ab",
+        "size": 1256
+      },
+      "implementation": "0x2e388f1a9c0ca3529e82e46b2ce01fdfdf635984",
+      "implementation_code": {
+        "keccak256": "0xbd39e8508a3e1cc9cfd7fa52b2e3c7873eb0aeeca7fdfc6d167c9ab362a8e9b1",
+        "size": 24357
+      },
+      "implementation_code_matches_records": [
+        "deployments/testnet/YieldVault.json"
+      ],
+      "implementation_expected": "0x2e388f1a9c0ca3529e82e46b2ce01fdfdf635984",
+      "owner": "0x558de0e24956a634735914b1ea252c4c2214124c",
+      "owner_expected": "0x558de0e24956a634735914b1ea252c4c2214124c",
+      "role": "beacon (Factory)"
+    }
+  },
+  "block": 31190661,
+  "block_hash": "0x6a444a987794de12106afcfb05619b0198837b6cdc55a4d959efefac0bd5f8b4",
+  "chain": "testnet",
+  "chain_id": 688689,
+  "factories": {
+    "0x558de0e24956a634735914b1ea252c4c2214124c": {
+      "beacon": "0xaa2f4320d36827a4a399ed8d0148d4e316ea5305",
+      "owner": "0xb29eaea575bd4bae7d9a301446e6204c3a23adf1",
+      "paused": false,
+      "vault_count": 15,
+      "vaults": [
+        {
+          "asset": "0xb1437aeea18189eb6d02dc46cd4d28613d582e9a",
+          "asset_balance": "100000000000000001",
+          "beacon_proxy_code": {
+            "keccak256": "0x874bddd24162a363ae7b2a08581471adc9fb1112112bc5b03b4b77f4b5d20237",
+            "size": 415
+          },
+          "counterparty": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "factory": "0x558de0e24956a634735914b1ea252c4c2214124c",
+          "feeRecipient": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "index": 0,
+          "initialized_version": 1,
+          "phase": 2,
+          "roundIndex": 1,
+          "totalManagedAssets": "1",
+          "totalSupply": "1000000",
+          "vault": "0x52324d9b4ed6e3720db9b976550cc1cc47e554b3"
+        },
+        {
+          "asset": "0xb1437aeea18189eb6d02dc46cd4d28613d582e9a",
+          "asset_balance": "5000000000000000000",
+          "beacon_proxy_code": {
+            "keccak256": "0x874bddd24162a363ae7b2a08581471adc9fb1112112bc5b03b4b77f4b5d20237",
+            "size": 415
+          },
+          "counterparty": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "factory": "0x558de0e24956a634735914b1ea252c4c2214124c",
+          "feeRecipient": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "index": 1,
+          "initialized_version": 1,
+          "phase": 1,
+          "roundIndex": 1,
+          "totalManagedAssets": "5000000000000000000",
+          "totalSupply": "5000000000000000000000000",
+          "vault": "0x09603571bb8010499efdcced30911174670e5a54"
+        },
+        {
+          "asset": "0xb1437aeea18189eb6d02dc46cd4d28613d582e9a",
+          "asset_balance": "2000000000000000000",
+          "beacon_proxy_code": {
+            "keccak256": "0x874bddd24162a363ae7b2a08581471adc9fb1112112bc5b03b4b77f4b5d20237",
+            "size": 415
+          },
+          "counterparty": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "factory": "0x558de0e24956a634735914b1ea252c4c2214124c",
+          "feeRecipient": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "index": 2,
+          "initialized_version": 1,
+          "phase": 1,
+          "roundIndex": 1,
+          "totalManagedAssets": "2000000000000000000",
+          "totalSupply": "2000000000000000000000000",
+          "vault": "0x4a18b1def98d30ad0585b34c48cbfbe348a92272"
+        },
+        {
+          "asset": "0xb1437aeea18189eb6d02dc46cd4d28613d582e9a",
+          "asset_balance": "3000000000000000000",
+          "beacon_proxy_code": {
+            "keccak256": "0x874bddd24162a363ae7b2a08581471adc9fb1112112bc5b03b4b77f4b5d20237",
+            "size": 415
+          },
+          "counterparty": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "factory": "0x558de0e24956a634735914b1ea252c4c2214124c",
+          "feeRecipient": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "index": 3,
+          "initialized_version": 1,
+          "phase": 2,
+          "roundIndex": 1,
+          "totalManagedAssets": "2000000000000000000",
+          "totalSupply": "2000000000000000000000000",
+          "vault": "0x2a646cfaac9c21f1a3d7ea65978d31e8f2630d02"
+        },
+        {
+          "asset": "0xb1437aeea18189eb6d02dc46cd4d28613d582e9a",
+          "asset_balance": "2000000000000000000",
+          "beacon_proxy_code": {
+            "keccak256": "0x874bddd24162a363ae7b2a08581471adc9fb1112112bc5b03b4b77f4b5d20237",
+            "size": 415
+          },
+          "counterparty": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "factory": "0x558de0e24956a634735914b1ea252c4c2214124c",
+          "feeRecipient": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "index": 4,
+          "initialized_version": 1,
+          "phase": 2,
+          "roundIndex": 1,
+          "totalManagedAssets": "2000000000000000000",
+          "totalSupply": "2000000000000000000000000",
+          "vault": "0x2c41a8627f2254f9fe6c90182a2c15aa461fc1b4"
+        },
+        {
+          "asset": "0xb1437aeea18189eb6d02dc46cd4d28613d582e9a",
+          "asset_balance": "2000000000000000000",
+          "beacon_proxy_code": {
+            "keccak256": "0x874bddd24162a363ae7b2a08581471adc9fb1112112bc5b03b4b77f4b5d20237",
+            "size": 415
+          },
+          "counterparty": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "factory": "0x558de0e24956a634735914b1ea252c4c2214124c",
+          "feeRecipient": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "index": 5,
+          "initialized_version": 1,
+          "phase": 2,
+          "roundIndex": 1,
+          "totalManagedAssets": "2000000000000000000",
+          "totalSupply": "2000000000000000000000000",
+          "vault": "0xeb6204363ca9053c4a0ea8909c86d0227dbdefab"
+        },
+        {
+          "asset": "0xb1437aeea18189eb6d02dc46cd4d28613d582e9a",
+          "asset_balance": "2000000000000000000",
+          "beacon_proxy_code": {
+            "keccak256": "0x874bddd24162a363ae7b2a08581471adc9fb1112112bc5b03b4b77f4b5d20237",
+            "size": 415
+          },
+          "counterparty": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "factory": "0x558de0e24956a634735914b1ea252c4c2214124c",
+          "feeRecipient": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "index": 6,
+          "initialized_version": 1,
+          "phase": 3,
+          "roundIndex": 1,
+          "totalManagedAssets": "2000000000000000000",
+          "totalSupply": "2000000000000000000000000",
+          "vault": "0x1be4c7a50d49dfb84b1f8e01eedece655b7085e6"
+        },
+        {
+          "asset": "0xb1437aeea18189eb6d02dc46cd4d28613d582e9a",
+          "asset_balance": "1",
+          "beacon_proxy_code": {
+            "keccak256": "0x874bddd24162a363ae7b2a08581471adc9fb1112112bc5b03b4b77f4b5d20237",
+            "size": 415
+          },
+          "counterparty": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "factory": "0x558de0e24956a634735914b1ea252c4c2214124c",
+          "feeRecipient": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "index": 7,
+          "initialized_version": 1,
+          "phase": 3,
+          "roundIndex": 1,
+          "totalManagedAssets": "1",
+          "totalSupply": "0",
+          "vault": "0x770cf7d9a5fa7bef95c97b420bcd76a5786c732b"
+        },
+        {
+          "asset": "0xb1437aeea18189eb6d02dc46cd4d28613d582e9a",
+          "asset_balance": "0",
+          "beacon_proxy_code": {
+            "keccak256": "0x874bddd24162a363ae7b2a08581471adc9fb1112112bc5b03b4b77f4b5d20237",
+            "size": 415
+          },
+          "counterparty": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "factory": "0x558de0e24956a634735914b1ea252c4c2214124c",
+          "feeRecipient": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "index": 8,
+          "initialized_version": 1,
+          "phase": 3,
+          "roundIndex": 1,
+          "totalManagedAssets": "0",
+          "totalSupply": "0",
+          "vault": "0xfb6c26567301b3ca2f076ab3fc50c272d1944c34"
+        },
+        {
+          "asset": "0xb1437aeea18189eb6d02dc46cd4d28613d582e9a",
+          "asset_balance": "1990000000000000000",
+          "beacon_proxy_code": {
+            "keccak256": "0x874bddd24162a363ae7b2a08581471adc9fb1112112bc5b03b4b77f4b5d20237",
+            "size": 415
+          },
+          "counterparty": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "factory": "0x558de0e24956a634735914b1ea252c4c2214124c",
+          "feeRecipient": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "index": 9,
+          "initialized_version": 1,
+          "phase": 3,
+          "roundIndex": 1,
+          "totalManagedAssets": "1990000000000000000",
+          "totalSupply": "1990000000000000000000000",
+          "vault": "0x11c589fa5e2ede3386b52fc58c776768240db848"
+        },
+        {
+          "asset": "0xb1437aeea18189eb6d02dc46cd4d28613d582e9a",
+          "asset_balance": "0",
+          "beacon_proxy_code": {
+            "keccak256": "0x874bddd24162a363ae7b2a08581471adc9fb1112112bc5b03b4b77f4b5d20237",
+            "size": 415
+          },
+          "counterparty": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "factory": "0x558de0e24956a634735914b1ea252c4c2214124c",
+          "feeRecipient": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "index": 10,
+          "initialized_version": 1,
+          "phase": 1,
+          "roundIndex": 1,
+          "totalManagedAssets": "0",
+          "totalSupply": "0",
+          "vault": "0xc7ac43854f090761531bf3f7898a204635c6e988"
+        },
+        {
+          "asset": "0xb1437aeea18189eb6d02dc46cd4d28613d582e9a",
+          "asset_balance": "2000000000000000000",
+          "beacon_proxy_code": {
+            "keccak256": "0x874bddd24162a363ae7b2a08581471adc9fb1112112bc5b03b4b77f4b5d20237",
+            "size": 415
+          },
+          "counterparty": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "factory": "0x558de0e24956a634735914b1ea252c4c2214124c",
+          "feeRecipient": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "index": 11,
+          "initialized_version": 1,
+          "phase": 2,
+          "roundIndex": 1,
+          "totalManagedAssets": "1000000000000000000",
+          "totalSupply": "1000000000000000000000000",
+          "vault": "0x7f70fb9ffd405b278bd90db41cfccb1f64ad0973"
+        },
+        {
+          "asset": "0xb1437aeea18189eb6d02dc46cd4d28613d582e9a",
+          "asset_balance": "2000000000000000000",
+          "beacon_proxy_code": {
+            "keccak256": "0x874bddd24162a363ae7b2a08581471adc9fb1112112bc5b03b4b77f4b5d20237",
+            "size": 415
+          },
+          "counterparty": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "factory": "0x558de0e24956a634735914b1ea252c4c2214124c",
+          "feeRecipient": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "index": 12,
+          "initialized_version": 1,
+          "phase": 1,
+          "roundIndex": 1,
+          "totalManagedAssets": "2000000000000000000",
+          "totalSupply": "2000000000000000000000000",
+          "vault": "0x06579d66699a7ee427ba5a4a2660419d0fc75824"
+        },
+        {
+          "asset": "0xb1437aeea18189eb6d02dc46cd4d28613d582e9a",
+          "asset_balance": "0",
+          "beacon_proxy_code": {
+            "keccak256": "0x874bddd24162a363ae7b2a08581471adc9fb1112112bc5b03b4b77f4b5d20237",
+            "size": 415
+          },
+          "counterparty": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "factory": "0x558de0e24956a634735914b1ea252c4c2214124c",
+          "feeRecipient": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "index": 13,
+          "initialized_version": 1,
+          "phase": 1,
+          "roundIndex": 1,
+          "totalManagedAssets": "0",
+          "totalSupply": "0",
+          "vault": "0xda13268b7dbbec5ad2dd7be92c83155060b19b70"
+        },
+        {
+          "asset": "0xb1437aeea18189eb6d02dc46cd4d28613d582e9a",
+          "asset_balance": "66049400918582286927",
+          "beacon_proxy_code": {
+            "keccak256": "0x874bddd24162a363ae7b2a08581471adc9fb1112112bc5b03b4b77f4b5d20237",
+            "size": 415
+          },
+          "counterparty": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "factory": "0x558de0e24956a634735914b1ea252c4c2214124c",
+          "feeRecipient": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+          "index": 14,
+          "initialized_version": 1,
+          "phase": 1,
+          "roundIndex": 1,
+          "totalManagedAssets": "66049400918582286927",
+          "totalSupply": "66049400918582286927000000",
+          "vault": "0x133475720bebd7e0335a9af8e5118ed0b19815e2"
+        }
+      ]
+    }
+  },
+  "proxies": {
+    "0x008a7856fecf9a73f5011f77b020877f5d74a7f2": {
+      "admin": "0x79d6028229f2d819a1a4bb52a05bc97f5f37d667",
+      "admin_is_proxy_admin": true,
+      "implementation": "0x6a3dd86669e24723ac0ef0e30c2dd9ad1a8c2a45",
+      "implementation_code": {
+        "keccak256": "0xaaa648149c5496f70c0c36b7ef403f0199192afe48e8ba7853be335b1a6e586e",
+        "size": 3675
+      },
+      "implementation_code_matches_records": [
+        "deployments/testnet/SlpDistributor.json",
+        "deployments/testnet/SlpDistributor_Implementation.json"
+      ],
+      "implementation_expected": "0x6a3dd86669e24723ac0ef0e30c2dd9ad1a8c2a45",
+      "implementation_is_expected": true,
+      "initialized_version": 1,
+      "initialized_version_expected": 1,
+      "name": "SlpDistributor",
+      "owner": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+      "paused": false,
+      "proxy_code": {
+        "keccak256": "0xe5e3693157141608a301682c8c228c0277eac7efc0b98b57f874ca49752b5fd8",
+        "size": 2739
+      }
+    },
+    "0x558de0e24956a634735914b1ea252c4c2214124c": {
+      "admin": "0x79d6028229f2d819a1a4bb52a05bc97f5f37d667",
+      "admin_is_proxy_admin": true,
+      "implementation": "0xf51f16d97c80db2c55291e1add00ddfd4e7420d1",
+      "implementation_code": {
+        "keccak256": "0x3136ce2981b28c4878def62622101b4eebe947445801fa04e229c4d9de3d86a4",
+        "size": 36576
+      },
+      "implementation_code_matches_records": [
+        "deployments/testnet/YieldVaultFactory.json",
+        "deployments/testnet/YieldVaultFactory_Implementation.json"
+      ],
+      "implementation_expected": "0xf51f16d97c80db2c55291e1add00ddfd4e7420d1",
+      "implementation_is_expected": true,
+      "initialized_version": 1,
+      "initialized_version_expected": 1,
+      "name": "YieldVaultFactory",
+      "owner": "0xb29eaea575bd4bae7d9a301446e6204c3a23adf1",
+      "paused": false,
+      "proxy_code": {
+        "keccak256": "0xe5e3693157141608a301682c8c228c0277eac7efc0b98b57f874ca49752b5fd8",
+        "size": 2739
+      }
+    },
+    "0x6bd39d03d2fbbf14aee362977a09c293b282b0bc": {
+      "admin": "0x79d6028229f2d819a1a4bb52a05bc97f5f37d667",
+      "admin_is_proxy_admin": true,
+      "implementation": "0xf4caf6898a9316994b736cd03b3bfbe964e95384",
+      "implementation_code": {
+        "keccak256": "0x0add86f7545d8bba1a5d3d2a3d77927936e155158e6707adc4c78a1a39f8bb7a",
+        "size": 13215
+      },
+      "implementation_code_matches_records": [
+        "deployments/testnet/Oracle_Implementation.json"
+      ],
+      "implementation_expected": "0xf4caf6898a9316994b736cd03b3bfbe964e95384",
+      "implementation_is_expected": true,
+      "initialized_version": 3,
+      "initialized_version_expected": 3,
+      "name": "Oracle",
+      "owner": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+      "paused": false,
+      "proxy_code": {
+        "keccak256": "0xe5e3693157141608a301682c8c228c0277eac7efc0b98b57f874ca49752b5fd8",
+        "size": 2739
+      }
+    },
+    "0xb1437aeea18189eb6d02dc46cd4d28613d582e9a": {
+      "admin": "0x79d6028229f2d819a1a4bb52a05bc97f5f37d667",
+      "admin_is_proxy_admin": true,
+      "implementation": "0x64dc1e8b5e9515de37b58b4d8629bf89bcd1f576",
+      "implementation_code": {
+        "keccak256": "0x4e4031495d6c61dd405014ee650bed73ea8cf3c33008e80a5d0d56095d07fcfb",
+        "size": 12897
+      },
+      "implementation_code_matches_records": [
+        "deployments/testnet/StPROS_Implementation.json"
+      ],
+      "implementation_expected": "0x64dc1e8b5e9515de37b58b4d8629bf89bcd1f576",
+      "implementation_is_expected": true,
+      "initialized_version": 2,
+      "initialized_version_expected": 2,
+      "name": "StPROS",
+      "owner": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+      "paused": false,
+      "proxy_code": {
+        "keccak256": "0xe5e3693157141608a301682c8c228c0277eac7efc0b98b57f874ca49752b5fd8",
+        "size": 2739
+      }
+    },
+    "0xb79db65038a11fa8f5a361e5ff265842b3619ddc": {
+      "admin": "0x79d6028229f2d819a1a4bb52a05bc97f5f37d667",
+      "admin_is_proxy_admin": true,
+      "implementation": "0xafe333e1035020f48226c4e2931efa68a0688e47",
+      "implementation_code": {
+        "keccak256": "0x991878411fc18bf1984776edac27923d4964db2e6e352ea7cd96d4863b91aa61",
+        "size": 8197
+      },
+      "implementation_code_matches_records": [
+        "deployments/testnet/BridgeVault.json",
+        "deployments/testnet/BridgeVault_Implementation.json"
+      ],
+      "implementation_expected": "0xafe333e1035020f48226c4e2931efa68a0688e47",
+      "implementation_is_expected": true,
+      "initialized_version": 1,
+      "initialized_version_expected": 1,
+      "name": "BridgeVault",
+      "owner": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+      "paused": false,
+      "proxy_code": {
+        "keccak256": "0xe5e3693157141608a301682c8c228c0277eac7efc0b98b57f874ca49752b5fd8",
+        "size": 2739
+      }
+    }
+  },
+  "proxy_admin": {
+    "address": "0x79d6028229f2d819a1a4bb52a05bc97f5f37d667",
+    "code": {
+      "keccak256": "0xfdb374f62c5df71a60c5965707d6653c4910b1e309693a88263492ade756df11",
+      "size": 2632
+    },
+    "code_matches_records": [
+      "deployments/mainnet/DefaultProxyAdmin.json",
+      "deployments/testnet/DefaultProxyAdmin.json"
+    ],
+    "owner": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd"
+  },
+  "stpros": {
+    "C_completedWithdrawal": "6000000000000000000",
+    "E_escrow": "0",
+    "PRE4_relations": {
+      "E_ge_R": true,
+      "R_eq_Q_minus_C": false,
+      "W_minus_R_ge_S_minus_E": false,
+      "note": "PRE-4 is a mainnet V1 precondition; on testnet (V3) these are recorded for information only",
+      "pool_is_zero": false
+    },
+    "Q_queuedWithdrawal": "1511098291851011388640",
+    "R_totalCanWithdrawAmount": "0",
+    "S_totalSupply": "7492555956857525148649",
+    "W_wprosBalance": "0",
+    "maxWithdrawCount": 5,
+    "native_balance": "0",
+    "oracle": "0x6bd39d03d2fbbf14aee362977a09c293b282b0bc",
+    "oracle_pool_wpros": [
+      "14985111913715050297662",
+      "7492555956857525148649"
+    ],
+    "tracked_slot9": "2132477310903545105620",
+    "unbondingPeriod": 0
+  },
+  "timestamp": 1791527227,
+  "wpros": {
+    "address": "0x838800b758277cc111b2d48ab01e5e164f8e9471",
+    "code": {
+      "keccak256": "0xa5da078b4689994929a5a4c177f1262ffcc95102a6af8298d9a13f456b1d4eba",
+      "size": 3630
+    },
+    "totalSupply": "151025265687472407983839899"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "contract": "project/contracts/YieldVaultFactory.sol:IFactoryManagedYieldVault",
+  "errors": [],
+  "events": [],
+  "functions": [
+    {
+      "outputs": [],
+      "selector": "0x2c4b2308",
+      "signature": "emergencyCancel()",
+      "stateMutability": "nonpayable"
+    }
+  ],
+  "selector_collisions": [],
+  "source": "HEAD",
+  "special": []
+}

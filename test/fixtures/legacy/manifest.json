@@ -1,0 +1,103 @@
+{
+  "fixtures": {
+    "mainnet/Oracle_V1": {
+      "creationKeccak": "0x18c6642339e62976d5203cb17917d663ecd1110363b9d475efc0162ac197c228",
+      "onchain": "MATCH",
+      "runtimeKeccak": "0xf51bf95f1aaa1e9f727b56b95fe1a0e6cda716f4ec3dd2dc9dd0b55ca8d3f70c",
+      "sourceRecord": "deployments/mainnet/Oracle_Implementation.json"
+    },
+    "mainnet/ProxyAdmin_V4": {
+      "creationKeccak": "0x30c9762c8e0ea27161da5ce705cd0c681d6131938655103b1a1b2945b43ddd00",
+      "onchain": "MATCH",
+      "runtimeKeccak": "0xfdb374f62c5df71a60c5965707d6653c4910b1e309693a88263492ade756df11",
+      "sourceRecord": "deployments/mainnet/DefaultProxyAdmin.json"
+    },
+    "mainnet/StPROS_V1": {
+      "creationKeccak": "0x75f3f4c0b8a94537076464473d4aae6d8643e888e1d405726af203116b00c816",
+      "onchain": "MATCH",
+      "runtimeKeccak": "0x2d1812cb63ed3c07e2b5bc194206a4f51c5fdfd42e2b5fef10f9fea548b0dace",
+      "sourceRecord": "deployments/mainnet/StPROS_Implementation.json"
+    },
+    "mainnet/TransparentUpgradeableProxy_V4": {
+      "creationKeccak": "0x2263a7750608b79bba01684bd6cac686d9d06799f954229e6d7abb1dc4667890",
+      "onchain": "MATCH",
+      "runtimeKeccak": "0xe5e3693157141608a301682c8c228c0277eac7efc0b98b57f874ca49752b5fd8",
+      "sourceRecord": "deployments/mainnet/StPROS_Proxy.json"
+    },
+    "mainnet/WPROS": {
+      "address": "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0",
+      "onchain": "READ_AT_PIN",
+      "runtimeKeccak": "0x0896e7a43b7eddb23349f2e874fd51b547e22ad97ae931d7aca16d6990690677"
+    },
+    "mainnet/YieldVaultFactory_V1": {
+      "creationKeccak": "0x89a6a4474e6dd3b4ff84a40d76e4efd472f73ec0c30e67f44800ff320a83b278",
+      "onchain": "MATCH",
+      "runtimeKeccak": "0x4f574b18d5a311d246b37b257146194fae508668b25a726c831ecff57c250dbf",
+      "sourceRecord": "deployments/mainnet/YieldVaultFactory_Implementation.json"
+    },
+    "mainnet/YieldVault_V1": {
+      "creationKeccak": "0x4f4d0ff3932920372978658b54a8ba41ff8665e6ca4521c8ef1890336a1b67ec",
+      "onchain": "MATCH",
+      "runtimeKeccak": "0x4fd0522ed130547360e0bd2cd9d970a79b557e40366684fc1dd2733f7b987bd9",
+      "sourceRecord": "deployments/mainnet/YieldVault.json"
+    },
+    "testnet/BridgeVault_V3": {
+      "creationKeccak": "0x27dae28fc11168273812b731d79acb9e5671e6dc59bfa92c49dcb14190817914",
+      "onchain": "MATCH",
+      "runtimeKeccak": "0x991878411fc18bf1984776edac27923d4964db2e6e352ea7cd96d4863b91aa61",
+      "sourceRecord": "deployments/testnet/BridgeVault_Implementation.json"
+    },
+    "testnet/Oracle_V3": {
+      "creationKeccak": "0x489470a8cd73d8d0fae682b9e02c16c651f90ae761a10db1478ac07bf5001e33",
+      "onchain": "MATCH",
+      "runtimeKeccak": "0x0add86f7545d8bba1a5d3d2a3d77927936e155158e6707adc4c78a1a39f8bb7a",
+      "sourceRecord": "deployments/testnet/Oracle_Implementation.json"
+    },
+    "testnet/ProxyAdmin_V4": {
+      "creationKeccak": "0x30c9762c8e0ea27161da5ce705cd0c681d6131938655103b1a1b2945b43ddd00",
+      "onchain": "MATCH",
+      "runtimeKeccak": "0xfdb374f62c5df71a60c5965707d6653c4910b1e309693a88263492ade756df11",
+      "sourceRecord": "deployments/testnet/DefaultProxyAdmin.json"
+    },
+    "testnet/SlpDistributor_V3": {
+      "creationKeccak": "0x49a480a4494170f3cb0e7b1ad2cf484caecfb12f05e6fa2c9f5fab704fb90714",
+      "onchain": "MATCH",
+      "runtimeKeccak": "0xaaa648149c5496f70c0c36b7ef403f0199192afe48e8ba7853be335b1a6e586e",
+      "sourceRecord": "deployments/testnet/SlpDistributor_Implementation.json"
+    },
+    "testnet/StPROS_V3": {
+      "creationKeccak": "0x1f73900fcb271a74fc23d220ea1d603a10881d52fc17043f8fce219f4d7c87e0",
+      "onchain": "MATCH",
+      "runtimeKeccak": "0x4e4031495d6c61dd405014ee650bed73ea8cf3c33008e80a5d0d56095d07fcfb",
+      "sourceRecord": "deployments/testnet/StPROS_Implementation.json"
+    },
+    "testnet/TransparentUpgradeableProxy_V4": {
+      "creationKeccak": "0x2263a7750608b79bba01684bd6cac686d9d06799f954229e6d7abb1dc4667890",
+      "onchain": "MATCH",
+      "runtimeKeccak": "0xe5e3693157141608a301682c8c228c0277eac7efc0b98b57f874ca49752b5fd8",
+      "sourceRecord": "deployments/testnet/StPROS_Proxy.json"
+    },
+    "testnet/WPROS": {
+      "address": "0x838800b758277cc111b2d48ab01e5e164f8e9471",
+      "onchain": "READ_AT_PIN",
+      "runtimeKeccak": "0xa5da078b4689994929a5a4c177f1262ffcc95102a6af8298d9a13f456b1d4eba"
+    },
+    "testnet/YieldVaultFactory_V3": {
+      "creationKeccak": "0x776b3bda38206698016ea4ef60f9fe93e8abc089371c61043527ab31514cb4f9",
+      "onchain": "MATCH",
+      "runtimeKeccak": "0x3136ce2981b28c4878def62622101b4eebe947445801fa04e229c4d9de3d86a4",
+      "sourceRecord": "deployments/testnet/YieldVaultFactory_Implementation.json"
+    },
+    "testnet/YieldVault_V3": {
+      "creationKeccak": "0x846c228c6eea252179d7cf1bc4478291e9d1715e0ffcd220fecee967bd5c6bd3",
+      "onchain": "MATCH",
+      "runtimeKeccak": "0xbd39e8508a3e1cc9cfd7fa52b2e3c7873eb0aeeca7fdfc6d167c9ab362a8e9b1",
+      "sourceRecord": "deployments/testnet/YieldVault.json"
+    }
+  },
+  "pins": {
+    "_comment": "Pinned blocks for B0 deployed-state snapshots and inventories (tools/release/logscan.py plan end blocks).",
+    "mainnet": 19774476,
+    "testnet": 31190661
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "address": "0x772e27a320a60aeeb0b5c68dc6c8633460ef5706",
+  "linear": [
+    {
+      "bytes": 20,
+      "label": "beacon",
+      "offset": 0,
+      "slot": 0,
+      "type": "contract UpgradeableBeacon"
+    },
+    {
+      "bytes": 32,
+      "label": "allProxies",
+      "offset": 0,
+      "slot": 1,
+      "type": "address[]"
+    },
+    {
+      "bytes": 32,
+      "label": "isFactoryVault",
+      "offset": 0,
+      "slot": 2,
+      "type": "mapping(address => bool)"
+    },
+    {
+      "bytes": 32,
+      "label": "counterpartyWhitelist",
+      "offset": 0,
+      "slot": 3,
+      "type": "mapping(address => bool)"
+    }
+  ],
+  "record": "deployments/mainnet/YieldVaultFactory_Implementation.json",
+  "structs": {}
+}

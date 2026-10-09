@@ -1,0 +1,63 @@
+{
+  "abstract": false,
+  "contract": "project/contracts/SlpDistributor.sol:SlpDistributor",
+  "linear": [
+    {
+      "bytes": 20,
+      "label": "keeper",
+      "offset": 0,
+      "slot": 0,
+      "type": "address"
+    },
+    {
+      "bytes": 64,
+      "label": "_slps",
+      "offset": 0,
+      "slot": 1,
+      "type": "struct EnumerableSet.AddressSet"
+    }
+  ],
+  "namespaces": [
+    {
+      "declared_constant": [
+        "INITIALIZABLE_STORAGE"
+      ],
+      "namespace": "openzeppelin.storage.Initializable",
+      "root": "0xf0c57e16840df040f15088dc2f81fe391c3923bec73e23a9662efc9c229c6a00",
+      "struct": "Initializable.InitializableStorage"
+    },
+    {
+      "declared_constant": [
+        "OwnableStorageLocation"
+      ],
+      "namespace": "openzeppelin.storage.Ownable",
+      "root": "0x9016d09d72d40fdae2fd8ceac6b6234c7706214fd39c1cd1e609a0528c199300",
+      "struct": "OwnableUpgradeable.OwnableStorage"
+    }
+  ],
+  "source": "HEAD",
+  "structs": {
+    "struct EnumerableSet.AddressSet": [
+      {
+        "label": "_inner",
+        "offset": 0,
+        "slot": 0,
+        "type": "struct EnumerableSet.Set"
+      }
+    ],
+    "struct EnumerableSet.Set": [
+      {
+        "label": "_values",
+        "offset": 0,
+        "slot": 0,
+        "type": "bytes32[]"
+      },
+      {
+        "label": "_positions",
+        "offset": 0,
+        "slot": 1,
+        "type": "mapping(bytes32 => uint256)"
+      }
+    ]
+  }
+}

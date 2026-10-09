@@ -1,0 +1,23 @@
+{
+  "baselines": {
+    "head.Oracle.update": 30204,
+    "head.StPROS.deposit": 66208,
+    "head.StPROS.depositWithPROS": 35635,
+    "head.StPROS.redeem": 161124,
+    "head.StPROS.withdrawComplete.1record": 97303,
+    "head.StPROS.withdrawComplete.5records": 184579,
+    "head.YieldVault.deposit": 109066,
+    "head.YieldVault.finalize": 29441,
+    "head.YieldVault.redeem": 19041,
+    "legacyV1.StPROS.depositWithPROS": 26399,
+    "legacyV1.StPROS.redeem": 174961,
+    "legacyV1.StPROS.withdrawComplete.5records": 86035,
+    "legacyV1.StPROS.withdrawCompleteToPROS.1record": 99410,
+    "legacyV1.YieldVault.deposit": 104957,
+    "legacyV1.YieldVault.finalize": 27537,
+    "legacyV1.YieldVault.redeem": 16188
+  },
+  "measured_with": "forge 0.3.0 (5a8bd89 2024-12-20T08:45:53.204298000Z)",
+  "method": "in-test gasleft() delta around one external call; warm access list; no intrinsic gas; HEAD behind the recorded v4 TUP with WPROS9, legacyV1 on recorded mainnet bytecode with the real WPROS runtime",
+  "tolerance": 0.05
+}

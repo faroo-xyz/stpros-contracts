@@ -1,0 +1,29 @@
+{
+  "address": "0x7746ef546d562b443ae4b4145541a3b1a3d75717",
+  "linear": [
+    {
+      "bytes": 32,
+      "label": "poolInfo",
+      "offset": 0,
+      "slot": 0,
+      "type": "mapping(address => struct Oracle.PoolInfo)"
+    }
+  ],
+  "record": "deployments/mainnet/Oracle_Implementation.json",
+  "structs": {
+    "struct Oracle.PoolInfo": [
+      {
+        "label": "tokenAmount",
+        "offset": 0,
+        "slot": 0,
+        "type": "uint256"
+      },
+      {
+        "label": "vTokenAmount",
+        "offset": 0,
+        "slot": 1,
+        "type": "uint256"
+      }
+    ]
+  }
+}

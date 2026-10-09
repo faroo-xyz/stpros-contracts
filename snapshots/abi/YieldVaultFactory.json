@@ -1,0 +1,269 @@
+{
+  "contract": "project/contracts/YieldVaultFactory.sol:YieldVaultFactory",
+  "errors": [
+    {
+      "selector": "0xd93c0665",
+      "signature": "EnforcedPause()"
+    },
+    {
+      "selector": "0x8dfc202b",
+      "signature": "ExpectedPause()"
+    },
+    {
+      "selector": "0x4f1332db",
+      "signature": "InvalidCounterparty()"
+    },
+    {
+      "selector": "0xfb3cbae8",
+      "signature": "InvalidFactoryInParams(address)"
+    },
+    {
+      "selector": "0x68155f9a",
+      "signature": "InvalidImplementation()"
+    },
+    {
+      "selector": "0xf92ee8a9",
+      "signature": "InvalidInitialization()"
+    },
+    {
+      "selector": "0xaf7301ae",
+      "signature": "InvalidVault(address)"
+    },
+    {
+      "selector": "0xd7e6bcf8",
+      "signature": "NotInitializing()"
+    },
+    {
+      "selector": "0x1e4fbdf7",
+      "signature": "OwnableInvalidOwner(address)"
+    },
+    {
+      "selector": "0x118cdaa7",
+      "signature": "OwnableUnauthorizedAccount(address)"
+    }
+  ],
+  "events": [
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        true
+      ],
+      "signature": "BeaconCreated(address,address)",
+      "topic0": "0x71a8466bb649fa9952eb7579fd94754b4e4345c604613f39182eff1c30267d6c"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        true
+      ],
+      "signature": "BeaconUpgraded(address,address)",
+      "topic0": "0xc945ae30494f6ee00b9e4bf1fec5653ced7244b559666f44f9a88ea732e957b0"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        false
+      ],
+      "signature": "CounterpartyWhitelistUpdated(address,bool)",
+      "topic0": "0x8121ec7f2ca1072efea9ad252f3437bfac291ac5eb8e08f25e683cb69f78fb9a"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        true
+      ],
+      "signature": "EmergencyCancelled(address,address)",
+      "topic0": "0x26f79e25d35f5be83b3ccfc5696864ed1dd355079e938a8feea2a0c0b654b406"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        false
+      ],
+      "signature": "Initialized(uint64)",
+      "topic0": "0xc7f505b2f371ae2175ee4913f4499e1f2633a7b5936321eed1cdaeb6115181d2"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        true
+      ],
+      "signature": "OwnershipTransferred(address,address)",
+      "topic0": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        false
+      ],
+      "signature": "Paused(address)",
+      "topic0": "0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        false
+      ],
+      "signature": "Unpaused(address)",
+      "topic0": "0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        true
+      ],
+      "signature": "YieldVaultCreated(address,address)",
+      "topic0": "0x6b13be6b77247cc66d50e180048dab4edf7d82948568f8cee47f00bba849a0bb"
+    }
+  ],
+  "functions": [
+    {
+      "outputs": [],
+      "selector": "0xbb79305a",
+      "signature": "addCounterpartyToWhitelist(address)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "address"
+      ],
+      "selector": "0xad14e7d1",
+      "signature": "allProxies(uint256)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "address"
+      ],
+      "selector": "0x59659e90",
+      "signature": "beacon()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "bool"
+      ],
+      "selector": "0x8504e053",
+      "signature": "counterpartyWhitelist(address)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "address"
+      ],
+      "selector": "0x235fba4c",
+      "signature": "createYieldVault((address,address,address,address,address,string,string,(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)))",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "address"
+      ],
+      "selector": "0xd8bd5c29",
+      "signature": "currentImplementation()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [],
+      "selector": "0x7b9480f7",
+      "signature": "emergencyCancel(address)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "address[]"
+      ],
+      "selector": "0x883edfb8",
+      "signature": "getAllProxies()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [],
+      "selector": "0xc4d66de8",
+      "signature": "initialize(address)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "bool"
+      ],
+      "selector": "0x58c62442",
+      "signature": "isFactoryVault(address)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "address"
+      ],
+      "selector": "0x8da5cb5b",
+      "signature": "owner()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [],
+      "selector": "0x8456cb59",
+      "signature": "pause()",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "bool"
+      ],
+      "selector": "0x5c975abb",
+      "signature": "paused()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [],
+      "selector": "0x8e957d22",
+      "signature": "removeCounterpartyFromWhitelist(address)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [],
+      "selector": "0x715018a6",
+      "signature": "renounceOwnership()",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0xa30385d7",
+      "signature": "totalProxies()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [],
+      "selector": "0xf2fde38b",
+      "signature": "transferOwnership(address)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [],
+      "selector": "0x3f4ba83a",
+      "signature": "unpause()",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [],
+      "selector": "0x2f11fdc3",
+      "signature": "upgradeBeaconTo(address)",
+      "stateMutability": "nonpayable"
+    }
+  ],
+  "selector_collisions": [],
+  "source": "HEAD",
+  "special": [
+    {
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    }
+  ]
+}

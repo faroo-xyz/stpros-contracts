@@ -1,0 +1,283 @@
+{
+  "address": "0xafe333e1035020f48226c4e2931efa68a0688e47",
+  "contract": "BridgeVault",
+  "errors": [
+    {
+      "selector": "0x86174cf7",
+      "signature": "AssetAlreadyRegistered(address,address)"
+    },
+    {
+      "selector": "0xd93c0665",
+      "signature": "EnforcedPause()"
+    },
+    {
+      "selector": "0x6d963f88",
+      "signature": "EthTransferFailed()"
+    },
+    {
+      "selector": "0x8dfc202b",
+      "signature": "ExpectedPause()"
+    },
+    {
+      "selector": "0xdb42144d",
+      "signature": "InsufficientBalance(address,uint256,uint256)"
+    },
+    {
+      "selector": "0xf92ee8a9",
+      "signature": "InvalidInitialization()"
+    },
+    {
+      "selector": "0xf4abf912",
+      "signature": "InvalidWithdrawAddress()"
+    },
+    {
+      "selector": "0x73d390d3",
+      "signature": "InvalidWithdrawToken(address,address)"
+    },
+    {
+      "selector": "0xd7e6bcf8",
+      "signature": "NotInitializing()"
+    },
+    {
+      "selector": "0xbfb92565",
+      "signature": "NotVTokenContract(address)"
+    },
+    {
+      "selector": "0x1e4fbdf7",
+      "signature": "OwnableInvalidOwner(address)"
+    },
+    {
+      "selector": "0x118cdaa7",
+      "signature": "OwnableUnauthorizedAccount(address)"
+    },
+    {
+      "selector": "0x3ee5aeb5",
+      "signature": "ReentrancyGuardReentrantCall()"
+    },
+    {
+      "selector": "0x5274afe7",
+      "signature": "SafeERC20FailedOperation(address)"
+    },
+    {
+      "selector": "0x686586cc",
+      "signature": "VTokenAddressAlreadyExists(address)"
+    },
+    {
+      "selector": "0x0671afd3",
+      "signature": "VTokenAddressNotFound(address)"
+    },
+    {
+      "selector": "0xd6d9e665",
+      "signature": "ZeroWithdrawAmount()"
+    }
+  ],
+  "events": [
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        true,
+        false
+      ],
+      "signature": "EmergencyWithdraw(address,address,uint256)",
+      "topic0": "0xf24ef89f38eadc1bde50701ad6e4d6d11a2dc24f7cf834a486991f3883328504"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        false
+      ],
+      "signature": "EthReceived(address,uint256)",
+      "topic0": "0x85177f287940f2f05425a4029951af0e047a7f9c4eaa9a6e6917bcd869f86695"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        false
+      ],
+      "signature": "Initialized(uint64)",
+      "topic0": "0xc7f505b2f371ae2175ee4913f4499e1f2633a7b5936321eed1cdaeb6115181d2"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        true
+      ],
+      "signature": "OwnershipTransferred(address,address)",
+      "topic0": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        false
+      ],
+      "signature": "Paused(address)",
+      "topic0": "0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        true,
+        false
+      ],
+      "signature": "TokenWithdrawn(address,address,uint256)",
+      "topic0": "0x8210728e7c071f615b840ee026032693858fbcd5e5359e67e438c890f59e5620"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        false
+      ],
+      "signature": "Unpaused(address)",
+      "topic0": "0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        false,
+        false
+      ],
+      "signature": "VTokenSet(address,bool,bool)",
+      "topic0": "0xd7b049f713b3afedd46a8735360f4f25a00c486ffbefac5d438ea5b1ed2fa122"
+    },
+    {
+      "anonymous": false,
+      "indexed": [
+        true,
+        true
+      ],
+      "signature": "WethChanged(address,address)",
+      "topic0": "0x85fa3ce90a48b2b78537cbd0e84e5777c32c7e90a65b337166d0f932e9838b0b"
+    }
+  ],
+  "functions": [
+    {
+      "outputs": [],
+      "selector": "0xe63ea408",
+      "signature": "emergencyWithdraw(address,address,uint256)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0xf8b2cb4f",
+      "signature": "getBalance(address)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [],
+      "selector": "0xe4bbb5a8",
+      "signature": "initialize(address,address,bool)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "bool"
+      ],
+      "selector": "0xf8d95313",
+      "signature": "isVTokenAddress(address)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "address"
+      ],
+      "selector": "0x8da5cb5b",
+      "signature": "owner()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [],
+      "selector": "0x8456cb59",
+      "signature": "pause()",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "bool"
+      ],
+      "selector": "0x5c975abb",
+      "signature": "paused()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [],
+      "selector": "0x715018a6",
+      "signature": "renounceOwnership()",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [],
+      "selector": "0xbcbe2967",
+      "signature": "setVToken(address,bool,bool)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [],
+      "selector": "0xf2fde38b",
+      "signature": "transferOwnership(address)",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [],
+      "selector": "0x3f4ba83a",
+      "signature": "unpause()",
+      "stateMutability": "nonpayable"
+    },
+    {
+      "outputs": [
+        "uint256"
+      ],
+      "selector": "0xb176ac57",
+      "signature": "vTokenAddressCount()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "bool"
+      ],
+      "selector": "0xdcf8d38a",
+      "signature": "vTokenAddresses(address)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "address"
+      ],
+      "selector": "0x4fd9b029",
+      "signature": "vTokenByAsset(address)",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [
+        "address"
+      ],
+      "selector": "0x3fc8cef3",
+      "signature": "weth()",
+      "stateMutability": "view"
+    },
+    {
+      "outputs": [],
+      "selector": "0x01e33667",
+      "signature": "withdrawToken(address,address,uint256)",
+      "stateMutability": "nonpayable"
+    }
+  ],
+  "record": "deployments/testnet/BridgeVault_Implementation.json",
+  "selector_collisions": [],
+  "special": [
+    {
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "stateMutability": "payable",
+      "type": "receive"
+    }
+  ]
+}

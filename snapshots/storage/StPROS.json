@@ -1,0 +1,167 @@
+{
+  "abstract": false,
+  "contract": "project/contracts/StPROS.sol:StPROS",
+  "linear": [
+    {
+      "bytes": 20,
+      "label": "oracle",
+      "offset": 0,
+      "slot": 0,
+      "type": "contract Oracle"
+    },
+    {
+      "bytes": 32,
+      "label": "totalCanWithdrawAmount",
+      "offset": 0,
+      "slot": 1,
+      "type": "uint256"
+    },
+    {
+      "bytes": 32,
+      "label": "queuedWithdrawal",
+      "offset": 0,
+      "slot": 2,
+      "type": "uint256"
+    },
+    {
+      "bytes": 32,
+      "label": "completedWithdrawal",
+      "offset": 0,
+      "slot": 3,
+      "type": "uint256"
+    },
+    {
+      "bytes": 32,
+      "label": "withdrawalHead",
+      "offset": 0,
+      "slot": 4,
+      "type": "mapping(address => uint256)"
+    },
+    {
+      "bytes": 32,
+      "label": "withdrawalTail",
+      "offset": 0,
+      "slot": 5,
+      "type": "mapping(address => uint256)"
+    },
+    {
+      "bytes": 32,
+      "label": "withdrawals",
+      "offset": 0,
+      "slot": 6,
+      "type": "mapping(address => mapping(uint256 => struct VToken.Withdrawal))"
+    },
+    {
+      "bytes": 32,
+      "label": "maxWithdrawCount",
+      "offset": 0,
+      "slot": 7,
+      "type": "uint256"
+    },
+    {
+      "bytes": 32,
+      "label": "unbondingPeriod",
+      "offset": 0,
+      "slot": 8,
+      "type": "uint256"
+    },
+    {
+      "bytes": 32,
+      "label": "_tracked",
+      "offset": 0,
+      "slot": 9,
+      "type": "uint256"
+    },
+    {
+      "bytes": 20,
+      "label": "slp",
+      "offset": 0,
+      "slot": 10,
+      "type": "address"
+    },
+    {
+      "bytes": 20,
+      "label": "bridgeVault",
+      "offset": 0,
+      "slot": 11,
+      "type": "contract BridgeVault"
+    }
+  ],
+  "namespaces": [
+    {
+      "declared_constant": [
+        "ERC20StorageLocation"
+      ],
+      "namespace": "openzeppelin.storage.ERC20",
+      "root": "0x52c63247e1f47db19d5ce0460030c497f067ca4cebf71ba98eeadabe20bace00",
+      "struct": "ERC20Upgradeable.ERC20Storage"
+    },
+    {
+      "declared_constant": [
+        "ERC4626StorageLocation"
+      ],
+      "namespace": "openzeppelin.storage.ERC4626",
+      "root": "0x0773e532dfede91f04b12a73d3d2acd361424f41f76b4fb79f090161e36b4e00",
+      "struct": "ERC4626Upgradeable.ERC4626Storage"
+    },
+    {
+      "declared_constant": [
+        "INITIALIZABLE_STORAGE"
+      ],
+      "namespace": "openzeppelin.storage.Initializable",
+      "root": "0xf0c57e16840df040f15088dc2f81fe391c3923bec73e23a9662efc9c229c6a00",
+      "struct": "Initializable.InitializableStorage"
+    },
+    {
+      "declared_constant": [
+        "OwnableStorageLocation"
+      ],
+      "namespace": "openzeppelin.storage.Ownable",
+      "root": "0x9016d09d72d40fdae2fd8ceac6b6234c7706214fd39c1cd1e609a0528c199300",
+      "struct": "OwnableUpgradeable.OwnableStorage"
+    },
+    {
+      "declared_constant": [
+        "PausableStorageLocation"
+      ],
+      "namespace": "openzeppelin.storage.Pausable",
+      "root": "0xcd5ed15c6e187e77e9aee88184c21f4f2182ab5827cb3b7e07fbedcd63f03300",
+      "struct": "PausableUpgradeable.PausableStorage"
+    }
+  ],
+  "source": "HEAD",
+  "structs": {
+    "struct VToken.Withdrawal": [
+      {
+        "label": "queued",
+        "offset": 0,
+        "slot": 0,
+        "type": "uint256"
+      },
+      {
+        "label": "pending",
+        "offset": 0,
+        "slot": 1,
+        "type": "uint256"
+      },
+      {
+        "label": "createdAt",
+        "offset": 0,
+        "slot": 2,
+        "type": "uint256"
+      },
+      {
+        "label": "unbondingPeriod",
+        "offset": 0,
+        "slot": 3,
+        "type": "uint256"
+      },
+      {
+        "label": "receiver",
+        "offset": 0,
+        "slot": 4,
+        "type": "address"
+      }
+    ]
+  }
+}
