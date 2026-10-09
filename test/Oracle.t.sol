@@ -1,26 +1,30 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.28;
 
-import {Test} from "forge-std/Test.sol";
+import {R4UnitTest} from "./helpers/R4UnitTest.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 
 import {Oracle} from "../contracts/Oracle.sol";
 import {VToken} from "../contracts/VToken.sol";
-import {MockWPROS} from "./mocks/MockWPROS.sol";
+import {WPROS9} from "./mocks/WPROS9.sol";
 
 contract OracleVTokenHarness is VToken {
+    function seedShares(address who, uint256 amount) external {
+        _mint(who, amount);
+    }
+
     function initialize(IERC20 asset_, address owner_, address oracle_) external initializer {
-        __VToken_init(asset_, owner_, "Staked PROS", "stPROS");
+        __VToken_init(asset_, owner_, "Staked PROS", "stPROS", address(0x1234));
         oracle = Oracle(oracle_);
     }
 }
 
-contract OracleTest is Test {
+contract OracleTest is R4UnitTest {
     Oracle internal oracle;
     OracleVTokenHarness internal vtoken;
-    MockWPROS internal wpros;
+    WPROS9 internal wpros;
 
     address internal owner = makeAddr("owner");
     address internal slp = makeAddr("slp");
@@ -31,10 +35,11 @@ contract OracleTest is Test {
     uint256 internal constant UPDATE_INTERVAL = 1 hours;
 
     function setUp() external {
-        wpros = new MockWPROS();
+        owner = _newTimelock();
+        wpros = new WPROS9();
 
         Oracle oracleImplementation = new Oracle();
-        bytes memory oracleInitData = abi.encodeWithSelector(Oracle.initialize.selector, owner);
+        bytes memory oracleInitData = abi.encodeWithSelector(Oracle.initialize.selector, owner, address(0x1234));
         ERC1967Proxy oracleProxy = new ERC1967Proxy(address(oracleImplementation), oracleInitData);
         oracle = Oracle(address(oracleProxy));
 
@@ -45,12 +50,20 @@ contract OracleTest is Test {
         vtoken = OracleVTokenHarness(payable(address(vtokenProxy)));
 
         vm.prank(owner);
-        oracle.setPoolInfo(address(wpros), 1_000 ether, 1_000 ether);
+        oracle.setVToken(address(vtoken), true);
+        vm.prank(owner);
+        oracle.setCommissionVToken(address(wpros), address(vtoken));
+        vtoken.seedShares(alice, 1_000 ether);
+        vm.prank(address(vtoken));
+        oracle.initializePool(address(wpros), 1_000 ether, 1_000 ether);
     }
 
     function _upgradeOracleToV2() internal {
-        vm.prank(owner);
-        oracle.initializeV2(slp, address(vtoken), MAX_UPDATE, UPDATE_INTERVAL);
+        vm.startPrank(owner);
+        oracle.setSlp(slp);
+        oracle.setUpdateLimits(MAX_UPDATE, UPDATE_INTERVAL);
+        oracle.setMaxAprPpm(500_000);
+        vm.stopPrank();
     }
 
     function _commissionMappings() internal view returns (address[] memory tokens, address[] memory vTokens) {
@@ -61,12 +74,11 @@ contract OracleTest is Test {
     }
 
     function _upgradeOracleToV3(uint256 ratePpm) internal {
-        (address[] memory tokens, address[] memory vTokens) = _commissionMappings();
         vm.prank(owner);
-        oracle.initializeV3(commissionAccount, ratePpm, tokens, vTokens);
+        oracle.setCommissionConfig(commissionAccount, ratePpm);
     }
 
-    function test_InitializeV2_ShouldConfigureSlpVTokenAndLimits() external {
+    function test_Governance_ShouldConfigureSlpVTokenAndLimits() external {
         _upgradeOracleToV2();
 
         assertEq(oracle.slp(), slp, "slp");
@@ -75,15 +87,18 @@ contract OracleTest is Test {
         assertEq(oracle.updateInterval(), UPDATE_INTERVAL, "interval");
     }
 
-    function test_InitializeV2_ShouldRevert_WhenCalledTwice() external {
+    function test_RemovedInitializeV2_ShouldRevert() external {
         _upgradeOracleToV2();
-
         vm.prank(owner);
-        vm.expectRevert();
-        oracle.initializeV2(slp, address(vtoken), MAX_UPDATE, UPDATE_INTERVAL);
+        (bool ok,) = address(oracle).call(
+            abi.encodeWithSignature(
+                "initializeV2(address,address,uint256,uint256)", slp, address(vtoken), MAX_UPDATE, UPDATE_INTERVAL
+            )
+        );
+        assertFalse(ok, "removed migration initializer must not be callable");
     }
 
-    function test_InitializeV3_ShouldConfigureCommission() external {
+    function test_Governance_ShouldConfigureCommission() external {
         _upgradeOracleToV2();
         _upgradeOracleToV3(1_000);
 
@@ -92,70 +107,78 @@ contract OracleTest is Test {
         assertEq(oracle.tokenToVToken(address(wpros)), address(vtoken), "commission vToken");
     }
 
-    function test_InitializeV2AndV3_ShouldConfigureBothVersions() external {
-        (address[] memory tokens, address[] memory vTokens) = _commissionMappings();
-
+    function test_Governance_ShouldConfigureR4AndRejectOldInitializer() external {
+        _upgradeOracleToV2();
+        _upgradeOracleToV3(10_000);
+        assertEq(oracle.slp(), slp);
+        assertTrue(oracle.vTokenAddresses(address(vtoken)));
+        assertEq(oracle.maxUpdateAmount(), MAX_UPDATE);
+        assertEq(oracle.updateInterval(), UPDATE_INTERVAL);
+        assertEq(oracle.commissionAccount(), commissionAccount);
+        assertEq(oracle.commissionRatePpm(), 10_000);
+        assertEq(oracle.tokenToVToken(address(wpros)), address(vtoken));
         vm.prank(owner);
-        oracle.initializeV2AndV3(
-            slp, address(vtoken), MAX_UPDATE, UPDATE_INTERVAL, commissionAccount, 10_000, tokens, vTokens
+        (bool ok,) = address(oracle).call(
+            abi.encodeWithSignature(
+                "initializeV3(address,uint256,address[],address[])",
+                commissionAccount,
+                10_000,
+                new address[](0),
+                new address[](0)
+            )
         );
-
-        assertEq(oracle.slp(), slp, "slp");
-        assertTrue(oracle.vTokenAddresses(address(vtoken)), "registered");
-        assertEq(oracle.maxUpdateAmount(), MAX_UPDATE, "max update");
-        assertEq(oracle.updateInterval(), UPDATE_INTERVAL, "interval");
-        assertEq(oracle.commissionAccount(), commissionAccount, "commission account");
-        assertEq(oracle.commissionRatePpm(), 10_000, "commission rate");
-        assertEq(oracle.tokenToVToken(address(wpros)), address(vtoken), "commission vToken");
+        assertFalse(ok);
     }
 
     function test_Update_ShouldIncreaseTokenAmount_WhenCalledBySlp() external {
         _upgradeOracleToV2();
-        vm.warp(UPDATE_INTERVAL + 1);
+        vm.warp(block.timestamp + 7 days);
 
-        assertTrue(oracle.canUpdate(address(wpros), 10 ether), "preview allows update");
+        assertTrue(oracle.canUpdate(address(wpros), 1 ether), "preview allows update");
 
         vm.prank(slp);
-        oracle.update(address(wpros), 10 ether);
+        oracle.update(address(wpros), 1 ether);
 
         (uint256 tokenAmount,) = oracle.poolInfo(address(wpros));
-        assertEq(tokenAmount, 1_010 ether, "token amount increased");
+        assertEq(tokenAmount, 1_001 ether, "token amount increased");
         assertEq(oracle.lastUpdateAt(address(wpros)), block.timestamp, "timestamp updated");
     }
 
-    function test_Update_ShouldMintCommissionUsingPreUpdateRate() external {
+    function test_Update_ShouldMintCommissionUsingExactPostUpdateFormula() external {
         _upgradeOracleToV2();
         _upgradeOracleToV3(10_000);
         vm.prank(owner);
-        oracle.setPoolInfo(address(wpros), 2_000 ether, 1_000 ether);
-        vm.warp(UPDATE_INTERVAL + 1);
-
+        oracle.setTokenAmount(address(wpros), 1_000 ether, 2_000 ether);
+        vm.warp(block.timestamp + 7 days);
         vm.prank(slp);
-        oracle.update(address(wpros), 100 ether);
-
-        (uint256 tokenAmount, uint256 vTokenAmount) = oracle.poolInfo(address(wpros));
-        assertEq(tokenAmount, 2_100 ether, "token side uses full update amount");
-        assertEq(vTokenAmount, 1_000 ether + 0.5 ether, "vToken side adds commission shares");
-        assertEq(vtoken.balanceOf(commissionAccount), 0.5 ether, "commission minted");
+        oracle.update(address(wpros), 10 ether);
+        uint256 expected = uint256(0.1 ether) * 1_000 ether / (2_010 ether - 0.1 ether);
+        (uint256 t, uint256 v) = oracle.poolInfo(address(wpros));
+        assertEq(t, 2_010 ether);
+        assertEq(v, 1_000 ether + expected);
+        assertEq(vtoken.balanceOf(commissionAccount), expected);
+        assertLe(expected * t / v, 0.1 ether, "exact post-update commission bound");
     }
 
     function test_Update_ShouldRevert_WhenCommissionMappingMissing() external {
         _upgradeOracleToV2();
         vm.prank(owner);
-        oracle.initializeV3(commissionAccount, 10_000, new address[](0), new address[](0));
-        vm.warp(UPDATE_INTERVAL + 1);
+        oracle.setCommissionConfig(commissionAccount, 10_000);
+        vm.prank(owner);
+        oracle.setCommissionVToken(address(wpros), address(0));
+        vm.warp(block.timestamp + 7 days);
 
-        assertFalse(oracle.canUpdate(address(wpros), 100 ether), "missing commission mapping");
+        assertFalse(oracle.canUpdate(address(wpros), 1 ether), "missing commission mapping");
 
         vm.prank(slp);
         vm.expectRevert(abi.encodeWithSelector(Oracle.MissingCommissionVToken.selector, address(wpros)));
-        oracle.update(address(wpros), 100 ether);
+        oracle.update(address(wpros), 1 ether);
     }
 
     function test_Update_ShouldNotMintCommission_WhenRoundedToZero() external {
         _upgradeOracleToV2();
         _upgradeOracleToV3(10);
-        vm.warp(UPDATE_INTERVAL + 1);
+        vm.warp(block.timestamp + 7 days);
 
         vm.prank(slp);
         oracle.update(address(wpros), 1);
@@ -170,7 +193,7 @@ contract OracleTest is Test {
 
         vm.prank(owner);
         vm.expectRevert(abi.encodeWithSelector(Oracle.InvalidCommissionRate.selector, 1_000_001, 1_000_000));
-        oracle.initializeV3(commissionAccount, 1_000_001, new address[](0), new address[](0));
+        oracle.setCommissionConfig(commissionAccount, 1_000_001);
     }
 
     function test_SetCommissionVToken_ShouldValidateAsset() external {
@@ -201,7 +224,7 @@ contract OracleTest is Test {
 
     function test_Update_ShouldRevert_WhenTooFrequent() external {
         _upgradeOracleToV2();
-        vm.warp(UPDATE_INTERVAL + 1);
+        vm.warp(block.timestamp + 7 days);
 
         vm.prank(slp);
         oracle.update(address(wpros), 1 ether);
@@ -215,7 +238,7 @@ contract OracleTest is Test {
 
     function test_CanUpdate_ShouldReturnFalse_WhenPaused() external {
         _upgradeOracleToV2();
-        vm.warp(UPDATE_INTERVAL + 1);
+        vm.warp(block.timestamp + 7 days);
 
         vm.prank(owner);
         oracle.pause();
@@ -225,7 +248,7 @@ contract OracleTest is Test {
 
     function test_CanUpdate_ShouldReturnFalse_WhenAmountExceedsMax() external {
         _upgradeOracleToV2();
-        vm.warp(UPDATE_INTERVAL + 1);
+        vm.warp(block.timestamp + 7 days);
 
         assertFalse(oracle.canUpdate(address(wpros), MAX_UPDATE + 1), "amount too large");
     }
@@ -244,7 +267,7 @@ contract OracleTest is Test {
 
     function test_CanUpdate_ShouldReturnFalse_WhenUpdateDisabled() external {
         vm.prank(owner);
-        oracle.initializeV2(slp, address(vtoken), 0, 0);
+        oracle.setUpdateLimits(0, UPDATE_INTERVAL);
 
         assertFalse(oracle.canUpdate(address(wpros), 1 ether), "maxUpdateAmount zero");
     }
@@ -279,43 +302,51 @@ contract OracleTest is Test {
         oracle.onRedeem(address(wpros), 2_000 ether, 2_000 ether);
     }
 
-    function test_SetPoolInfo_ByOwner_ShouldAllowAnyToken() external {
-        address otherToken = makeAddr("otherToken");
-
+    function test_RemovedPoolSetter_ByOwner_ShouldRevert() external {
+        (uint256 t, uint256 v) = oracle.poolInfo(address(wpros));
         vm.prank(owner);
-        oracle.setPoolInfo(otherToken, 3 ether, 4 ether);
-
-        (uint256 tokenAmount, uint256 vTokenAmount) = oracle.poolInfo(otherToken);
-        assertEq(tokenAmount, 3 ether, "token amount");
-        assertEq(vTokenAmount, 4 ether, "vToken amount");
+        (bool ok,) = address(oracle).call(
+            abi.encodeWithSignature("setPoolInfo(address,uint256,uint256)", makeAddr("otherToken"), 3 ether, 4 ether)
+        );
+        assertFalse(ok, "arbitrary pool setter removed in R4");
+        (uint256 afterT, uint256 afterV) = oracle.poolInfo(address(wpros));
+        assertEq(t, afterT);
+        assertEq(v, afterV);
     }
 
-    function test_SetPoolInfo_ByVToken_ShouldAllowOwnAsset() external {
-        _upgradeOracleToV2();
-
+    function test_RemovedPoolSetter_ByVToken_ShouldRevert() external {
+        (uint256 t, uint256 v) = oracle.poolInfo(address(wpros));
         vm.prank(address(vtoken));
-        oracle.setPoolInfo(address(wpros), 500 ether, 500 ether);
-
-        (uint256 tokenAmount, uint256 vTokenAmount) = oracle.poolInfo(address(wpros));
-        assertEq(tokenAmount, 500 ether, "token amount");
-        assertEq(vTokenAmount, 500 ether, "vToken amount");
+        (bool ok,) = address(oracle).call(
+            abi.encodeWithSignature("setPoolInfo(address,uint256,uint256)", address(wpros), 3 ether, 4 ether)
+        );
+        assertFalse(ok, "arbitrary pool setter removed in R4");
+        (uint256 afterT, uint256 afterV) = oracle.poolInfo(address(wpros));
+        assertEq(t, afterT);
+        assertEq(v, afterV);
     }
 
     function test_SetPoolInfo_ByVToken_ShouldRevert_WrongAsset() external {
-        _upgradeOracleToV2();
-        address wrongToken = makeAddr("wrongToken");
-
-        vm.startPrank(address(vtoken));
-        vm.expectRevert(
-            abi.encodeWithSelector(Oracle.InvalidVTokenAsset.selector, wrongToken, IERC4626(address(vtoken)).asset())
+        (uint256 t, uint256 v) = oracle.poolInfo(address(wpros));
+        vm.prank(address(vtoken));
+        (bool ok,) = address(oracle).call(
+            abi.encodeWithSignature("setPoolInfo(address,uint256,uint256)", makeAddr("wrongToken"), 3 ether, 4 ether)
         );
-        oracle.setPoolInfo(wrongToken, 1 ether, 1 ether);
-        vm.stopPrank();
+        assertFalse(ok, "arbitrary pool setter removed in R4");
+        (uint256 afterT, uint256 afterV) = oracle.poolInfo(address(wpros));
+        assertEq(t, afterT);
+        assertEq(v, afterV);
     }
 
     function test_SetPoolInfo_ByUnregisteredCaller_ShouldRevert() external {
+        (uint256 t, uint256 v) = oracle.poolInfo(address(wpros));
         vm.prank(alice);
-        vm.expectRevert(abi.encodeWithSelector(Oracle.NotVToken.selector, alice));
-        oracle.setPoolInfo(address(wpros), 1 ether, 1 ether);
+        (bool ok,) = address(oracle).call(
+            abi.encodeWithSignature("setPoolInfo(address,uint256,uint256)", address(wpros), 3 ether, 4 ether)
+        );
+        assertFalse(ok, "arbitrary pool setter removed in R4");
+        (uint256 afterT, uint256 afterV) = oracle.poolInfo(address(wpros));
+        assertEq(t, afterT);
+        assertEq(v, afterV);
     }
 }

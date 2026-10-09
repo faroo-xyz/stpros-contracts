@@ -4,7 +4,7 @@ pragma solidity ^0.8.28;
 import {VToken} from "./VToken.sol";
 import {IWPROS} from "./interfaces/IWPROS.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
+import {Oracle} from "./Oracle.sol";
 
 contract StPROS is VToken {
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -18,63 +18,85 @@ contract StPROS is VToken {
     /// @notice Thrown when ETH is sent from non-asset address
     error OnlyAssetCanSendETH();
 
-    /// @notice Override initialize to include reentrancy guard (for new deployments)
-    function initialize(IERC20 asset, address owner, string memory name, string memory symbol)
-        public
-        initializer
-    {
-        __VToken_init(asset, owner, name, symbol);
+    error InvalidMigrationState();
+
+    /// @notice Fresh R4 configuration is supplied atomically in the proxy constructor.
+    function initialize(
+        IERC20 asset_,
+        address owner_,
+        string memory name_,
+        string memory symbol_,
+        address oracle_,
+        address slp_,
+        address payable bridgeVault_,
+        address guardian_
+    ) public onlyConstructing reinitializer(4) {
+        if (oracle_.code.length == 0) revert InvalidAddress();
+        __VToken_init(asset_, owner_, name_, symbol_, guardian_);
+        oracle = Oracle(oracle_);
+        _setSlp(slp_);
+        _setBridgeVault(bridgeVault_);
     }
 
-    /// @notice One-time migration initializer after upgrading to v2 logic.
-    /// @dev `reinitializer(2)` guarantees this runs at most once. This migration is intentionally
-    /// executed only through ProxyAdmin.upgradeAndCall with initializeV2 calldata in the same
-    /// transaction as the implementation upgrade. The upgrade authority is held by the multisig;
-    /// do not perform an implementation-only upgrade that leaves this initializer callable.
-    /// Oracle must already register this proxy as a vToken (via `Oracle.initializeV2` or `setVToken`).
-    /// Legacy reserve equal to `totalCanWithdrawAmount` is unwrapped and forwarded as native PROS to `_bridgeVault`,
-    /// then `totalCanWithdrawAmount` is cleared.
-    /// Any remaining WPROS on this contract is unwrapped and forwarded as native PROS to `_slp`.
-    /// Escrow shares held by this contract are burned before pool info is reseeded.
-    function initializeV2(address _slp, address payable _bridgeVault) external reinitializer(2) {
-        _setSlp(_slp);
-        _setBridgeVault(_bridgeVault);
+    function migrateFromV1(address slp_, address payable bridgeVault_, address guardian_, address timelock_)
+        external
+        onlyProxyAdmin
+        onlyFromVersion(1)
+        reinitializer(4)
+        nonReentrant
+    {
+        if (slp != address(0) || address(bridgeVault) != address(0) || slp_.code.length == 0) {
+            revert InvalidMigrationState();
+        }
+        (uint256 t, uint256 v) = oracle.poolInfo(asset());
+        if (t != 0 || v != 0 || oracle.tokenToVToken(asset()) != address(this)) revert InvalidMigrationState();
+        _setSlp(slp_);
+        _setBridgeVault(bridgeVault_);
+        if (!bridgeVault.vTokenAddresses(address(this)) || bridgeVault.weth() != asset()) {
+            revert InvalidMigrationState();
+        }
 
-        uint256 migrateAmount = totalCanWithdrawAmount;
-        if (migrateAmount > 0) {
-            IWPROS(address(asset())).withdraw(migrateAmount);
-            (bool success,) = _bridgeVault.call{value: migrateAmount}("");
-            if (!success) {
-                revert TransferFailed();
-            }
+        uint256 reserve = totalCanWithdrawAmount;
+        uint256 wrapped = IERC20(asset()).balanceOf(address(this));
+        uint256 escrow = balanceOf(address(this));
+        if (
+            reserve != queuedWithdrawal - completedWithdrawal || wrapped < reserve || escrow < reserve
+                || wrapped - reserve < totalSupply() - escrow
+        ) revert InvalidMigrationState();
+        uint256 beforeBridge = bridgeVault_.balance;
+        if (reserve != 0) {
+            IWPROS(asset()).withdraw(reserve);
+            (bool success,) = bridgeVault_.call{value: reserve}("");
+            if (!success) revert TransferFailed();
         }
         totalCanWithdrawAmount = 0;
+        if (wrapped > reserve) _sendTokenToSlp(wrapped - reserve, true);
+        if (escrow != 0) _burn(address(this), escrow);
+        oracle.initializePool(asset(), totalSupply(), totalSupply());
+        _migrateGovernance(guardian_, timelock_);
 
-        uint256 remainingWpros = IERC20(asset()).balanceOf(address(this));
-        if (remainingWpros > 0) {
-            IWPROS(address(asset())).withdraw(remainingWpros);
-            (bool success,) = _slp.call{value: remainingWpros}("");
-            if (!success) {
-                revert TransferFailed();
-            }
+        (t, v) = oracle.poolInfo(asset());
+        if (
+            IERC20(asset()).balanceOf(address(this)) != 0 || balanceOf(address(this)) != 0
+                || totalCanWithdrawAmount != 0 || t != totalSupply() || v != totalSupply()
+                || bridgeVault_.balance != beforeBridge + reserve || getTotalBalance() < queuedWithdrawal
+        ) {
+            revert InvalidMigrationState();
         }
+    }
 
-        uint256 escrow = balanceOf(address(this));
-        if (escrow > 0) {
-            _burn(address(this), escrow);
-        }
-
-        uint256 vTokenAmount = totalSupply();
-        if (vTokenAmount > 0) {
-            uint256 tokenAmount =
-                oracle.getTokenAmountByVToken(address(asset()), vTokenAmount, Math.Rounding.Floor);
-            oracle.setPoolInfo(address(asset()), tokenAmount, vTokenAmount);
-        }
+    function migrateFromV2(address guardian_, address timelock_)
+        external
+        onlyProxyAdmin
+        onlyFromVersion(2)
+        reinitializer(4)
+    {
+        _migrateGovernance(guardian_, timelock_);
     }
 
     /// @notice Receive native PROS from WPROS unwrapping.
     /// @dev WPROS/WETH-style `withdraw` pays out via `transfer`, forwarding only 2300 gas.
-    /// Do not emit here or `withdraw` / `initializeV2` will revert.
+    /// Do not emit here or `withdraw` / migration will revert.
     receive() external payable override {
         if (msg.sender != address(asset())) {
             revert OnlyAssetCanSendETH();

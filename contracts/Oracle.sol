@@ -3,16 +3,17 @@ pragma solidity ^0.8.28;
 
 import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import {GuardedOwnableUpgradeable} from "./access/GuardedOwnableUpgradeable.sol";
+import {MigrationGuard} from "./upgrade/MigrationGuard.sol";
 
 import {IOracle} from "./interfaces/IOracle.sol";
 
 interface IVTokenCommission is IERC4626 {
     function mintCommission(address account, uint256 shares) external;
+    function paused() external view returns (bool);
 }
 
-contract Oracle is IOracle, OwnableUpgradeable, PausableUpgradeable {
+contract Oracle is IOracle, GuardedOwnableUpgradeable, MigrationGuard {
     using Math for uint256;
 
     /// @notice Commission rate denominator. 1_000_000 = 100%.
@@ -72,7 +73,7 @@ contract Oracle is IOracle, OwnableUpgradeable, PausableUpgradeable {
     /// @notice Maximum `_tokenAmount` allowed per `update` call
     uint256 public maxUpdateAmount;
 
-    /// @notice Minimum seconds required between two `update` calls per token; 0 disables the interval check
+    /// @notice Minimum seconds between updates; R4 requires the approved one-hour floor.
     uint256 public updateInterval;
 
     /// @notice Last successful `update` timestamp per token
@@ -84,8 +85,32 @@ contract Oracle is IOracle, OwnableUpgradeable, PausableUpgradeable {
     /// @notice Commission rate in parts per million. 1_000_000 = 100%.
     uint256 public commissionRatePpm;
 
-    /// @notice Token to commission-mint vToken mapping, independent from `vTokenAddresses`
+    /// @notice Canonical vToken per asset, also used for commission minting
     mapping(address => address) public tokenToVToken;
+
+    /// @notice Slot 9, the only appended linear state in Oracle R4.
+    uint256 public maxAprPpm;
+    // D5 recommended hard ceiling; product sign-off remains a release gate.
+    uint256 public constant MAX_APR_PPM = 500_000;
+    uint256 public constant MAX_CATCH_UP = 7 days;
+
+    error InvalidPoolState();
+    error StaleTokenAmount();
+    error InvalidRateLimits();
+
+    event MaxAprPpmChanged(uint256 maxAprPpm);
+
+    struct OracleV1Migration {
+        address reporter;
+        address vToken;
+        uint256 maxUpdateAmount;
+        uint256 updateInterval;
+        uint256 maxAprPpm;
+        address commissionAccount;
+        uint256 commissionRatePpm;
+        address guardian;
+        address timelock;
+    }
 
     /// @notice Emitted when pool info is set
     event SetTokenAmount(address indexed token, uint256 tokenAmount, uint256 vTokenAmount);
@@ -120,76 +145,83 @@ contract Oracle is IOracle, OwnableUpgradeable, PausableUpgradeable {
         uint256 vTokenAmount
     );
 
-    function initialize(address owner) public initializer {
-        if (owner == address(0)) {
-            revert InvalidAddress();
-        }
-        __Ownable_init(owner);
-        __Pausable_init();
+    function initialize(address owner_, address guardian_) public onlyConstructing reinitializer(4) {
+        __GuardedOwnable_init(owner_, guardian_);
     }
 
-    /// @notice One-time migration initializer after upgrading to v2 logic.
-    /// @dev `reinitializer(2)` guarantees this runs at most once. This migration is intentionally
-    /// executed only through ProxyAdmin.upgradeAndCall with initializeV2 calldata in the same
-    /// transaction as the implementation upgrade. The upgrade authority is held by the multisig;
-    /// do not perform an implementation-only upgrade that leaves this initializer callable.
-    /// @param _slp SLP contract allowed to call `update`
-    /// @param _vToken vToken contract allowed to manage its own asset pool
-    /// @param _maxUpdateAmount Maximum `_tokenAmount` per `update`; 0 disables `update`
-    /// @param _updateInterval Minimum seconds between updates per token; 0 disables the interval check
-    function initializeV2(address _slp, address _vToken, uint256 _maxUpdateAmount, uint256 _updateInterval)
+    function migrateFromV1(OracleV1Migration calldata p) external onlyProxyAdmin onlyFromVersion(1) reinitializer(4) {
+        address token = IERC4626(p.vToken).asset();
+        if (slp != address(0) || poolInfo[token].tokenAmount != 0 || poolInfo[token].vTokenAmount != 0) {
+            revert InvalidPoolState();
+        }
+        _setSlp(p.reporter);
+        _setVToken(p.vToken, true);
+        _setUpdateLimits(p.maxUpdateAmount, p.updateInterval);
+        _setMaxAprPpm(p.maxAprPpm);
+        _setCommissionConfig(p.commissionAccount, p.commissionRatePpm);
+        _setCommissionVToken(token, p.vToken);
+        lastUpdateAt[token] = block.timestamp;
+        _migrateGovernance(p.guardian, p.timelock);
+    }
+
+    /// @notice Migrate the recorded single canonical WPROS/stPROS pool without changing its economics.
+    /// @dev The supplied asset must match the inventoried single-pool topology. Mappings cannot
+    /// prove absence of other keys; release inventory verification remains mandatory.
+    function migrateFromV3(address token, uint256 aprPpm, address guardian_, address timelock_)
         external
-        reinitializer(2)
+        onlyProxyAdmin
+        onlyFromVersion(3)
+        reinitializer(4)
     {
-        _initializeV2(_slp, _vToken, _maxUpdateAmount, _updateInterval);
+        if (token == address(0)) revert InvalidAddress();
+        address vToken = tokenToVToken[token];
+        if (vToken == address(0) || vToken.code.length == 0) revert MissingCommissionVToken(token);
+        if (!vTokenAddresses[vToken]) revert NotVToken(vToken);
+        address expectedAsset = IERC4626(vToken).asset();
+        if (expectedAsset != token) revert InvalidVTokenAsset(token, expectedAsset);
+
+        _setMaxAprPpm(aprPpm);
+        _setUpdateLimits(maxUpdateAmount, Math.max(updateInterval, 1 hours));
+        lastUpdateAt[token] = block.timestamp;
+        _migrateGovernance(guardian_, timelock_);
     }
 
-    /// @notice One-time migration initializer after upgrading from v2 to v3 logic.
-    /// @dev Must be executed through the multisig-controlled ProxyAdmin.upgradeAndCall path when
-    /// paired with an implementation upgrade, never as a delayed public follow-up call.
-    /// @param _commissionAccount Global account receiving minted commission vTokens
-    /// @param _commissionRatePpm Commission rate in parts per million; 1_000_000 = 100%
-    /// @param _tokens Pool token addresses for commission minting
-    /// @param _vTokens vToken addresses paired with `_tokens`
-    function initializeV3(
-        address _commissionAccount,
-        uint256 _commissionRatePpm,
-        address[] calldata _tokens,
-        address[] calldata _vTokens
-    ) external reinitializer(3) {
-        _initializeV3(_commissionAccount, _commissionRatePpm, _tokens, _vTokens);
+    /// @notice Seed only an empty pool from its canonical vToken.
+    function initializePool(address token, uint256 tokenAmount, uint256 vTokenAmount) external {
+        _authorizeVTokenPool(token);
+        PoolInfo storage pool = poolInfo[token];
+        if (
+            pool.tokenAmount != 0 || pool.vTokenAmount != 0 || (tokenAmount == 0) != (vTokenAmount == 0)
+                || IERC4626(msg.sender).totalSupply() != vTokenAmount
+        ) revert InvalidPoolState();
+        pool.tokenAmount = tokenAmount;
+        pool.vTokenAmount = vTokenAmount;
+        lastUpdateAt[token] = block.timestamp;
+        emit SetTokenAmount(token, tokenAmount, vTokenAmount);
     }
 
-    /// @notice One-time migration initializer for proxies upgrading directly from v1 to v3 logic.
-    /// @dev Must be executed through the multisig-controlled ProxyAdmin.upgradeAndCall path in the
-    /// same transaction as the implementation upgrade.
-    function initializeV2AndV3(
-        address _slp,
-        address _vToken,
-        uint256 _maxUpdateAmount,
-        uint256 _updateInterval,
-        address _commissionAccount,
-        uint256 _commissionRatePpm,
-        address[] calldata _tokens,
-        address[] calldata _vTokens
-    ) external reinitializer(3) {
-        _initializeV2(_slp, _vToken, _maxUpdateAmount, _updateInterval);
-        _initializeV3(_commissionAccount, _commissionRatePpm, _tokens, _vTokens);
+    /// @notice Timelocked compare-and-set correction; share accounting is never rewritten.
+    function setTokenAmount(address token, uint256 expectedOldT, uint256 newT) external onlyOwner {
+        PoolInfo storage pool = poolInfo[token];
+        if (pool.tokenAmount != expectedOldT) revert StaleTokenAmount();
+        if (pool.vTokenAmount == 0 || newT == 0) revert InvalidPoolState();
+        pool.tokenAmount = newT;
+        emit SetTokenAmount(token, newT, pool.vTokenAmount);
     }
 
-    /// @notice Set pool info for a token, owner or registered vToken only
-    /// @dev vToken callers may only update the pool keyed by their own `asset()`
-    /// @param _token The token address
-    /// @param _tokenAmount The token amount
-    /// @param _vTokenAmount The vToken amount
-    function setPoolInfo(address _token, uint256 _tokenAmount, uint256 _vTokenAmount) external {
-        _authorizeVTokenPool(_token);
-        if (_token == address(0)) {
-            revert InvalidAddress();
-        }
+    function setMaxAprPpm(uint256 value) external onlyOwner {
+        _setMaxAprPpm(value);
+    }
 
-        poolInfo[_token] = PoolInfo({tokenAmount: _tokenAmount, vTokenAmount: _vTokenAmount});
-        emit SetTokenAmount(_token, _tokenAmount, _vTokenAmount);
+    function _setMaxAprPpm(uint256 value) internal {
+        if (value > MAX_APR_PPM) revert InvalidRateLimits();
+        maxAprPpm = value;
+        emit MaxAprPpmChanged(value);
+    }
+
+    function _rateAllowance(address token) internal view returns (uint256) {
+        uint256 elapsed = block.timestamp - lastUpdateAt[token];
+        return poolInfo[token].tokenAmount.mulDiv(maxAprPpm * Math.min(elapsed, MAX_CATCH_UP), 365 days * 1_000_000);
     }
 
     /// @notice Set the SLP contract allowed to call `update`, owner only
@@ -205,9 +237,9 @@ contract Oracle is IOracle, OwnableUpgradeable, PausableUpgradeable {
         _setVToken(_vTokenAddress, enabled);
     }
 
-    /// @notice Set per-update amount cap and optional cooldown, owner only
+    /// @notice Set per-update amount cap and cooldown, owner only
     /// @param _maxUpdateAmount Maximum `_tokenAmount` per `update`; 0 disables `update`
-    /// @param _updateInterval Minimum seconds between updates per token; 0 disables the interval check
+    /// @param _updateInterval Minimum seconds between updates per token; at least one hour
     function setUpdateLimits(uint256 _maxUpdateAmount, uint256 _updateInterval) external onlyOwner {
         _setUpdateLimits(_maxUpdateAmount, _updateInterval);
     }
@@ -246,6 +278,10 @@ contract Oracle is IOracle, OwnableUpgradeable, PausableUpgradeable {
             revert UpdateTooFrequent(lastUpdateAt[_token] + updateInterval);
         }
 
+        if (poolInfo[_token].vTokenAmount == 0) revert InvalidPoolState();
+        uint256 allowance_ = _rateAllowance(_token);
+        if (_tokenAmount > allowance_) revert UpdateAmountTooLarge(_tokenAmount, allowance_);
+
         (uint256 commissionTokenAmount, uint256 commissionVTokenAmount, address commissionVToken) =
             _previewCommission(_token, _tokenAmount);
 
@@ -264,27 +300,27 @@ contract Oracle is IOracle, OwnableUpgradeable, PausableUpgradeable {
     }
 
     /// @inheritdoc IOracle
+    /// @dev Advisory only: external mintCommission may still revert for other reasons.
     function canUpdate(address token, uint256 tokenAmount) public view returns (bool) {
-        if (paused()) {
-            return false;
-        }
-        if (token == address(0)) {
-            return false;
-        }
-        if (tokenAmount == 0) {
-            return false;
-        }
-        if (maxUpdateAmount == 0 || tokenAmount > maxUpdateAmount) {
-            return false;
-        }
-        if (updateInterval != 0 && block.timestamp < lastUpdateAt[token] + updateInterval) {
-            return false;
-        }
-        uint256 commissionTokenAmount =
-            tokenAmount.mulDiv(commissionRatePpm, COMMISSION_RATE_DENOMINATOR, Math.Rounding.Floor);
-        if (commissionTokenAmount != 0) {
-            if (commissionAccount == address(0) || tokenToVToken[token] == address(0)) {
-                return false;
+        PoolInfo memory pool = poolInfo[token];
+        if (
+            paused() || token == address(0) || tokenAmount == 0 || pool.vTokenAmount == 0 || maxUpdateAmount == 0
+                || tokenAmount > maxUpdateAmount || block.timestamp < lastUpdateAt[token]
+                || block.timestamp - lastUpdateAt[token] < updateInterval
+                || tokenAmount > type(uint256).max - pool.tokenAmount || tokenAmount > _rateAllowance(token)
+        ) return false;
+        uint256 fee = tokenAmount.mulDiv(commissionRatePpm, COMMISSION_RATE_DENOMINATOR);
+        if (fee != 0) {
+            address vToken = tokenToVToken[token];
+            if (commissionAccount == address(0) || vToken == address(0)) return false;
+            uint256 shares = fee.mulDiv(pool.vTokenAmount, pool.tokenAmount + tokenAmount - fee);
+            if (shares > type(uint256).max - pool.vTokenAmount) return false;
+            if (shares != 0) {
+                try IVTokenCommission(vToken).paused() returns (bool stopped) {
+                    if (stopped) return false;
+                } catch {
+                    return false;
+                }
             }
         }
         return true;
@@ -301,6 +337,7 @@ contract Oracle is IOracle, OwnableUpgradeable, PausableUpgradeable {
         }
 
         PoolInfo storage pool = poolInfo[_token];
+        if (pool.vTokenAmount == 0) lastUpdateAt[_token] = block.timestamp;
         pool.tokenAmount += _tokenAmount;
         pool.vTokenAmount += _vTokenAmount;
 
@@ -324,6 +361,7 @@ contract Oracle is IOracle, OwnableUpgradeable, PausableUpgradeable {
 
         pool.tokenAmount -= _tokenAmount;
         pool.vTokenAmount -= _vTokenAmount;
+        if (pool.vTokenAmount == 0) pool.tokenAmount = 0;
 
         emit PoolUpdated(_token, pool.tokenAmount, pool.vTokenAmount, false);
     }
@@ -364,23 +402,9 @@ contract Oracle is IOracle, OwnableUpgradeable, PausableUpgradeable {
         return tokenAmount;
     }
 
-    /// @notice Pause the contract
-    function pause() external onlyOwner {
-        _pause();
-    }
-
-    /// @notice Unpause the contract
-    function unpause() external onlyOwner {
-        _unpause();
-    }
-
-    /// @notice Allow owner on any pool, or a registered vToken on its own asset pool only
+    /// @notice Only the registered canonical vToken may mutate its own asset pool
     function _authorizeVTokenPool(address _token) internal view {
-        if (msg.sender == owner()) {
-            return;
-        }
-
-        if (!vTokenAddresses[msg.sender]) {
+        if (!vTokenAddresses[msg.sender] || msg.sender != tokenToVToken[_token]) {
             revert NotVToken(msg.sender);
         }
 
@@ -409,25 +433,10 @@ contract Oracle is IOracle, OwnableUpgradeable, PausableUpgradeable {
     }
 
     function _setUpdateLimits(uint256 _maxUpdateAmount, uint256 _updateInterval) internal {
+        if (_updateInterval < 1 hours) revert InvalidRateLimits();
         maxUpdateAmount = _maxUpdateAmount;
         updateInterval = _updateInterval;
         emit UpdateLimitsChanged(_maxUpdateAmount, _updateInterval);
-    }
-
-    function _initializeV2(address _slp, address _vToken, uint256 _maxUpdateAmount, uint256 _updateInterval) internal {
-        _setSlp(_slp);
-        _setVToken(_vToken, true);
-        _setUpdateLimits(_maxUpdateAmount, _updateInterval);
-    }
-
-    function _initializeV3(
-        address _commissionAccount,
-        uint256 _commissionRatePpm,
-        address[] calldata _tokens,
-        address[] calldata _vTokens
-    ) internal {
-        _setCommissionConfig(_commissionAccount, _commissionRatePpm);
-        _setCommissionVTokens(_tokens, _vTokens);
     }
 
     function _setCommissionConfig(address _account, uint256 _ratePpm) internal {
@@ -493,6 +502,10 @@ contract Oracle is IOracle, OwnableUpgradeable, PausableUpgradeable {
             revert MissingCommissionVToken(_token);
         }
 
-        commissionVTokenAmount = getVTokenAmountByToken(_token, commissionTokenAmount, Math.Rounding.Floor);
+        // D6 exact formula draft; product acceptance remains outstanding.
+        PoolInfo memory pool = poolInfo[_token];
+        commissionVTokenAmount = commissionTokenAmount.mulDiv(
+            pool.vTokenAmount, pool.tokenAmount + _tokenAmount - commissionTokenAmount, Math.Rounding.Floor
+        );
     }
 }

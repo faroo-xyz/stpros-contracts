@@ -1,204 +1,147 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.28;
 
-import {Test} from "forge-std/Test.sol";
-import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
+import {LegacyTopology, IWETH9Like} from "./helpers/LegacyTopology.sol";
+import {ILegacyProxyAdminV4} from "./helpers/LegacyInterfaces.sol";
+import {TimelockController} from "@openzeppelin/contracts/governance/TimelockController.sol";
 import {StPROS} from "../contracts/StPROS.sol";
 import {Oracle} from "../contracts/Oracle.sol";
 import {BridgeVault} from "../contracts/BridgeVault.sol";
-import {VToken} from "../contracts/VToken.sol";
-import {MockWPROS} from "./mocks/MockWPROS.sol";
 
-contract StPROSHarness is StPROS {
-    function initializeHarness(IERC20 asset_, address owner_, address oracle_) external initializer {
-        __VToken_init(asset_, owner_, "Faroo Staked PROS", "stPROS");
-        oracle = Oracle(oracle_);
-        maxWithdrawCount = 10;
-    }
-
-    function seedLegacyReserve(uint256 reserveAmount, uint256 extraWpros) external {
-        MockWPROS(payable(address(asset()))).mint(address(this), reserveAmount + extraWpros);
-        totalCanWithdrawAmount = reserveAmount;
-    }
-
-    function expose_setTotalCanWithdrawAmount(uint256 amount) external {
-        totalCanWithdrawAmount = amount;
-    }
-
-    function seedEscrow(uint256 shares) external {
-        _mint(address(this), shares);
-    }
-
-    function seedLegacyWithdrawal(address user, uint256 pending, uint256 queuedBaseline) external {
-        uint256 tail = withdrawalTail[user];
-        withdrawals[user][tail] = Withdrawal({
-            queued: queuedBaseline,
-            pending: pending,
-            createdAt: block.timestamp,
-            unbondingPeriod: 0,
-            receiver: address(0)
-        });
-        withdrawalTail[user] = tail + 1;
-        queuedWithdrawal += pending;
-    }
+contract StProsSink {
+    receive() external payable {}
 }
 
-contract StPROSTest is Test {
-    MockWPROS internal wpros;
+/// @notice Ports the original eight StPROS cases to guarded R4 migration from recorded V1.
+contract StPROSTest is LegacyTopology {
+    LegacyV1 internal old;
+    StPROS internal stpros;
     Oracle internal oracle;
     BridgeVault internal bridgeVault;
-    StPROSHarness internal stpros;
-
-    address internal owner = makeAddr("owner");
-    address internal slp = makeAddr("slp");
+    address internal owner;
+    address internal slp;
     address internal alice = makeAddr("alice");
-
+    address internal guardian = makeAddr("guardian");
     uint256 internal constant RESERVE = 40 ether;
     uint256 internal constant EXTRA_WPROS = 100 ether;
 
     function setUp() external {
-        wpros = new MockWPROS();
-        vm.deal(address(wpros), 1_000_000 ether);
-
-        Oracle oracleImplementation = new Oracle();
-        bytes memory oracleInitData = abi.encodeWithSelector(Oracle.initialize.selector, owner);
-        ERC1967Proxy oracleProxy = new ERC1967Proxy(address(oracleImplementation), oracleInitData);
-        oracle = Oracle(address(oracleProxy));
-
-        StPROSHarness stprosImplementation = new StPROSHarness();
-        bytes memory stprosInitData = abi.encodeWithSelector(
-            StPROSHarness.initializeHarness.selector, address(wpros), owner, address(oracle)
+        vm.warp(1_000_000);
+        address[] memory actors = new address[](1);
+        actors[0] = address(this);
+        owner = address(new TimelockController(1 days, actors, actors, address(0)));
+        old = _deployMainnetV1(owner);
+        stpros = StPROS(payable(address(old.stPROS)));
+        oracle = Oracle(address(old.oracle));
+        slp = address(new StProsSink());
+        bridgeVault = BridgeVault(
+            payable(
+                _deployTransparentProxyV4(
+                    "mainnet",
+                    address(new BridgeVault()),
+                    old.proxyAdmin,
+                    abi.encodeCall(BridgeVault.initialize, (owner, address(stpros), true, guardian))
+                )
+            )
         );
-        ERC1967Proxy stprosProxy = new ERC1967Proxy(address(stprosImplementation), stprosInitData);
-        stpros = StPROSHarness(payable(address(stprosProxy)));
-
-        BridgeVault bridgeVaultImplementation = new BridgeVault();
-        bytes memory bridgeVaultInitData = abi.encodeWithSelector(
-            BridgeVault.initialize.selector, owner, address(stpros), true
-        );
-        ERC1967Proxy bridgeVaultProxy = new ERC1967Proxy(address(bridgeVaultImplementation), bridgeVaultInitData);
-        bridgeVault = BridgeVault(payable(address(bridgeVaultProxy)));
-
-        vm.prank(owner);
-        oracle.setPoolInfo(address(wpros), 1_000 ether, 1_000 ether);
-    }
-
-    function _upgradeOracleToV2() internal {
-        vm.prank(owner);
-        oracle.initializeV2(slp, address(stpros), 100 ether, 0);
     }
 
     function _seedLegacyState() internal {
-        stpros.seedLegacyReserve(RESERVE, EXTRA_WPROS);
-        stpros.seedEscrow(RESERVE);
-        stpros.seedLegacyWithdrawal(alice, RESERVE, 0);
+        _v1DepositWithPROS(old, alice, RESERVE + EXTRA_WPROS);
+        _v1Redeem(old, alice, RESERVE);
+    }
+
+    function _upgrade() internal {
+        address oi = address(new Oracle());
+        address si = address(new StPROS());
+        Oracle.OracleV1Migration memory p =
+            Oracle.OracleV1Migration(slp, address(stpros), 100 ether, 1 hours, 500_000, address(0), 0, guardian, owner);
+        vm.startPrank(owner);
+        ILegacyProxyAdminV4(old.proxyAdmin).upgradeAndCall(
+            address(oracle), oi, abi.encodeCall(Oracle.migrateFromV1, (p))
+        );
+        ILegacyProxyAdminV4(old.proxyAdmin).upgradeAndCall(
+            address(stpros),
+            si,
+            abi.encodeCall(StPROS.migrateFromV1, (slp, payable(address(bridgeVault)), guardian, owner))
+        );
+        vm.stopPrank();
+    }
+
+    function upgradeForTest() external {
+        _upgrade();
     }
 
     function test_DepositWithPROS_ShouldMintAndForwardToSlp() external {
-        _upgradeOracleToV2();
-        vm.prank(owner);
-        stpros.setSlp(slp);
-        vm.prank(owner);
-        stpros.setBridgeVault(payable(address(bridgeVault)));
-
-        uint256 slpBefore = slp.balance;
-        vm.deal(alice, 25 ether);
+        _upgrade();
+        vm.deal(alice, 10 ether);
         vm.prank(alice);
-        uint256 shares = stpros.depositWithPROS{value: 25 ether}();
-
-        assertEq(shares, 25 ether, "shares minted");
-        assertEq(stpros.balanceOf(alice), 25 ether, "alice balance");
-        assertEq(slp.balance - slpBefore, 25 ether, "slp received PROS");
-        assertEq(wpros.balanceOf(address(stpros)), 0, "no WPROS retained");
-
-        (uint256 tokenAmount, uint256 vTokenAmount) = oracle.poolInfo(address(wpros));
-        assertEq(tokenAmount, 1_025 ether, "pool token side");
-        assertEq(vTokenAmount, 1_025 ether, "pool vToken side");
+        uint256 shares = stpros.depositWithPROS{value: 10 ether}();
+        assertEq(shares, 10 ether);
+        assertEq(stpros.balanceOf(alice), shares);
+        assertEq(slp.balance, 10 ether);
+        assertEq(IWETH9Like(old.wpros).balanceOf(address(stpros)), 0);
+        (uint256 t, uint256 v) = oracle.poolInfo(old.wpros);
+        assertEq(t, shares);
+        assertEq(v, shares);
     }
 
     function test_DepositWithPROS_ShouldRevert_WhenZeroValue() external {
-        _upgradeOracleToV2();
-        vm.prank(owner);
-        stpros.setSlp(slp);
-
+        _upgrade();
         vm.prank(alice);
         vm.expectRevert(StPROS.PROSNotSent.selector);
-        stpros.depositWithPROS{value: 0}();
+        stpros.depositWithPROS();
     }
 
     function test_Receive_ShouldRevert_WhenSenderIsNotAsset() external {
+        _upgrade();
         vm.deal(alice, 1 ether);
         vm.prank(alice);
-        vm.expectRevert(StPROS.OnlyAssetCanSendETH.selector);
         (bool success,) = address(stpros).call{value: 1 ether}("");
-        success;
+        assertFalse(success);
     }
 
-    function test_InitializeV2_ShouldMigrateReserveToBridgeVault() external {
-        _upgradeOracleToV2();
+    function test_MigrateFromV1_ShouldMigrateReserveToBridgeVault() external {
         _seedLegacyState();
-
-        vm.prank(owner);
-        stpros.initializeV2(slp, payable(address(bridgeVault)));
-
-        assertEq(bridgeVault.getBalance(address(wpros)), RESERVE, "bridge reserve");
-        assertEq(stpros.totalCanWithdrawAmount(), 0, "reserve cleared");
+        _upgrade();
+        assertEq(address(bridgeVault).balance, RESERVE);
+        assertEq(stpros.totalCanWithdrawAmount(), 0);
     }
 
-    function test_InitializeV2_ShouldForwardRemainingWprosToSlp() external {
-        _upgradeOracleToV2();
+    function test_MigrateFromV1_ShouldForwardRemainingWprosToSlp() external {
         _seedLegacyState();
-
-        uint256 slpBefore = slp.balance;
-        vm.prank(owner);
-        stpros.initializeV2(slp, payable(address(bridgeVault)));
-
-        assertEq(slp.balance - slpBefore, EXTRA_WPROS, "remaining WPROS sent to slp");
-        assertEq(wpros.balanceOf(address(stpros)), 0, "no WPROS left");
+        _upgrade();
+        assertEq(slp.balance, EXTRA_WPROS);
+        assertEq(IWETH9Like(old.wpros).balanceOf(address(stpros)), 0);
     }
 
-    function test_InitializeV2_ShouldBurnEscrowAndKeepPoolWhenSupplyZero() external {
-        _upgradeOracleToV2();
+    function test_MigrateFromV1_ShouldBurnEscrowAndZeroPoolWhenSupplyZero() external {
         _seedLegacyState();
-
-        vm.prank(owner);
-        stpros.initializeV2(slp, payable(address(bridgeVault)));
-
-        assertEq(stpros.balanceOf(address(stpros)), 0, "escrow burned");
-        assertEq(stpros.totalSupply(), 0, "no circulating shares");
-
-        (uint256 tokenAmount, uint256 vTokenAmount) = oracle.poolInfo(address(wpros));
-        assertEq(tokenAmount, 1_000 ether, "pool unchanged when supply is zero");
-        assertEq(vTokenAmount, 1_000 ether, "pool unchanged when supply is zero");
+        _v1Redeem(old, alice, EXTRA_WPROS);
+        _upgrade();
+        assertEq(stpros.balanceOf(address(stpros)), 0);
+        assertEq(stpros.totalSupply(), 0);
+        (uint256 t, uint256 v) = oracle.poolInfo(old.wpros);
+        assertEq(t, 0);
+        assertEq(v, 0);
     }
 
-    function test_InitializeV2_LegacyQueue_ShouldCompleteAfterMigration() external {
-        _upgradeOracleToV2();
+    function test_MigrateFromV1_LegacyQueue_ShouldCompleteAfterMigration() external {
         _seedLegacyState();
-
-        vm.prank(owner);
-        stpros.initializeV2(slp, payable(address(bridgeVault)));
-
-        uint256 aliceBefore = alice.balance;
+        _upgrade();
+        vm.warp(block.timestamp + 7 days);
+        uint256 beforeBalance = alice.balance;
         vm.prank(alice);
-        uint256 claimed = stpros.withdrawComplete();
-
-        assertEq(claimed, RESERVE, "legacy queue claimable");
-        assertEq(alice.balance - aliceBefore, RESERVE, "native payout");
-        assertEq(stpros.getWithdrawals(alice).length, 0, "queue drained");
-        assertEq(stpros.completedWithdrawal(), RESERVE, "completed updated");
+        assertEq(stpros.withdrawCompleteToPROS(), RESERVE);
+        assertEq(alice.balance - beforeBalance, RESERVE);
+        assertEq(stpros.getWithdrawals(alice).length, 0);
+        assertEq(stpros.completedWithdrawal(), RESERVE);
     }
 
-    function test_InitializeV2_ShouldRevert_WhenReserveExceedsWprosBalance() external {
-        _upgradeOracleToV2();
-
-        wpros.mint(address(stpros), 10 ether);
-        stpros.expose_setTotalCanWithdrawAmount(50 ether);
-
-        vm.prank(owner);
-        vm.expectRevert();
-        stpros.initializeV2(slp, payable(address(bridgeVault)));
+    function test_MigrateFromV1_ShouldRevert_WhenReserveExceedsWprosBalance() external {
+        _seedLegacyState();
+        vm.store(address(stpros), bytes32(uint256(1)), bytes32(uint256(200 ether)));
+        vm.expectRevert(StPROS.InvalidMigrationState.selector);
+        this.upgradeForTest();
     }
 }

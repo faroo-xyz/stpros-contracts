@@ -47,30 +47,8 @@ function getNetworkOracle(networkName: string): Address | undefined {
 
 export const oracleSetPoolInfoTask = task(
   "oracle:set-pool-info",
-  "Set Oracle pool conversion rate for a token (owner only)",
+  "Deprecated in R4; refuses before connecting to a network",
 )
-  /**
-   * Usage:
-   * pnpm hardhat oracle:set-pool-info --network mainnet <tokenAddress> <tokenAmount> <vTokenAmount>
-   *
-   * Example (1:1 rate for WPROS):
-   * pnpm hardhat oracle:set-pool-info --network mainnet \
-   *   0x52c48d4213107b20bc583832b0d951fb9ca8f0b0 \
-   *   1000000000000000000 \
-   *   1000000000000000000
-   *
-   * Example with explicit oracle proxy:
-   * pnpm hardhat oracle:set-pool-info --network mainnet \
-   *   0x52c48d4213107b20bc583832b0d951fb9ca8f0b0 \
-   *   1000000000000000000 \
-   *   1000000000000000000 \
-   *   --oracle 0x051713fd66845a13bf23baca008c5c22c27ccb58
-   *
-   * Notes:
-   * - Callable only by Oracle owner.
-   * - tokenAmount and vTokenAmount are raw integer units.
-   * - Setting either amount to 0 makes getVTokenAmountByToken / getTokenAmountByVToken fall back to 1:1.
-   */
   .addPositionalArgument({
     name: "token",
     description: "Underlying token address used as the pool key",
@@ -88,59 +66,10 @@ export const oracleSetPoolInfoTask = task(
     description: "Oracle proxy address; defaults to contants/index.ts on mainnet/testnet",
     defaultValue: "",
   })
-  .setInlineAction(async (taskArgs, hre) => {
-    const connection = await hre.network.getOrCreate();
-
-    try {
-      const [signer] = await connection.viem.getWalletClients();
-
-      if (signer?.account?.address === undefined) {
-        throw new Error("No signer account available for the selected network");
-      }
-
-      const token = getRequiredAddress(taskArgs.token, "token address");
-      const tokenAmount = getRequiredBigInt(taskArgs.tokenAmount, "tokenAmount");
-      const vTokenAmount = getRequiredBigInt(taskArgs.vTokenAmount, "vTokenAmount");
-      const oracleAddress =
-        getOptionalAddress(taskArgs.oracle, "oracle address")
-        ?? getNetworkOracle(connection.networkName);
-
-      if (oracleAddress === undefined) {
-        throw new Error("Missing oracle address. Pass --oracle or use mainnet/testnet.");
-      }
-
-      const oracleContract = await connection.viem.getContractAt("Oracle", oracleAddress, {
-        client: {
-          wallet: signer,
-        },
-      });
-      const [owner, previousPoolInfo] = await Promise.all([
-        oracleContract.read.owner(),
-        oracleContract.read.poolInfo([token]),
-      ]);
-
-      const hash = await oracleContract.write.setPoolInfo([token, tokenAmount, vTokenAmount]);
-      const publicClient = await connection.viem.getPublicClient();
-      const receipt = await publicClient.waitForTransactionReceipt({ hash });
-      const currentPoolInfo = await oracleContract.read.poolInfo([token]);
-
-      console.log(`[oracle:set-pool-info] oracle=${oracleAddress}`);
-      console.log(`[oracle:set-pool-info] caller=${signer.account.address}`);
-      console.log(`[oracle:set-pool-info] owner=${owner}`);
-      console.log(`[oracle:set-pool-info] token=${token}`);
-      console.log(
-        `[oracle:set-pool-info] previousPoolInfo tokenAmount=${previousPoolInfo[0]} vTokenAmount=${previousPoolInfo[1]}`,
-      );
-      console.log(`[oracle:set-pool-info] tokenAmount=${tokenAmount}`);
-      console.log(`[oracle:set-pool-info] vTokenAmount=${vTokenAmount}`);
-      console.log(
-        `[oracle:set-pool-info] currentPoolInfo tokenAmount=${currentPoolInfo[0]} vTokenAmount=${currentPoolInfo[1]}`,
-      );
-      console.log(`[oracle:set-pool-info] txHash=${hash}`);
-      console.log(`[oracle:set-pool-info] blockNumber=${receipt.blockNumber}`);
-    } finally {
-      await connection.close();
-    }
+  .setInlineAction(async () => {
+    throw new Error(
+      "Deprecated oracle:set-pool-info: R4 removed setPoolInfo. Use reviewed Timelock setTokenAmount(token, expectedOldT, newT) calldata; this command cannot send a transaction.",
+    );
   })
   .build();
 

@@ -1,5 +1,5 @@
 import { task } from "hardhat/config";
-import { isAddress, parseEventLogs, type Address } from "viem";
+import { encodeFunctionData, isAddress, parseEventLogs, type Address } from "viem";
 
 const MAX_PERFORMANCE_FEE_BPS = 10_000n;
 const MIN_LOCK_DURATION = 1n;
@@ -19,6 +19,7 @@ type YieldVaultInitParams = {
   asset: Address;
   factory: Address;
   admin: Address;
+  operator: Address;
   counterparty: Address;
   feeRecipient: Address;
   name: string;
@@ -114,6 +115,7 @@ function resolveCreateYieldVaultParams(
     factory: string;
     asset: string | undefined;
     admin: string | undefined;
+    operator: string | undefined;
     counterparty: string | undefined;
     feeRecipient: string | undefined;
     name: string | undefined;
@@ -128,7 +130,7 @@ function resolveCreateYieldVaultParams(
     settleTimelockWindow: string | undefined;
     openedAt: string | undefined;
   },
-  signerAddress: Address,
+  canonicalTimelock: Address,
 ): YieldVaultInitParams {
   const factory = getRequiredAddress(taskArgs.factory, "factory address");
   const openWindow = getRequiredBigInt(
@@ -168,7 +170,8 @@ function resolveCreateYieldVaultParams(
   return {
     asset: getRequiredAddress(taskArgs.asset, "asset address"),
     factory,
-    admin: getOptionalAddress(taskArgs.admin, "admin address") ?? signerAddress,
+    admin: getOptionalAddress(taskArgs.admin, "admin address") ?? canonicalTimelock,
+    operator: getRequiredAddress(taskArgs.operator, "operator address"),
     counterparty: getRequiredAddress(taskArgs.counterparty, "counterparty address"),
     feeRecipient: getRequiredAddress(taskArgs.feeRecipient, "feeRecipient address"),
     name: (() => {
@@ -401,7 +404,7 @@ export const yvfCreateTask = task(
    * Notes:
    * - factory is the YieldVaultFactory proxy address.
    * - asset is usually the deployed stPROS proxy address.
-   * - admin defaults to the current signer if omitted.
+   * - admin defaults to factory.timelock(); creation emits calldata for a Timelock operation.
    * - numeric values should be passed in raw integer form.
    * - lockDuration and settleTimelockWindow must each be at least 1 second.
    */
@@ -416,9 +419,10 @@ export const yvfCreateTask = task(
   })
   .addOption({
     name: "admin",
-    description: "Vault admin address, defaults to signer",
+    description: "Vault admin address, must equal factory.timelock()",
     defaultValue: "",
   })
+  .addOption({ name: "operator", description: "Distinct OPS address (required)", defaultValue: "" })
   .addOption({
     name: "counterparty",
     description: "Counterparty address",
@@ -486,63 +490,21 @@ export const yvfCreateTask = task(
   })
   .setInlineAction(async (taskArgs, hre) => {
     const connection = await hre.network.getOrCreate();
-
     try {
-      const [signer] = await connection.viem.getWalletClients();
-
-      if (signer?.account?.address === undefined) {
-        throw new Error("No signer account available for the selected network");
-      }
-
+      const factoryAddress = getRequiredAddress(taskArgs.factory, "factory address");
+      const factory = await connection.viem.getContractAt("YieldVaultFactory", factoryAddress) as any;
+      const timelock = await factory.read.timelock() as Address;
       const params = resolveCreateYieldVaultParams(
-        taskArgs as Parameters<typeof resolveCreateYieldVaultParams>[0],
-        signer.account.address,
+        taskArgs as Parameters<typeof resolveCreateYieldVaultParams>[0], timelock,
       );
-      const factoryArtifact = await hre.artifacts.readArtifact("YieldVaultFactory");
-      const factoryContract = await connection.viem.getContractAt(
-        "YieldVaultFactory",
-        params.factory,
-        {
-          client: {
-            wallet: signer,
-          },
-        },
-      ) as any;
-      const hash = await factoryContract.write.createYieldVault([params]);
-      const publicClient = await connection.viem.getPublicClient();
-      const receipt = await publicClient.waitForTransactionReceipt({ hash });
-      const [createdLog] = parseEventLogs({
-        abi: factoryArtifact.abi,
-        logs: receipt.logs,
-        eventName: "YieldVaultCreated",
-        strict: false,
-      });
-      const vaultAddress = createdLog?.args.proxy as Address | undefined;
-
-      console.log(`[yvf:create] factory=${params.factory}`);
-      console.log(`[yvf:create] asset=${params.asset}`);
-      console.log(`[yvf:create] admin=${params.admin}`);
-      console.log(`[yvf:create] counterparty=${params.counterparty}`);
-      console.log(`[yvf:create] feeRecipient=${params.feeRecipient}`);
-      console.log(`[yvf:create] name=${params.name}`);
-      console.log(`[yvf:create] symbol=${params.symbol}`);
-      console.log(`[yvf:create] firstRound.openedAt=${params.firstRound.openedAt}`);
-      console.log(`[yvf:create] firstRound.openWindow=${params.firstRound.openWindow}`);
-      console.log(`[yvf:create] firstRound.lockDuration=${params.firstRound.lockDuration}`);
-      console.log(`[yvf:create] firstRound.roundCap=${params.firstRound.roundCap}`);
-      console.log(`[yvf:create] firstRound.perAddressCap=${params.firstRound.perAddressCap}`);
-      console.log(`[yvf:create] firstRound.minSubscription=${params.firstRound.minSubscription}`);
-      console.log(`[yvf:create] firstRound.performanceFeeBps=${params.firstRound.performanceFeeBps}`);
-      console.log(`[yvf:create] firstRound.maxLossBps=${params.firstRound.maxLossBps}`);
-      console.log(`[yvf:create] firstRound.settleTimelockWindow=${params.firstRound.settleTimelockWindow}`);
-      console.log(`[yvf:create] txHash=${hash}`);
-
-      if (vaultAddress !== undefined) {
-        console.log(`[yvf:create] vault=${vaultAddress}`);
+      if (params.admin.toLowerCase() !== timelock.toLowerCase()) throw new Error("admin must equal factory.timelock()");
+      if ([timelock, params.counterparty, params.feeRecipient, "0x0000000000000000000000000000000000000000"].some(a => a.toLowerCase() === params.operator.toLowerCase())) {
+        throw new Error("operator must be nonzero and distinct from governance, counterparty and fee recipient");
       }
-    } finally {
-      await connection.close();
-    }
+      const artifact = await hre.artifacts.readArtifact("YieldVaultFactory");
+      console.log(JSON.stringify({timelock, target: factoryAddress, value: "0", data:
+        encodeFunctionData({abi: artifact.abi, functionName: "createYieldVault", args: [params]})}, null, 2));
+    } finally { await connection.close(); }
   })
   .build();
 
@@ -798,3 +760,22 @@ export const yvfUpgradeBeaconTask = task(
     }
   })
   .build();
+
+/** R4 retirement is governance calldata only; this task never sends a transaction. */
+export const yvfRetireTask = task("yvf:retire", "Build Timelock calldata for terminal vault retirement")
+  .addPositionalArgument({name: "factory", description: "Factory proxy"})
+  .addPositionalArgument({name: "vault", description: "Registered vault"})
+  .setInlineAction(async (args, hre) => {
+    const target = getRequiredAddress(args.factory, "factory");
+    const vault = getRequiredAddress(args.vault, "vault");
+    const artifact = await hre.artifacts.readArtifact("YieldVaultFactory");
+    console.log(JSON.stringify({target, value: "0", data: encodeFunctionData({abi: artifact.abi, functionName: "retireVault", args: [vault]})}, null, 2));
+  }).build();
+
+export const yvfCloseCreationTask = task("yvf:close-creation", "Build Timelock calldata to permanently close factory creation")
+  .addPositionalArgument({name: "factory", description: "Factory proxy"})
+  .setInlineAction(async (args, hre) => {
+    const target = getRequiredAddress(args.factory, "factory");
+    const artifact = await hre.artifacts.readArtifact("YieldVaultFactory");
+    console.log(JSON.stringify({target, value: "0", data: encodeFunctionData({abi: artifact.abi, functionName: "closeCreation"})}, null, 2));
+  }).build();

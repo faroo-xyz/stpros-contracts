@@ -2,8 +2,8 @@
 pragma solidity ^0.8.28;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import {GuardedOwnableUpgradeable} from "./access/GuardedOwnableUpgradeable.sol";
+import {MigrationGuard} from "./upgrade/MigrationGuard.sol";
 
 import {BeaconProxy} from "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
 import {UpgradeableBeacon} from "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
@@ -12,10 +12,15 @@ import {YieldVault} from "./YieldVault.sol";
 
 interface IFactoryManagedYieldVault {
     function emergencyCancel() external;
+    function retire() external;
 }
 
-contract YieldVaultFactory is Initializable, OwnableUpgradeable, PausableUpgradeable {
+contract YieldVaultFactory is Initializable, GuardedOwnableUpgradeable, MigrationGuard {
+    /// @dev Uses a separately deployed implementation, keeping creation bytecode out of runtime (EIP-170).
+    /// Existing beacons are untouched; fresh proxies get independent factory-owned beacons.
+    address private immutable INITIAL_VAULT_IMPLEMENTATION;
     /// @notice Thrown when counterparty address is invalid
+
     error InvalidCounterparty();
 
     /// @notice Thrown when vault address is not created by factory
@@ -31,6 +36,16 @@ contract YieldVaultFactory is Initializable, OwnableUpgradeable, PausableUpgrade
     address[] public allProxies;
     mapping(address => bool) public isFactoryVault;
     mapping(address => bool) public counterpartyWhitelist;
+    // Appended and packed into slot 4.
+    address public timelock;
+    bool public creationClosed;
+
+    error CreationClosed();
+    error InvalidGovernance();
+
+    event TimelockChanged(address indexed previousTimelock, address indexed newTimelock);
+    event CreationPermanentlyClosed();
+    event VaultRetired(address indexed vault);
 
     event BeaconCreated(address indexed beacon, address indexed implementation);
     event YieldVaultCreated(address indexed proxy, address indexed creator);
@@ -39,22 +54,57 @@ contract YieldVaultFactory is Initializable, OwnableUpgradeable, PausableUpgrade
     event EmergencyCancelled(address indexed vault, address indexed operator);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
+    constructor(address initialVaultImplementation) {
         _disableInitializers();
+        if (initialVaultImplementation.code.length == 0) revert InvalidImplementation();
+        INITIAL_VAULT_IMPLEMENTATION = initialVaultImplementation;
     }
 
-    function initialize(address initialOwner) external initializer {
-        __Ownable_init(initialOwner);
-        __Pausable_init();
+    function initialize(address initialOwner, address guardian_, address timelock_)
+        external
+        onlyConstructing
+        reinitializer(4)
+    {
+        if (initialOwner != timelock_) revert InvalidGovernance();
+        __GuardedOwnable_init(initialOwner, guardian_);
+        _setTimelock(timelock_);
 
-        YieldVault implementation = new YieldVault();
+        address implementation = INITIAL_VAULT_IMPLEMENTATION;
 
-        beacon = new UpgradeableBeacon(
-            address(implementation),
-            address(this)
-        );
+        beacon = new UpgradeableBeacon(implementation, address(this));
 
-        emit BeaconCreated(address(beacon), address(implementation));
+        emit BeaconCreated(address(beacon), implementation);
+    }
+
+    function migrateToR4(address guardian_, address timelock_)
+        external
+        onlyProxyAdmin
+        onlyFromVersion(1)
+        reinitializer(4)
+    {
+        _migrateGovernance(guardian_, timelock_);
+        _setTimelock(timelock_);
+    }
+
+    function setTimelock(address timelock_) external onlyOwner {
+        _setTimelock(timelock_);
+    }
+
+    function _setTimelock(address timelock_) internal {
+        _validateTimelock(timelock_);
+        emit TimelockChanged(timelock, timelock_);
+        timelock = timelock_;
+    }
+
+    function closeCreation() external onlyOwner {
+        creationClosed = true;
+        emit CreationPermanentlyClosed();
+    }
+
+    function retireVault(address vault) external onlyOwner {
+        if (!isFactoryVault[vault]) revert InvalidVault(vault);
+        IFactoryManagedYieldVault(vault).retire();
+        emit VaultRetired(vault);
     }
 
     /// @notice Add counterparty address into whitelist
@@ -77,7 +127,18 @@ contract YieldVaultFactory is Initializable, OwnableUpgradeable, PausableUpgrade
         emit CounterpartyWhitelistUpdated(counterparty, false);
     }
 
-    function createYieldVault(YieldVault.InitParams calldata params) external onlyOwner whenNotPaused returns (address proxyAddr) {
+    function createYieldVault(YieldVault.InitParams calldata params)
+        external
+        onlyOwner
+        whenNotPaused
+        returns (address proxyAddr)
+    {
+        if (creationClosed) revert CreationClosed();
+        if (
+            params.admin != timelock || params.operator == address(0) || params.operator == params.admin
+                || params.operator == params.counterparty || params.operator == params.feeRecipient
+                || params.counterparty == params.admin
+        ) revert InvalidGovernance();
         if (params.factory != address(this)) {
             revert InvalidFactoryInParams(params.factory);
         }
@@ -85,15 +146,9 @@ contract YieldVaultFactory is Initializable, OwnableUpgradeable, PausableUpgrade
             revert InvalidCounterparty();
         }
 
-        bytes memory initData = abi.encodeWithSelector(
-            YieldVault.initialize.selector,
-            params
-        );
+        bytes memory initData = abi.encodeWithSelector(YieldVault.initialize.selector, params);
 
-        BeaconProxy proxy = new BeaconProxy(
-            address(beacon),
-            initData
-        );
+        BeaconProxy proxy = new BeaconProxy(address(beacon), initData);
 
         proxyAddr = address(proxy);
 
@@ -105,7 +160,7 @@ contract YieldVaultFactory is Initializable, OwnableUpgradeable, PausableUpgrade
         return proxyAddr;
     }
 
-    /// @notice Emergency-cancel an epoch vault (only works while vault is SUBSCRIBING)
+    /// @notice Cancel an unsettled round, refund funded profit and reopen redemption
     function emergencyCancel(address vault) external onlyOwner {
         if (!isFactoryVault[vault]) {
             revert InvalidVault(vault);
@@ -113,16 +168,6 @@ contract YieldVaultFactory is Initializable, OwnableUpgradeable, PausableUpgrade
 
         IFactoryManagedYieldVault(vault).emergencyCancel();
         emit EmergencyCancelled(vault, msg.sender);
-    }
-
-    /// @notice Pause factory: block createYieldVault and downstream vault deposit/fundProfit checks
-    function pause() external onlyOwner {
-        _pause();
-    }
-
-    /// @notice Unpause factory
-    function unpause() external onlyOwner {
-        _unpause();
     }
 
     function upgradeBeaconTo(address newImplementation) external onlyOwner {

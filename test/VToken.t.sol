@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.28;
 
-import {Test} from "forge-std/Test.sol";
+import {R4UnitTest} from "./helpers/R4UnitTest.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import {Oracle} from "../contracts/Oracle.sol";
 import {BridgeVault} from "../contracts/BridgeVault.sol";
 import {VToken} from "../contracts/VToken.sol";
-import {MockWPROS} from "./mocks/MockWPROS.sol";
+import {WPROS9} from "./mocks/WPROS9.sol";
 
 contract VTokenHarness is VToken {
     function initialize(address asset_, address owner_, address oracle_) external initializer {
-        __VToken_init(IERC20(asset_), owner_, "Staked PROS", "stPROS");
+        __VToken_init(IERC20(asset_), owner_, "Staked PROS", "stPROS", address(0x1234));
         oracle = Oracle(oracle_);
         maxWithdrawCount = 10;
     }
@@ -54,8 +54,8 @@ contract ObservingNativeReceiver {
     }
 }
 
-contract VTokenTest is Test {
-    MockWPROS internal wpros;
+contract VTokenTest is R4UnitTest {
+    WPROS9 internal wpros;
     Oracle internal oracle;
     BridgeVault internal bridgeVault;
     VTokenHarness internal vtoken;
@@ -70,10 +70,11 @@ contract VTokenTest is Test {
     uint256 internal constant BASE_AMOUNT = 100 ether;
 
     function setUp() external {
-        wpros = new MockWPROS();
+        owner = _newTimelock();
+        wpros = new WPROS9();
 
         Oracle oracleImplementation = new Oracle();
-        bytes memory oracleInitData = abi.encodeWithSelector(Oracle.initialize.selector, owner);
+        bytes memory oracleInitData = abi.encodeWithSelector(Oracle.initialize.selector, owner, address(0x1234));
         ERC1967Proxy oracleProxy = new ERC1967Proxy(address(oracleImplementation), oracleInitData);
         oracle = Oracle(address(oracleProxy));
 
@@ -85,7 +86,7 @@ contract VTokenTest is Test {
 
         BridgeVault bridgeVaultImplementation = new BridgeVault();
         bytes memory bridgeVaultInitData =
-            abi.encodeWithSelector(BridgeVault.initialize.selector, owner, address(vtoken), false);
+            abi.encodeWithSelector(BridgeVault.initialize.selector, owner, address(vtoken), true, address(0x1234));
         ERC1967Proxy bridgeVaultProxy = new ERC1967Proxy(address(bridgeVaultImplementation), bridgeVaultInitData);
         bridgeVault = BridgeVault(payable(address(bridgeVaultProxy)));
 
@@ -93,7 +94,7 @@ contract VTokenTest is Test {
         vtoken.setMaxWithdrawCount(3);
 
         vm.prank(owner);
-        oracle.setPoolInfo(address(wpros), 1e18, 1e18);
+        oracle.setCommissionVToken(address(wpros), address(vtoken));
 
         vm.prank(owner);
         oracle.setVToken(address(vtoken), true);
@@ -103,8 +104,8 @@ contract VTokenTest is Test {
         vm.prank(owner);
         vtoken.setBridgeVault(payable(address(bridgeVault)));
 
-        wpros.mint(alice, 10_000 ether);
-        wpros.mint(bob, 10_000 ether);
+        _fundWrapped(wpros, alice, 10_000 ether);
+        _fundWrapped(wpros, bob, 10_000 ether);
         vm.deal(address(wpros), 1_000_000 ether);
 
         vm.prank(alice);
@@ -114,7 +115,7 @@ contract VTokenTest is Test {
     }
 
     function _fundBridgeVault(uint256 amount) internal {
-        wpros.mint(address(bridgeVault), amount);
+        vm.deal(address(bridgeVault), address(bridgeVault).balance + amount);
     }
 
     function _aliceDeposit(uint256 amount) internal {
@@ -289,8 +290,8 @@ contract VTokenTest is Test {
     function test_Deposit_ShouldWork_WithoutInv1Restriction() external {
         _aliceDeposit(100 ether);
 
-        wpros.mint(address(vtoken), 1 ether);
-        wpros.mint(alice, 1 ether);
+        _fundWrapped(wpros, address(vtoken), 1 ether);
+        _fundWrapped(wpros, alice, 1 ether);
 
         vm.prank(alice);
         vtoken.deposit(1 ether, alice);
@@ -393,8 +394,8 @@ contract VTokenTest is Test {
         _aliceDeposit(20 ether);
 
         (uint256 tokenAmount, uint256 vTokenAmount) = oracle.poolInfo(address(wpros));
-        assertEq(tokenAmount, 1e18 + 20 ether, "token side");
-        assertEq(vTokenAmount, 1e18 + 20 ether, "vToken side");
+        assertEq(tokenAmount, 20 ether, "token side");
+        assertEq(vTokenAmount, 20 ether, "vToken side");
     }
 
     function test_Withdraw_ShouldBurnSharesAndSyncOracleOnRedeem() external {
@@ -408,8 +409,8 @@ contract VTokenTest is Test {
         assertEq(vtoken.balanceOf(address(vtoken)), 0, "no escrow minted");
 
         (uint256 tokenAmount, uint256 vTokenAmount) = oracle.poolInfo(address(wpros));
-        assertEq(tokenAmount, 1e18 + 30 ether, "token side");
-        assertEq(vTokenAmount, 1e18 + 30 ether, "vToken side");
+        assertEq(tokenAmount, 30 ether, "token side");
+        assertEq(vTokenAmount, 30 ether, "vToken side");
     }
 
     function test_WithdrawComplete_LegacyReceiver_ShouldPayMsgSender() external {
@@ -429,7 +430,8 @@ contract VTokenTest is Test {
 
     function test_WithdrawComplete_ShouldPayNative_WhenBridgeVaultIsWeth() external {
         BridgeVault nativeVaultImplementation = new BridgeVault();
-        bytes memory initData = abi.encodeWithSelector(BridgeVault.initialize.selector, owner, address(vtoken), true);
+        bytes memory initData =
+            abi.encodeWithSelector(BridgeVault.initialize.selector, owner, address(vtoken), true, address(0x1234));
         ERC1967Proxy nativeVaultProxy = new ERC1967Proxy(address(nativeVaultImplementation), initData);
         BridgeVault nativeVault = BridgeVault(payable(address(nativeVaultProxy)));
 
@@ -447,7 +449,7 @@ contract VTokenTest is Test {
 
         uint256 aliceBefore = alice.balance;
         vm.prank(alice);
-        uint256 claimed = vtoken.withdrawComplete();
+        uint256 claimed = vtoken.withdrawCompleteToPROS();
 
         assertEq(claimed, 25 ether, "claimed amount");
         assertEq(alice.balance - aliceBefore, 25 ether, "native payout");
@@ -455,7 +457,8 @@ contract VTokenTest is Test {
 
     function test_WithdrawComplete_ShouldFallbackToWpros_WhenNativeReceiverRejects() external {
         BridgeVault nativeVaultImplementation = new BridgeVault();
-        bytes memory initData = abi.encodeWithSelector(BridgeVault.initialize.selector, owner, address(vtoken), true);
+        bytes memory initData =
+            abi.encodeWithSelector(BridgeVault.initialize.selector, owner, address(vtoken), true, address(0x1234));
         ERC1967Proxy nativeVaultProxy = new ERC1967Proxy(address(nativeVaultImplementation), initData);
         BridgeVault nativeVault = BridgeVault(payable(address(nativeVaultProxy)));
         RejectNativeReceiver rejectReceiver = new RejectNativeReceiver();
@@ -473,7 +476,7 @@ contract VTokenTest is Test {
         vtoken.withdraw(25 ether, address(rejectReceiver), alice);
 
         vm.prank(alice);
-        uint256 claimed = vtoken.withdrawComplete();
+        uint256 claimed = vtoken.withdrawCompleteToPROS();
 
         assertEq(claimed, 25 ether, "claimed amount");
         assertEq(address(rejectReceiver).balance, 0, "native rejected");
@@ -484,7 +487,8 @@ contract VTokenTest is Test {
 
     function test_WithdrawComplete_ShouldUpdateQueueBeforeNativePayoutInteraction() external {
         BridgeVault nativeVaultImplementation = new BridgeVault();
-        bytes memory initData = abi.encodeWithSelector(BridgeVault.initialize.selector, owner, address(vtoken), true);
+        bytes memory initData =
+            abi.encodeWithSelector(BridgeVault.initialize.selector, owner, address(vtoken), true, address(0x1234));
         ERC1967Proxy nativeVaultProxy = new ERC1967Proxy(address(nativeVaultImplementation), initData);
         BridgeVault nativeVault = BridgeVault(payable(address(nativeVaultProxy)));
         ObservingNativeReceiver observingReceiver = new ObservingNativeReceiver(vtoken, alice);
@@ -502,7 +506,7 @@ contract VTokenTest is Test {
         vtoken.withdraw(25 ether, address(observingReceiver), alice);
 
         vm.prank(alice);
-        uint256 claimed = vtoken.withdrawComplete();
+        uint256 claimed = vtoken.withdrawCompleteToPROS();
 
         assertEq(claimed, 25 ether, "claimed amount");
         assertEq(observingReceiver.observedCompletedWithdrawal(), 25 ether, "completed before payout hook");

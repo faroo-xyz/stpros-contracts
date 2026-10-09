@@ -7,8 +7,8 @@ import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {ERC4626Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC4626Upgradeable.sol";
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import {GuardedOwnableUpgradeable} from "./access/GuardedOwnableUpgradeable.sol";
+import {MigrationGuard} from "./upgrade/MigrationGuard.sol";
 import {ERC165Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
 import {Oracle} from "./Oracle.sol";
@@ -42,8 +42,8 @@ import {IWPROS} from "./interfaces/IWPROS.sol";
  */
 contract VToken is
     ERC4626Upgradeable,
-    OwnableUpgradeable,
-    PausableUpgradeable,
+    GuardedOwnableUpgradeable,
+    MigrationGuard,
     ERC165Upgradeable,
     ReentrancyGuardTransient
 {
@@ -167,14 +167,13 @@ contract VToken is
     // =================== Initialization ===================
 
     /// @notice Initialize ERC20 / ERC4626 / access-control modules
-    function __VToken_init(IERC20 _asset, address _owner, string memory _name, string memory _symbol)
+    function __VToken_init(IERC20 _asset, address _owner, string memory _name, string memory _symbol, address _guardian)
         internal
         onlyInitializing
     {
         __ERC20_init(_name, _symbol);
         __ERC4626_init(_asset);
-        __Ownable_init(_owner);
-        __Pausable_init();
+        __GuardedOwnable_init(_owner, _guardian);
         __ERC165_init();
 
         maxWithdrawCount = DEFAULT_MAX_WITHDRAW_COUNT;
@@ -185,16 +184,6 @@ contract VToken is
     receive() external payable virtual {}
 
     // =================== Admin Functions ===================
-
-    /// @notice Set the oracle address, owner only
-    function setOracle(address _oracle) external onlyOwner {
-        if (_oracle == address(0)) {
-            revert InvalidAddress();
-        }
-        address oldOracle = address(oracle);
-        oracle = Oracle(_oracle);
-        emit OracleChanged(oldOracle, _oracle);
-    }
 
     /// @notice Set the SLP address, owner only
     function setSlp(address _slp) external onlyOwner {
@@ -208,6 +197,7 @@ contract VToken is
 
     /// @notice Set the max number of queued records per address, owner only
     function setMaxWithdrawCount(uint256 _maxWithdrawCount) external onlyOwner {
+        if (_maxWithdrawCount == 0 || _maxWithdrawCount > 32) revert ExceedMaxWithdrawCount(_maxWithdrawCount);
         maxWithdrawCount = _maxWithdrawCount;
         emit MaxWithdrawCountChanged(_maxWithdrawCount);
     }
@@ -221,16 +211,6 @@ contract VToken is
         uint256 oldUnbondingPeriod = unbondingPeriod;
         unbondingPeriod = _unbondingPeriod;
         emit UnbondingPeriodChanged(oldUnbondingPeriod, _unbondingPeriod);
-    }
-
-    /// @notice Pause pausable entry points, owner only
-    function pause() external onlyOwner {
-        _pause();
-    }
-
-    /// @notice Unpause, owner only
-    function unpause() external onlyOwner {
-        _unpause();
     }
 
     /// @notice Mint commission shares to the configured commission account, oracle only
@@ -255,6 +235,32 @@ contract VToken is
     /// @notice Complete all currently claimable withdrawals for the caller
     /// @return amount Actual assets claimed
     function withdrawComplete() public nonReentrant returns (uint256) {
+        return _withdrawComplete(0, msg.sender, true);
+    }
+
+    function withdrawComplete(uint256 maxRecords) public nonReentrant returns (uint256) {
+        return _withdrawComplete(maxRecords, msg.sender, true);
+    }
+
+    function withdrawComplete(address receiver) public nonReentrant returns (uint256) {
+        return _withdrawComplete(0, receiver, true);
+    }
+
+    function withdrawComplete(address receiver, uint256 maxRecords) public nonReentrant returns (uint256) {
+        return _withdrawComplete(maxRecords, receiver, true);
+    }
+
+    function withdrawCompleteToPROS() external nonReentrant returns (uint256) {
+        return _withdrawComplete(0, msg.sender, false);
+    }
+
+    function withdrawCompleteToPROS(uint256 maxRecords) external nonReentrant returns (uint256) {
+        return _withdrawComplete(maxRecords, msg.sender, false);
+    }
+
+    /// @dev maxRecords counts fully consumed records; zero has no additional limit.
+    function _withdrawComplete(uint256 maxRecords, address claimReceiver, bool wrapped) internal returns (uint256) {
+        if (claimReceiver == address(0)) revert InvalidAddress();
         if (address(bridgeVault) == address(0)) {
             revert InvalidBridgeVault();
         }
@@ -264,7 +270,7 @@ contract VToken is
         uint256 tail = withdrawalTail[msg.sender];
         uint256 totalSent = 0;
 
-        for (uint256 index = head; index < tail; index++) {
+        for (uint256 index = head; index < tail && (maxRecords == 0 || index - head < maxRecords); index++) {
             Withdrawal storage w = withdrawals[msg.sender][index];
             if (block.timestamp < w.createdAt + w.unbondingPeriod) {
                 break;
@@ -278,14 +284,14 @@ contract VToken is
                 releaseAmount = w.pending;
             }
 
-            address payoutReceiver = w.receiver == address(0) ? msg.sender : w.receiver;
+            address payoutReceiver = w.receiver == address(0) ? claimReceiver : w.receiver;
 
             if (releaseAmount < w.pending) {
                 w.pending -= releaseAmount;
                 w.queued += releaseAmount;
                 completedWithdrawal += releaseAmount;
                 totalSent += releaseAmount;
-                bridgeVault.withdrawToken(address(asset()), payoutReceiver, releaseAmount);
+                _payClaim(payoutReceiver, releaseAmount, wrapped);
                 emit WithdrawalCompleted(msg.sender, payoutReceiver, releaseAmount);
                 break;
             }
@@ -294,7 +300,7 @@ contract VToken is
             withdrawalHead[msg.sender] = index + 1;
             completedWithdrawal += releaseAmount;
             totalSent += releaseAmount;
-            bridgeVault.withdrawToken(address(asset()), payoutReceiver, releaseAmount);
+            _payClaim(payoutReceiver, releaseAmount, wrapped);
             emit WithdrawalCompleted(msg.sender, payoutReceiver, releaseAmount);
         }
 
@@ -303,6 +309,11 @@ contract VToken is
         }
 
         return totalSent;
+    }
+
+    function _payClaim(address receiver, uint256 amount, bool wrapped) private {
+        if (wrapped) bridgeVault.withdrawTokenWrapped(receiver, amount);
+        else bridgeVault.withdrawToken(asset(), receiver, amount);
     }
 
     /// @notice Total assets available to satisfy queued redemptions
@@ -316,6 +327,10 @@ contract VToken is
     /// @notice Preview the currently claimable amount for an address
     /// @dev A record becomes claimable when its waiting period has elapsed and the cumulative available amount clears its queued baseline
     function canWithdrawalAmount(address target) public view returns (uint256, uint256, uint256) {
+        return canWithdrawalAmount(target, 0);
+    }
+
+    function canWithdrawalAmount(address target, uint256 maxRecords) public view returns (uint256, uint256, uint256) {
         uint256 totalAvailableAmount = 0;
         uint256 fullyConsumedCount = 0;
         uint256 partialConsumedAmount = 0;
@@ -323,7 +338,7 @@ contract VToken is
         uint256 head = withdrawalHead[target];
         uint256 tail = withdrawalTail[target];
 
-        for (uint256 index = head; index < tail; index++) {
+        for (uint256 index = head; index < tail && (maxRecords == 0 || index - head < maxRecords); index++) {
             Withdrawal memory w = withdrawals[target][index];
             uint256 unlockAt = w.createdAt + w.unbondingPeriod;
             if (block.timestamp < unlockAt) {
@@ -387,11 +402,25 @@ contract VToken is
         return oracle.getTokenAmountByVToken(address(asset()), shares, rounding);
     }
 
-    function deposit(uint256 assets, address receiver) public virtual override whenNotPaused returns (uint256) {
+    function deposit(uint256 assets, address receiver)
+        public
+        virtual
+        override
+        whenNotPaused
+        nonReentrant
+        returns (uint256)
+    {
         return super.deposit(assets, receiver);
     }
 
-    function mint(uint256 shares, address receiver) public virtual override whenNotPaused returns (uint256) {
+    function mint(uint256 shares, address receiver)
+        public
+        virtual
+        override
+        whenNotPaused
+        nonReentrant
+        returns (uint256)
+    {
         return super.mint(shares, receiver);
     }
 
@@ -400,6 +429,7 @@ contract VToken is
         virtual
         override
         whenNotPaused
+        nonReentrant
         returns (uint256)
     {
         return super.withdraw(assets, receiver, owner);
@@ -410,6 +440,7 @@ contract VToken is
         virtual
         override
         whenNotPaused
+        nonReentrant
         returns (uint256)
     {
         return super.redeem(shares, receiver, owner);
@@ -428,6 +459,7 @@ contract VToken is
         virtual
         override
     {
+        if (receiver == address(0)) revert InvalidAddress();
         if (caller != owner) {
             _spendAllowance(owner, caller, shares);
         }
@@ -448,7 +480,7 @@ contract VToken is
             pending: assets,
             createdAt: block.timestamp,
             unbondingPeriod: unbondingPeriod,
-            receiver: receiver
+            receiver: receiver == owner ? address(0) : receiver
         });
         withdrawalTail[owner] = tail + 1;
         queuedWithdrawal += assets;

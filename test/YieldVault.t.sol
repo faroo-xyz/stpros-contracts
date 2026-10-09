@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.28;
 
-import {Test} from "forge-std/Test.sol";
+import {R4UnitTest} from "./helpers/R4UnitTest.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {YieldVault} from "../contracts/YieldVault.sol";
@@ -16,13 +16,22 @@ contract MockYieldAsset is ERC20 {
 
 contract MockYieldFactory {
     bool public paused;
+    address public timelock;
+
+    constructor(address tl) {
+        timelock = tl;
+    }
+
+    function deploy(address implementation, bytes memory data) external returns (ERC1967Proxy) {
+        return new ERC1967Proxy(implementation, data);
+    }
 
     function setPaused(bool p) external {
         paused = p;
     }
 }
 
-contract YieldVaultTest is Test {
+contract YieldVaultTest is R4UnitTest {
     MockYieldAsset internal asset;
     MockYieldFactory internal factory;
     YieldVault internal vault;
@@ -44,14 +53,16 @@ contract YieldVaultTest is Test {
     uint256 internal constant MAX_LOSS_BPS = 5_000; // 50%
 
     function setUp() external {
+        admin = _newTimelock();
         asset = new MockYieldAsset();
-        factory = new MockYieldFactory();
+        factory = new MockYieldFactory(admin);
         YieldVault implementation = new YieldVault();
 
         YieldVault.InitParams memory params = YieldVault.InitParams({
             asset: address(asset),
             factory: address(factory),
             admin: admin,
+            operator: address(this),
             counterparty: counterparty,
             feeRecipient: feeRecipient,
             name: "Yield Vault Share",
@@ -60,12 +71,13 @@ contract YieldVaultTest is Test {
         });
 
         bytes memory initData = abi.encodeWithSelector(YieldVault.initialize.selector, params);
-        ERC1967Proxy proxy = new ERC1967Proxy(address(implementation), initData);
+        ERC1967Proxy proxy = factory.deploy(address(implementation), initData);
         vault = YieldVault(address(proxy));
 
         asset.mint(alice, 10_000 ether);
         asset.mint(bob, 10_000 ether);
         asset.mint(admin, 10_000 ether);
+        asset.mint(address(this), 10_000 ether);
         asset.mint(payer, 10_000 ether);
 
         vm.prank(alice);
@@ -159,6 +171,7 @@ contract YieldVaultTest is Test {
             asset: address(asset),
             factory: address(factory),
             admin: admin,
+            operator: address(this),
             counterparty: counterparty,
             feeRecipient: feeRecipient,
             name: "Yield Vault Share",
@@ -168,7 +181,7 @@ contract YieldVaultTest is Test {
 
         bytes memory initData = abi.encodeWithSelector(YieldVault.initialize.selector, params);
         vm.expectRevert(YieldVault.InvalidRoundParams.selector);
-        new ERC1967Proxy(address(implementation), initData);
+        factory.deploy(address(implementation), initData);
     }
 
     function _deployVault(uint256 openedAt) internal returns (YieldVault deployed) {
@@ -177,6 +190,7 @@ contract YieldVaultTest is Test {
             asset: address(asset),
             factory: address(factory),
             admin: admin,
+            operator: address(this),
             counterparty: counterparty,
             feeRecipient: feeRecipient,
             name: "Yield Vault Share",
@@ -185,7 +199,7 @@ contract YieldVaultTest is Test {
         });
 
         bytes memory initData = abi.encodeWithSelector(YieldVault.initialize.selector, params);
-        ERC1967Proxy proxy = new ERC1967Proxy(address(implementation), initData);
+        ERC1967Proxy proxy = factory.deploy(address(implementation), initData);
         deployed = YieldVault(address(proxy));
     }
 
@@ -438,6 +452,7 @@ contract YieldVaultTest is Test {
         _lockAndMature();
 
         uint256 counterpartyBefore = asset.balanceOf(counterparty);
+        vm.prank(admin);
         vault.proposeSettlement(YieldVault.SettleMode.LOSS, 100 ether, address(0));
         vm.warp(vault.settleProposedAt() + SETTLE_TIMELOCK + 1);
         vault.finalize();
@@ -454,6 +469,7 @@ contract YieldVaultTest is Test {
         uint256 maxLoss = vault.totalManagedAssets() * vault.maxLossBps() / vault.MAX_PERFORMANCE_FEE_BPS();
 
         vm.expectRevert(abi.encodeWithSelector(YieldVault.LossExceedManaged.selector, maxLoss + 1, 500 ether));
+        vm.prank(admin);
         vault.proposeSettlement(YieldVault.SettleMode.LOSS, maxLoss + 1, address(0));
     }
 

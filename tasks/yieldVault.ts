@@ -1,5 +1,5 @@
 import { task } from "hardhat/config";
-import { formatUnits, isAddress, type Address } from "viem";
+import { encodeFunctionData, formatUnits, isAddress, type Address } from "viem";
 
 const ERC20_METADATA_ABI = [
   {
@@ -832,7 +832,7 @@ export const yieldVaultOpenNextRoundTask = task(
    *   --settleTimelockWindow 86400
    *
    * Notes:
-   * - Callable only by vault admin (DEFAULT_ADMIN_ROLE).
+   * - Callable only by vault OPERATOR_ROLE.
    * - Vault must be in SETTLED phase.
    * - epochCap must be >= current totalManagedAssets.
    * - numeric values should be passed in raw integer form.
@@ -1190,3 +1190,16 @@ export const yieldVaultRevokeRoleTask = task(
     }
   })
   .build();
+
+/** LOSS is authorized only when executed by factory.timelock(); never submit directly. */
+export const yieldVaultLossCalldataTask = task("yield-vault:loss-calldata", "Build Timelock LOSS proposal calldata")
+  .addPositionalArgument({name: "vault", description: "YieldVault proxy"})
+  .addPositionalArgument({name: "amount", description: "Loss amount in raw asset units"})
+  .setInlineAction(async (args, hre) => {
+    const target = getRequiredAddress(args.vault, "vault");
+    const amount = BigInt(args.amount);
+    if (amount < 0n) throw new Error("amount must be nonnegative");
+    const artifact = await hre.artifacts.readArtifact("YieldVault");
+    console.log(JSON.stringify({target, value: "0", data: encodeFunctionData({abi: artifact.abi,
+      functionName: "proposeSettlement", args: [1, amount, "0x0000000000000000000000000000000000000000"]})}, null, 2));
+  }).build();

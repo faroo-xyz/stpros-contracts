@@ -4,8 +4,8 @@ pragma solidity ^0.8.24;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import {GuardedOwnableUpgradeable} from "./access/GuardedOwnableUpgradeable.sol";
+import {MigrationGuard} from "./upgrade/MigrationGuard.sol";
 import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
 import {IWPROS} from "./interfaces/IWPROS.sol";
 
@@ -17,7 +17,7 @@ import {IWPROS} from "./interfaces/IWPROS.sol";
  * @dev Only registered vToken contracts can withdraw their own underlying asset.
  * Each underlying asset (IERC4626.asset) may be registered at most once per vault.
  */
-contract BridgeVault is OwnableUpgradeable, PausableUpgradeable, ReentrancyGuardTransient {
+contract BridgeVault is GuardedOwnableUpgradeable, MigrationGuard, ReentrancyGuardTransient {
     using SafeERC20 for IERC20;
 
     // =================== State variables ===================
@@ -101,16 +101,47 @@ contract BridgeVault is OwnableUpgradeable, PausableUpgradeable, ReentrancyGuard
     /// @param _owner Contract owner
     /// @param _vTokenAddress vToken contract to register for withdrawals
     /// @param _isWeth True to treat the vToken asset as wrapped native and pay out native balance
-    function initialize(address _owner, address _vTokenAddress, bool _isWeth) public initializer {
-        __Ownable_init(_owner);
-        __Pausable_init();
+    function initialize(address _owner, address _vTokenAddress, bool _isWeth, address _guardian)
+        public
+        onlyConstructing
+        reinitializer(4)
+    {
+        __GuardedOwnable_init(_owner, _guardian);
         _setVToken(_vTokenAddress, true, _isWeth);
+    }
+
+    function migrateToR4(address guardian_, address timelock_)
+        external
+        onlyProxyAdmin
+        onlyFromVersion(1)
+        reinitializer(4)
+    {
+        _migrateGovernance(guardian_, timelock_);
+    }
+
+    /// @notice Converts donated WPROS into native redemption liquidity.
+    function unwrapWrapped() external nonReentrant {
+        if (weth == address(0)) revert InvalidWithdrawAddress();
+        uint256 amount = IERC20(weth).balanceOf(address(this));
+        if (amount != 0) IWPROS(weth).withdraw(amount);
+    }
+
+    /// @notice V1-compatible wrapped payout, restricted to the wrapped-native vToken.
+    function withdrawTokenWrapped(address to, uint256 amount) external onlyVToken whenNotPaused nonReentrant {
+        if (to == address(0)) revert InvalidWithdrawAddress();
+        if (amount == 0) revert ZeroWithdrawAmount();
+        address expected = IERC4626(msg.sender).asset();
+        if (weth == address(0) || expected != weth) revert InvalidWithdrawToken(weth, expected);
+        if (amount > address(this).balance) revert InsufficientBalance(weth, amount, address(this).balance);
+        IWPROS(weth).deposit{value: amount}();
+        IERC20(weth).safeTransfer(to, amount);
+        emit TokenWithdrawn(weth, to, amount);
     }
 
     // =================== Receive Function ===================
 
     /// @notice Receive ETH
-    receive() external payable { }
+    receive() external payable {}
 
     // =================== External Functions ==================
 
@@ -156,7 +187,7 @@ contract BridgeVault is OwnableUpgradeable, PausableUpgradeable, ReentrancyGuard
     /// @param token ERC20 token address, use address(0) for ETH
     /// @param to Recipient address
     /// @param amount Amount to withdraw
-    function emergencyWithdraw(address token, address to, uint256 amount) external onlyOwner {
+    function emergencyWithdraw(address token, address to, uint256 amount) external onlyOwner nonReentrant {
         if (to == address(0)) {
             revert InvalidWithdrawAddress();
         }
@@ -173,14 +204,6 @@ contract BridgeVault is OwnableUpgradeable, PausableUpgradeable, ReentrancyGuard
         _payout(token, to, amount);
 
         emit EmergencyWithdraw(token, to, amount);
-    }
-
-    function pause() external onlyOwner {
-        _pause();
-    }
-
-    function unpause() external onlyOwner {
-        _unpause();
     }
 
     /// @notice Check if address is a VToken contract
@@ -229,6 +252,7 @@ contract BridgeVault is OwnableUpgradeable, PausableUpgradeable, ReentrancyGuard
         }
 
         address asset = IERC4626(_vTokenAddress).asset();
+        if (asset == address(0)) revert InvalidWithdrawAddress();
 
         if (enabled) {
             if (vTokenAddresses[_vTokenAddress]) {

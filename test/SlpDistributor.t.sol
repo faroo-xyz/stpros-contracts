@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.28;
 
-import {Test} from "forge-std/Test.sol";
+import {R4UnitTest} from "./helpers/R4UnitTest.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -9,14 +9,18 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 import {SlpDistributor} from "../contracts/SlpDistributor.sol";
 import {StPROS} from "../contracts/StPROS.sol";
 import {Oracle} from "../contracts/Oracle.sol";
-import {MockWPROS} from "./mocks/MockWPROS.sol";
+import {WPROS9} from "./mocks/WPROS9.sol";
 
 contract DistributorStPROSHarness is StPROS {
     function initializeHarness(IERC20 asset_, address owner_, address oracle_) external initializer {
-        __VToken_init(asset_, owner_, "Faroo Staked PROS", "stPROS");
+        __VToken_init(asset_, owner_, "Faroo Staked PROS", "stPROS", address(0x1234));
         oracle = Oracle(oracle_);
         maxWithdrawCount = 10;
     }
+}
+
+contract PayableSlp {
+    receive() external payable {}
 }
 
 contract RejectingReceiver {
@@ -39,7 +43,7 @@ contract ReentrantSlp {
     }
 }
 
-contract SlpDistributorTest is Test {
+contract SlpDistributorTest is R4UnitTest {
     SlpDistributor internal distributor;
 
     address internal owner = makeAddr("owner");
@@ -49,6 +53,9 @@ contract SlpDistributorTest is Test {
     address internal outsider = makeAddr("outsider");
 
     function setUp() external {
+        owner = _newTimelock();
+        slpA = address(new PayableSlp());
+        slpB = address(new PayableSlp());
         address[] memory slps = new address[](1);
         slps[0] = slpA;
         distributor = _deploy(owner, keeper, slps);
@@ -56,7 +63,7 @@ contract SlpDistributorTest is Test {
 
     function _deploy(address owner_, address keeper_, address[] memory slps_) internal returns (SlpDistributor) {
         SlpDistributor impl = new SlpDistributor();
-        bytes memory data = abi.encodeCall(SlpDistributor.initialize, (owner_, keeper_, slps_));
+        bytes memory data = abi.encodeCall(SlpDistributor.initialize, (owner_, keeper_, slps_, address(0x1234)));
         return SlpDistributor(payable(address(new ERC1967Proxy(address(impl), data))));
     }
 
@@ -83,7 +90,7 @@ contract SlpDistributorTest is Test {
     function test_Implementation_CannotBeInitialized() external {
         SlpDistributor impl = new SlpDistributor();
         vm.expectRevert();
-        impl.initialize(owner, keeper, new address[](0));
+        impl.initialize(owner, keeper, new address[](0), address(0x1234));
     }
 
     // ---------- receive ----------
@@ -247,12 +254,12 @@ contract SlpDistributorTest is Test {
     // ---------- integration with StPROS ----------
 
     function test_StPROSDeposit_ForwardsToDistributor_ThenKeeperDistributes() external {
-        MockWPROS wpros = new MockWPROS();
+        WPROS9 wpros = new WPROS9();
         vm.deal(address(wpros), 1_000 ether);
 
         Oracle oracleImpl = new Oracle();
         Oracle oracle = Oracle(
-            address(new ERC1967Proxy(address(oracleImpl), abi.encodeCall(Oracle.initialize, (owner))))
+            address(new ERC1967Proxy(address(oracleImpl), abi.encodeCall(Oracle.initialize, (owner, address(0x1234)))))
         );
 
         DistributorStPROSHarness stImpl = new DistributorStPROSHarness();
@@ -270,8 +277,8 @@ contract SlpDistributorTest is Test {
         );
 
         vm.startPrank(owner);
-        oracle.setPoolInfo(address(wpros), 1_000 ether, 1_000 ether);
-        oracle.initializeV2(makeAddr("oracleSlp"), address(stpros), 100 ether, 0);
+        oracle.setVToken(address(stpros), true);
+        oracle.setCommissionVToken(address(wpros), address(stpros));
         stpros.setSlp(address(distributor));
         distributor.setSlps(_list(slpB), true);
         vm.stopPrank();

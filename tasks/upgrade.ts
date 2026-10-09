@@ -486,13 +486,8 @@ export const oracleUpgradeTask = task(
 
 export const oracleUpgradeV2Task = task(
   "oracle:upgrade-v2",
-  "Upgrade Oracle and call initializeV2, or print Safe calldata on mainnet",
+  "Deprecated in R4; refuses before connecting to a network",
 )
-  /**
-   * Usage:
-   * pnpm hardhat oracle:upgrade-v2 --network testnet <implementation>
-   * pnpm hardhat oracle:upgrade-v2 --network mainnet <implementation> --slp <slp>
-   */
   .addPositionalArgument({
     name: "implementation",
     description: "New Oracle implementation address",
@@ -527,105 +522,17 @@ export const oracleUpgradeV2Task = task(
     description: "ProxyAdmin contract address",
     defaultValue: "",
   })
-  .setInlineAction(async (taskArgs, hre) => {
-    const connection = await hre.network.getOrCreate();
-
-    try {
-      const networkName = connection.networkName;
-      const implementation = getRequiredAddress(taskArgs.implementation, "implementation");
-      const proxy =
-        getOptionalAddress(taskArgs.proxy, "oracle proxy")
-        ?? getNetworkOracle(networkName);
-      const slp =
-        getOptionalAddress(taskArgs.slp, "slp address")
-        ?? getNetworkSlp(networkName);
-      const vToken =
-        getOptionalAddress(taskArgs.vToken, "vToken address")
-        ?? getNetworkStPros(networkName);
-      const maxUpdateAmount = getRequiredBigInt(taskArgs.maxUpdateAmount, "maxUpdateAmount");
-      const updateInterval = getRequiredBigInt(taskArgs.updateInterval, "updateInterval");
-      const proxyAdmin =
-        getOptionalAddress(taskArgs.proxyAdmin, "proxyAdmin address")
-        ?? getNetworkProxyAdmin(networkName);
-
-      if (proxy === undefined) {
-        throw new Error("Missing oracle proxy. Pass --proxy or use mainnet/testnet.");
-      }
-
-      if (slp === undefined) {
-        throw new Error("Missing slp address. Pass --slp or use testnet defaults.");
-      }
-
-      if (vToken === undefined) {
-        throw new Error("Missing vToken address. Pass --v-token or use mainnet/testnet.");
-      }
-
-      if (proxyAdmin === undefined) {
-        throw new Error("Missing proxyAdmin address. Pass --proxy-admin or use mainnet/testnet.");
-      }
-
-      const initData = encodeFunctionData({
-        abi: ORACLE_INITIALIZE_V2_ABI,
-        functionName: "initializeV2",
-        args: [slp, vToken, maxUpdateAmount, updateInterval],
-      });
-      const [signer] = networkName === "testnet"
-        ? await connection.viem.getWalletClients()
-        : [];
-      const publicClient = networkName === "testnet"
-        ? await connection.viem.getPublicClient()
-        : undefined;
-
-      await runUpgrade({
-        taskLabel: "oracle:upgrade-v2",
-        networkName,
-        proxy,
-        implementation,
-        proxyAdmin,
-        initData,
-        publicClient,
-        signer,
-        afterUpgrade: async () => {
-          const oracleContract = await connection.viem.getContractAt("Oracle", proxy);
-          const [slpOnChain, vTokenRegistered, maxOnChain, intervalOnChain] =
-            await Promise.all([
-              oracleContract.read.slp(),
-              oracleContract.read.vTokenAddresses([vToken]),
-              oracleContract.read.maxUpdateAmount(),
-              oracleContract.read.updateInterval(),
-            ]);
-
-          console.log(`[oracle:upgrade-v2] slp=${slpOnChain}`);
-          console.log(`[oracle:upgrade-v2] vToken=${vToken}`);
-          console.log(`[oracle:upgrade-v2] vTokenRegistered=${vTokenRegistered}`);
-          console.log(`[oracle:upgrade-v2] maxUpdateAmount=${maxOnChain}`);
-          console.log(`[oracle:upgrade-v2] updateInterval=${intervalOnChain}`);
-        },
-      });
-    } finally {
-      await connection.close();
-    }
+  .setInlineAction(async () => {
+    throw new Error(
+      "Deprecated oracle:upgrade-v2: R4 removed initializeV2. Legacy V2 upgrade commands are disabled; use independently reviewed R4 migration tooling when available.",
+    );
   })
   .build();
 
 export const oracleUpgradeV3Task = task(
   "oracle:upgrade-v3",
-  "Upgrade Oracle for commission V3, or print Safe calldata on mainnet",
+  "Deprecated in R4; refuses before connecting to a network",
 )
-  /**
-   * Testnet path:
-   * pnpm hardhat oracle:upgrade-v3 --network testnet <implementation> \
-   *   --commission-account <account> --commission-rate-ppm <rate>
-   *
-   * Mainnet path:
-   * pnpm hardhat oracle:upgrade-v3 --network mainnet <implementation> \
-   *   --slp <slp> --commission-account <account> --commission-rate-ppm <rate>
-   *
-   * Notes:
-   * - testnet is already V2, so this task calls initializeV3(...).
-   * - mainnet is still V1, so this task calls initializeV2AndV3(...).
-   * - --tokens and --v-tokens are comma-separated address lists; defaults to WPROS/STPROS.
-   */
   .addPositionalArgument({
     name: "implementation",
     description: "New Oracle implementation address",
@@ -680,107 +587,10 @@ export const oracleUpgradeV3Task = task(
     description: "ProxyAdmin contract address",
     defaultValue: "",
   })
-  .setInlineAction(async (taskArgs, hre) => {
-    const connection = await hre.network.getOrCreate();
-
-    try {
-      const networkName = connection.networkName;
-      const implementation = getRequiredAddress(taskArgs.implementation, "implementation");
-      const proxy =
-        getOptionalAddress(taskArgs.proxy, "oracle proxy")
-        ?? getNetworkOracle(networkName);
-      const commissionAccount = getRequiredAddress(
-        taskArgs.commissionAccount,
-        "commissionAccount",
-      );
-      const commissionRatePpm = getRequiredBigInt(
-        taskArgs.commissionRatePpm,
-        "commissionRatePpm",
-      );
-      const tokens =
-        getOptionalAddressList(taskArgs.tokens, "tokens")
-        ?? getDefaultCommissionTokens(networkName);
-      const vTokens =
-        getOptionalAddressList(taskArgs.vTokens, "vTokens")
-        ?? getDefaultCommissionVTokens(networkName);
-      const slp =
-        getOptionalAddress(taskArgs.slp, "slp address")
-        ?? getNetworkSlp(networkName);
-      const vToken =
-        getOptionalAddress(taskArgs.vToken, "vToken address")
-        ?? getNetworkStPros(networkName);
-      const maxUpdateAmount = getRequiredBigInt(taskArgs.maxUpdateAmount, "maxUpdateAmount");
-      const updateInterval = getRequiredBigInt(taskArgs.updateInterval, "updateInterval");
-      const proxyAdmin =
-        getOptionalAddress(taskArgs.proxyAdmin, "proxyAdmin address")
-        ?? getNetworkProxyAdmin(networkName);
-
-      if (proxy === undefined) {
-        throw new Error("Missing oracle proxy. Pass --proxy or use mainnet/testnet.");
-      }
-
-      if (tokens === undefined || vTokens === undefined) {
-        throw new Error("Missing commission token mapping. Pass --tokens and --v-tokens.");
-      }
-
-      requireSameLength(tokens, vTokens, "tokens", "vTokens");
-
-      if (proxyAdmin === undefined) {
-        throw new Error("Missing proxyAdmin address. Pass --proxy-admin or use mainnet/testnet.");
-      }
-
-      let initData: `0x${string}`;
-      if (networkName === "mainnet") {
-        if (slp === undefined) {
-          throw new Error("Missing slp address. Pass --slp for mainnet V1 -> V3.");
-        }
-
-        if (vToken === undefined) {
-          throw new Error("Missing vToken address. Pass --v-token or use mainnet/testnet.");
-        }
-
-        initData = encodeFunctionData({
-          abi: ORACLE_INITIALIZE_V2_AND_V3_ABI,
-          functionName: "initializeV2AndV3",
-          args: [
-            slp,
-            vToken,
-            maxUpdateAmount,
-            updateInterval,
-            commissionAccount,
-            commissionRatePpm,
-            tokens,
-            vTokens,
-          ],
-        });
-      } else {
-        initData = encodeFunctionData({
-          abi: ORACLE_INITIALIZE_V3_ABI,
-          functionName: "initializeV3",
-          args: [commissionAccount, commissionRatePpm, tokens, vTokens],
-        });
-      }
-
-      const [signer] = networkName === "testnet"
-        ? await connection.viem.getWalletClients()
-        : [];
-      const publicClient = networkName === "testnet"
-        ? await connection.viem.getPublicClient()
-        : undefined;
-
-      await runUpgrade({
-        taskLabel: "oracle:upgrade-v3",
-        networkName,
-        proxy,
-        implementation,
-        proxyAdmin,
-        initData,
-        publicClient,
-        signer,
-      });
-    } finally {
-      await connection.close();
-    }
+  .setInlineAction(async () => {
+    throw new Error(
+      "Deprecated oracle:upgrade-v3: R4 removed initializeV3 and initializeV2AndV3. Use the reviewed four-argument migrateFromV3 through atomic ProxyAdmin upgradeAndCall; this legacy command remains disabled.",
+    );
   })
   .build();
 
@@ -853,13 +663,8 @@ export const stProsUpgradeTask = task(
 
 export const stProsUpgradeV2Task = task(
   "stpros:upgrade-v2",
-  "Upgrade StPROS and call initializeV2, or print Safe calldata on mainnet",
+  "Deprecated in R4; refuses before connecting to a network",
 )
-  /**
-   * Usage:
-   * pnpm hardhat stpros:upgrade-v2 --network testnet <implementation>
-   * pnpm hardhat stpros:upgrade-v2 --network mainnet <implementation> --slp <slp> --bridge-vault <bridgeVault>
-   */
   .addPositionalArgument({
     name: "implementation",
     description: "New StPROS implementation address",
@@ -884,78 +689,9 @@ export const stProsUpgradeV2Task = task(
     description: "ProxyAdmin contract address",
     defaultValue: "",
   })
-  .setInlineAction(async (taskArgs, hre) => {
-    const connection = await hre.network.getOrCreate();
-
-    try {
-      const networkName = connection.networkName;
-      const implementation = getRequiredAddress(taskArgs.implementation, "implementation");
-      const proxy =
-        getOptionalAddress(taskArgs.proxy, "stPros proxy")
-        ?? getNetworkStPros(networkName);
-      const slp =
-        getOptionalAddress(taskArgs.slp, "slp address")
-        ?? getNetworkSlp(networkName);
-      const bridgeVault =
-        getOptionalAddress(taskArgs.bridgeVault, "bridgeVault address")
-        ?? getNetworkBridgeVault(networkName);
-      const proxyAdmin =
-        getOptionalAddress(taskArgs.proxyAdmin, "proxyAdmin address")
-        ?? getNetworkProxyAdmin(networkName);
-
-      if (proxy === undefined) {
-        throw new Error("Missing stPros proxy. Pass --proxy or use mainnet/testnet.");
-      }
-
-      if (slp === undefined) {
-        throw new Error("Missing slp address. Pass --slp or use testnet defaults.");
-      }
-
-      if (bridgeVault === undefined) {
-        throw new Error("Missing bridgeVault address. Pass --bridge-vault or use testnet defaults.");
-      }
-
-      if (proxyAdmin === undefined) {
-        throw new Error("Missing proxyAdmin address. Pass --proxy-admin or use mainnet/testnet.");
-      }
-
-      const initData = encodeFunctionData({
-        abi: STPROS_INITIALIZE_V2_ABI,
-        functionName: "initializeV2",
-        args: [slp, bridgeVault],
-      });
-      const [signer] = networkName === "testnet"
-        ? await connection.viem.getWalletClients()
-        : [];
-      const publicClient = networkName === "testnet"
-        ? await connection.viem.getPublicClient()
-        : undefined;
-
-      await runUpgrade({
-        taskLabel: "stpros:upgrade-v2",
-        networkName,
-        proxy,
-        implementation,
-        proxyAdmin,
-        initData,
-        publicClient,
-        signer,
-        afterUpgrade: async () => {
-          const stProsContract = await connection.viem.getContractAt("StPROS", proxy);
-          const [slpOnChain, bridgeVaultOnChain, totalCanWithdrawAmount] =
-            await Promise.all([
-              stProsContract.read.slp(),
-              stProsContract.read.bridgeVault(),
-              stProsContract.read.totalCanWithdrawAmount(),
-            ]);
-
-          console.log(`[stpros:upgrade-v2] slp=${slpOnChain}`);
-          console.log(`[stpros:upgrade-v2] bridgeVault=${bridgeVaultOnChain}`);
-          console.log(`[stpros:upgrade-v2] totalCanWithdrawAmount=${totalCanWithdrawAmount}`);
-        },
-      });
-    } finally {
-      await connection.close();
-    }
+  .setInlineAction(async () => {
+    throw new Error(
+      "Deprecated stpros:upgrade-v2: R4 removed initializeV2. Legacy V2 upgrade commands are disabled; use independently reviewed R4 migration tooling when available.",
+    );
   })
   .build();

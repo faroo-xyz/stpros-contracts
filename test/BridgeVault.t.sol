@@ -1,22 +1,22 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.28;
 
-import {Test} from "forge-std/Test.sol";
+import {R4UnitTest} from "./helpers/R4UnitTest.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import {BridgeVault} from "../contracts/BridgeVault.sol";
 import {VToken} from "../contracts/VToken.sol";
-import {MockWPROS} from "./mocks/MockWPROS.sol";
+import {WPROS9} from "./mocks/WPROS9.sol";
 
 contract BridgeVaultVTokenHarness is VToken {
     function initialize(IERC20 asset_, address owner_) external initializer {
-        __VToken_init(asset_, owner_, "Staked PROS", "stPROS");
+        __VToken_init(asset_, owner_, "Staked PROS", "stPROS", address(0x1234));
     }
 }
 
-contract BridgeVaultTest is Test {
-    MockWPROS internal wpros;
+contract BridgeVaultTest is R4UnitTest {
+    WPROS9 internal wpros;
     BridgeVault internal bridgeVault;
     BridgeVaultVTokenHarness internal vtoken;
 
@@ -25,7 +25,8 @@ contract BridgeVaultTest is Test {
     address internal outsider = makeAddr("outsider");
 
     function setUp() external {
-        wpros = new MockWPROS();
+        owner = _newTimelock();
+        wpros = new WPROS9();
 
         BridgeVaultVTokenHarness vtokenImplementation = new BridgeVaultVTokenHarness();
         bytes memory vtokenInitData =
@@ -34,9 +35,8 @@ contract BridgeVaultTest is Test {
         vtoken = BridgeVaultVTokenHarness(payable(address(vtokenProxy)));
 
         BridgeVault bridgeVaultImplementation = new BridgeVault();
-        bytes memory bridgeVaultInitData = abi.encodeWithSelector(
-            BridgeVault.initialize.selector, owner, address(vtoken), false
-        );
+        bytes memory bridgeVaultInitData =
+            abi.encodeWithSelector(BridgeVault.initialize.selector, owner, address(vtoken), false, address(0x1234));
         ERC1967Proxy bridgeVaultProxy = new ERC1967Proxy(address(bridgeVaultImplementation), bridgeVaultInitData);
         bridgeVault = BridgeVault(payable(address(bridgeVaultProxy)));
     }
@@ -49,7 +49,7 @@ contract BridgeVaultTest is Test {
     }
 
     function test_WithdrawToken_ShouldTransferWpros_WhenNotIsWeth() external {
-        wpros.mint(address(bridgeVault), 50 ether);
+        _fundWrapped(wpros, address(bridgeVault), 50 ether);
 
         vm.prank(address(vtoken));
         bridgeVault.withdrawToken(address(wpros), alice, 20 ether);
@@ -61,7 +61,7 @@ contract BridgeVaultTest is Test {
     function test_WithdrawToken_ShouldPayNative_WhenIsWeth() external {
         BridgeVault nativeVaultImplementation = new BridgeVault();
         bytes memory initData =
-            abi.encodeWithSelector(BridgeVault.initialize.selector, owner, address(vtoken), true);
+            abi.encodeWithSelector(BridgeVault.initialize.selector, owner, address(vtoken), true, address(0x1234));
         ERC1967Proxy nativeVaultProxy = new ERC1967Proxy(address(nativeVaultImplementation), initData);
         BridgeVault nativeVault = BridgeVault(payable(address(nativeVaultProxy)));
 
@@ -88,16 +88,14 @@ contract BridgeVaultTest is Test {
         address wrongToken = makeAddr("wrongToken");
 
         vm.prank(address(vtoken));
-        vm.expectRevert(
-            abi.encodeWithSelector(BridgeVault.InvalidWithdrawToken.selector, wrongToken, address(wpros))
-        );
+        vm.expectRevert(abi.encodeWithSelector(BridgeVault.InvalidWithdrawToken.selector, wrongToken, address(wpros)));
         bridgeVault.withdrawToken(wrongToken, alice, 1 ether);
     }
 
     function test_SetVToken_ShouldUnregisterAndClearWeth() external {
         BridgeVault nativeVaultImplementation = new BridgeVault();
         bytes memory initData =
-            abi.encodeWithSelector(BridgeVault.initialize.selector, owner, address(vtoken), true);
+            abi.encodeWithSelector(BridgeVault.initialize.selector, owner, address(vtoken), true, address(0x1234));
         ERC1967Proxy nativeVaultProxy = new ERC1967Proxy(address(nativeVaultImplementation), initData);
         BridgeVault nativeVault = BridgeVault(payable(address(nativeVaultProxy)));
 
@@ -112,7 +110,7 @@ contract BridgeVaultTest is Test {
     }
 
     function test_EmergencyWithdraw_ShouldTransferBalance() external {
-        wpros.mint(address(bridgeVault), 15 ether);
+        _fundWrapped(wpros, address(bridgeVault), 15 ether);
 
         vm.prank(owner);
         bridgeVault.emergencyWithdraw(address(wpros), alice, 15 ether);

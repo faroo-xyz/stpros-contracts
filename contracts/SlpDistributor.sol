@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.28;
 
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {GuardedOwnableUpgradeable} from "./access/GuardedOwnableUpgradeable.sol";
+import {MigrationGuard} from "./upgrade/MigrationGuard.sol";
 import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
@@ -12,7 +13,7 @@ import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet
  * and the keeper later splits the balance across whitelisted SLP contracts.
  * @dev Owner manages the SLP whitelist and the keeper; the keeper can only pay whitelisted SLPs.
  */
-contract SlpDistributor is OwnableUpgradeable, ReentrancyGuardTransient {
+contract SlpDistributor is GuardedOwnableUpgradeable, MigrationGuard, ReentrancyGuardTransient {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     /// @notice One payout instruction
@@ -70,12 +71,25 @@ contract SlpDistributor is OwnableUpgradeable, ReentrancyGuardTransient {
     /// @param owner_ Contract owner
     /// @param keeper_ Initial keeper; may be zero and set later via `setKeeper`
     /// @param slps_ Initial SLP whitelist; may be empty
-    function initialize(address owner_, address keeper_, address[] calldata slps_) external initializer {
-        __Ownable_init(owner_);
+    function initialize(address owner_, address keeper_, address[] calldata slps_, address guardian_)
+        external
+        onlyConstructing
+        reinitializer(4)
+    {
+        __GuardedOwnable_init(owner_, guardian_);
         if (keeper_ != address(0)) {
             _setKeeper(keeper_);
         }
         _setSlps(slps_, true);
+    }
+
+    function migrateToR4(address guardian_, address timelock_)
+        external
+        onlyProxyAdmin
+        onlyFromVersion(1)
+        reinitializer(4)
+    {
+        _migrateGovernance(guardian_, timelock_);
     }
 
     /// @notice Accept native PROS (e.g. forwarded by StPROS on mint)
@@ -104,7 +118,7 @@ contract SlpDistributor is OwnableUpgradeable, ReentrancyGuardTransient {
 
     /// @notice Send native PROS to whitelisted SLPs, keeper only
     /// @param distributions List of (slp, amount); the same SLP may appear more than once
-    function distribute(Distribution[] calldata distributions) external onlyKeeper nonReentrant {
+    function distribute(Distribution[] calldata distributions) external onlyKeeper whenNotPaused nonReentrant {
         uint256 length = distributions.length;
         if (length == 0) {
             revert EmptyDistribution();
@@ -159,7 +173,7 @@ contract SlpDistributor is OwnableUpgradeable, ReentrancyGuardTransient {
     function _setSlps(address[] calldata slps_, bool allowed) internal {
         for (uint256 i; i < slps_.length; ++i) {
             address slp = slps_[i];
-            if (slp == address(0)) {
+            if (slp == address(0) || (allowed && slp.code.length == 0)) {
                 revert InvalidAddress();
             }
             bool changed = allowed ? _slps.add(slp) : _slps.remove(slp);

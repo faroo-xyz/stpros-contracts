@@ -1,0 +1,27 @@
+{
+  "block": 31190661,
+  "timestamp": 1791527227,
+  "token": "0x838800b758277cc111b2d48ab01e5e164f8e9471",
+  "vToken": "0xb1437aeea18189eb6d02dc46cd4d28613d582e9a",
+  "oracle": "0x6bd39d03d2fbbf14aee362977a09c293b282b0bc",
+  "tokenAmount": 14985111913715050297662,
+  "vTokenAmount": 7492555956857525148649,
+  "totalSupply": 7492555956857525148649,
+  "initializedVersion": 3,
+  "lastUpdateAt": 0,
+  "reporter": "0x464017cdc3c2af2b5b525fde03ac93f15172db43",
+  "maxUpdateAmount": 1000000000000000000000000,
+  "updateInterval": 1,
+  "commissionAccount": "0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd",
+  "commissionRatePpm": 100000,
+  "sourceStateSha256": "605fef39d76afc40e7816bab015153ab8c60f271a8dc77a318c0e5a364be1fdc",
+  "sourceArchiveSha256": "79deed4da868c018e73eddbb0961d469f127e68cd6e774f3a8e52e9bfe65b3ad",
+  "eventCounts": {
+    "SlpChanged(address,address)": 1,
+    "VTokenSet(address,bool)": 1,
+    "UpdateLimitsChanged(uint256,uint256)": 1,
+    "CommissionConfigChanged(address,uint256)": 1,
+    "CommissionVTokenSet(address,address)": 1
+  },
+  "scope": "Pinned aggregate pool/supply and event-replayed registry/configuration. Tests reconstruct representative user/queue state via recorded code; not a full account-state fork."
+}
