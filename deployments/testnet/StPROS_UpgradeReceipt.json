@@ -1,0 +1,37 @@
+{
+  "proxy": "0xb1437aeea18189eb6d02dc46cd4d28613d582e9a",
+  "implementation": "0x64dc1e8b5e9515de37b58b4d8629bf89bcd1f576",
+  "deploymentTransaction": "0x7b293385de4972f9b4e5f1f3e1fe480d764630f321b51624d40963dca184de6d",
+  "before": {
+    "owner": "0x4597C97a43dFBb4a398E2b16AA9cE61f90d801DD",
+    "oracle": "0x6bD39d03d2fBBF14aee362977a09C293B282B0bc",
+    "slp": "0x464017CDC3c2af2b5B525FDe03Ac93F15172Db43",
+    "bridgeVault": "0xB79db65038a11fa8F5A361e5FF265842b3619Ddc",
+    "asset": "0x838800b758277CC111B2d48Ab01e5E164f8E9471",
+    "paused": "false",
+    "totalSupply": "7492555956857525148649",
+    "queuedWithdrawal": "1511098291851011388640",
+    "completedWithdrawal": "6000000000000000000",
+    "unbondingPeriod": "0",
+    "initializer": "0x0000000000000000000000000000000000000000000000000000000000000002"
+  },
+  "upgradeTransaction": "0x9b9b29d8cd11030c62eb0dec981df8679c1d95ffe234c0f2bd1fcceb1e17b308",
+  "upgradeBlock": "31153535",
+  "status": "success",
+  "after": {
+    "owner": "0x4597C97a43dFBb4a398E2b16AA9cE61f90d801DD",
+    "oracle": "0x6bD39d03d2fBBF14aee362977a09C293B282B0bc",
+    "slp": "0x464017CDC3c2af2b5B525FDe03Ac93F15172Db43",
+    "bridgeVault": "0xB79db65038a11fa8F5A361e5FF265842b3619Ddc",
+    "asset": "0x838800b758277CC111B2d48Ab01e5E164f8E9471",
+    "paused": "false",
+    "totalSupply": "7492555956857525148649",
+    "queuedWithdrawal": "1511098291851011388640",
+    "completedWithdrawal": "6000000000000000000",
+    "unbondingPeriod": "0",
+    "initializer": "0x0000000000000000000000000000000000000000000000000000000000000002"
+  },
+  "mintCommissionOracleSimulation": "passed",
+  "unauthorizedMint": "NotOracle",
+  "statePreserved": true
+}
