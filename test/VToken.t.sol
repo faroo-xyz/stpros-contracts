@@ -207,7 +207,7 @@ contract VTokenTest is R4UnitTest {
 
     function test_WithdrawComplete_ShouldProcessAllClaimableRecords() external {
         vm.prank(owner);
-        vtoken.setUnbondingPeriod(0);
+        vtoken.setUnbondingPeriod(1 days);
         vm.prank(owner);
         vtoken.setMaxWithdrawCount(10);
 
@@ -221,6 +221,7 @@ contract VTokenTest is R4UnitTest {
         vm.prank(alice);
         vtoken.withdraw(30 ether, alice, alice);
 
+        vm.warp(block.timestamp + 1 days);
         vm.prank(alice);
         uint256 got = vtoken.withdrawComplete();
         assertEq(got, 120 ether, "all claimable records processed");
@@ -300,7 +301,7 @@ contract VTokenTest is R4UnitTest {
 
     function test_WithdrawQueue_ShouldBindOwnerAndReceiver_WhenCallerUsesAllowance() external {
         vm.prank(owner);
-        vtoken.setUnbondingPeriod(0);
+        vtoken.setUnbondingPeriod(1 days);
 
         _aliceDeposit(200 ether);
         _fundBridgeVault(100 ether);
@@ -322,6 +323,7 @@ contract VTokenTest is R4UnitTest {
         assertEq(bobClaim, 0, "caller cannot drain owner's queue");
 
         uint256 charlieBefore = wpros.balanceOf(charlie);
+        vm.warp(block.timestamp + 1 days);
         vm.prank(alice);
         uint256 claimed = vtoken.withdrawComplete();
         assertEq(claimed, 100 ether, "owner can process own queue");
@@ -330,13 +332,14 @@ contract VTokenTest is R4UnitTest {
 
     function test_CanWithdrawalAmount_ShouldUseBridgeVaultBalance() external {
         vm.prank(owner);
-        vtoken.setUnbondingPeriod(0);
+        vtoken.setUnbondingPeriod(1 days);
 
         _aliceDeposit(60 ether);
         _fundBridgeVault(60 ether);
 
         vm.prank(alice);
         vtoken.withdraw(50 ether, alice, alice);
+        vm.warp(block.timestamp + 1 days);
         vm.prank(alice);
         vtoken.withdrawComplete();
 
@@ -344,6 +347,7 @@ contract VTokenTest is R4UnitTest {
         vm.prank(alice);
         vtoken.withdraw(10 ether, alice, alice);
 
+        vm.warp(block.timestamp + 1 days);
         (uint256 available,,) = vtoken.canWithdrawalAmount(alice);
         assertEq(available, 10 ether, "bridge vault balance should unlock second request");
     }
@@ -415,7 +419,7 @@ contract VTokenTest is R4UnitTest {
 
     function test_WithdrawComplete_LegacyReceiver_ShouldPayMsgSender() external {
         vm.prank(owner);
-        vtoken.setUnbondingPeriod(0);
+        vtoken.setUnbondingPeriod(1 days);
 
         _fundBridgeVault(30 ether);
         vtoken.seedLegacyWithdrawal(alice, 30 ether);
@@ -439,7 +443,7 @@ contract VTokenTest is R4UnitTest {
         vtoken.setBridgeVault(payable(address(nativeVault)));
 
         vm.prank(owner);
-        vtoken.setUnbondingPeriod(0);
+        vtoken.setUnbondingPeriod(1 days);
 
         _aliceDeposit(60 ether);
         vm.deal(address(nativeVault), 25 ether);
@@ -448,6 +452,7 @@ contract VTokenTest is R4UnitTest {
         vtoken.withdraw(25 ether, alice, alice);
 
         uint256 aliceBefore = alice.balance;
+        vm.warp(block.timestamp + 1 days);
         vm.prank(alice);
         uint256 claimed = vtoken.withdrawCompleteToPROS();
 
@@ -467,7 +472,7 @@ contract VTokenTest is R4UnitTest {
         vtoken.setBridgeVault(payable(address(nativeVault)));
 
         vm.prank(owner);
-        vtoken.setUnbondingPeriod(0);
+        vtoken.setUnbondingPeriod(1 days);
 
         _aliceDeposit(60 ether);
         vm.deal(address(nativeVault), 25 ether);
@@ -475,6 +480,7 @@ contract VTokenTest is R4UnitTest {
         vm.prank(alice);
         vtoken.withdraw(25 ether, address(rejectReceiver), alice);
 
+        vm.warp(block.timestamp + 1 days);
         vm.prank(alice);
         uint256 claimed = vtoken.withdrawCompleteToPROS();
 
@@ -497,7 +503,7 @@ contract VTokenTest is R4UnitTest {
         vtoken.setBridgeVault(payable(address(nativeVault)));
 
         vm.prank(owner);
-        vtoken.setUnbondingPeriod(0);
+        vtoken.setUnbondingPeriod(1 days);
 
         _aliceDeposit(60 ether);
         vm.deal(address(nativeVault), 25 ether);
@@ -505,6 +511,7 @@ contract VTokenTest is R4UnitTest {
         vm.prank(alice);
         vtoken.withdraw(25 ether, address(observingReceiver), alice);
 
+        vm.warp(block.timestamp + 1 days);
         vm.prank(alice);
         uint256 claimed = vtoken.withdrawCompleteToPROS();
 

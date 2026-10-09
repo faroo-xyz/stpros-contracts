@@ -90,7 +90,7 @@ contract Oracle is IOracle, GuardedOwnableUpgradeable, MigrationGuard {
 
     /// @notice Slot 9, the only appended linear state in Oracle R4.
     uint256 public maxAprPpm;
-    // D5 recommended hard ceiling; product sign-off remains a release gate.
+    // Approved hard ceiling; operational APR remains a release-time input.
     uint256 public constant MAX_APR_PPM = 500_000;
     uint256 public constant MAX_CATCH_UP = 7 days;
 
@@ -502,7 +502,7 @@ contract Oracle is IOracle, GuardedOwnableUpgradeable, MigrationGuard {
             revert MissingCommissionVToken(_token);
         }
 
-        // D6 exact formula draft; product acceptance remains outstanding.
+        // Approved exact dilution formula; commission applies only to reported yield.
         PoolInfo memory pool = poolInfo[_token];
         commissionVTokenAmount = commissionTokenAmount.mulDiv(
             pool.vTokenAmount, pool.tokenAmount + _tokenAmount - commissionTokenAmount, Math.Rounding.Floor

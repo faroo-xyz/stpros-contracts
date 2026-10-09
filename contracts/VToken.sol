@@ -115,6 +115,8 @@ contract VToken is
 
     /// @notice Default waiting period set during initialization
     uint256 internal constant DEFAULT_UNBONDING_PERIOD = 7 days;
+    /// @notice Approved minimum for future governance configuration, not legacy records/migrations.
+    uint256 public constant MIN_UNBONDING = 1 days;
     /// @notice Governance cap on the waiting period to avoid excessive lockups
     uint256 public constant MAX_UNBONDING = 30 days;
 
@@ -154,6 +156,7 @@ contract VToken is
 
     /// @notice Waiting period exceeds the governance cap
     error UnbondingPeriodTooLong(uint256 value, uint256 maxValue);
+    error UnbondingPeriodTooShort(uint256 value, uint256 minValue);
 
     /// @notice Native PROS transfer failed
     error TransferFailed();
@@ -205,6 +208,9 @@ contract VToken is
     /// @notice Set the global waiting period, owner only
     /// @dev Only affects future requests; historical records keep their snapshots
     function setUnbondingPeriod(uint256 _unbondingPeriod) external onlyOwner {
+        if (_unbondingPeriod < MIN_UNBONDING) {
+            revert UnbondingPeriodTooShort(_unbondingPeriod, MIN_UNBONDING);
+        }
         if (_unbondingPeriod > MAX_UNBONDING) {
             revert UnbondingPeriodTooLong(_unbondingPeriod, MAX_UNBONDING);
         }

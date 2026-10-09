@@ -13,6 +13,7 @@ interface IYieldVaultFactory {
     /// @notice Global factory pause switch; when true, subscriptions and profit funding are blocked
     function paused() external view returns (bool);
     function timelock() external view returns (address);
+    function approvedPerformanceFeeBps() external view returns (uint16);
 }
 
 /// @notice Rolling ERC-4626 vault. OPS manages PROFIT and rounds; only the factory's
@@ -28,7 +29,7 @@ contract YieldVault is Initializable, ERC4626Upgradeable, AccessControlUpgradeab
     }
 
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
-    // D8/D9 recommended draft values; not approved economic policy.
+    // Owner-approved round bounds and A1 deadline policy.
     uint256 public constant MIN_OPEN_WINDOW = 1 days;
     uint256 public constant MAX_OPEN_WINDOW = 90 days;
     uint256 public constant MAX_LOCK_DURATION = 365 days;
@@ -38,9 +39,8 @@ contract YieldVault is Initializable, ERC4626Upgradeable, AccessControlUpgradeab
     uint256 public constant MAX_SETTLE_TIMELOCK = SETTLEMENT_GRACE - MIN_PROPOSAL_WINDOW;
     uint256 public constant MAX_LOSS_BPS = 5_000;
     uint256 private constant BPS_DENOMINATOR = 10_000;
-    // D17 unresolved: preserve the existing 100% cap until product approval.
-    /// @notice Maximum performance fee rate in basis points (100%)
-    uint256 public constant MAX_PERFORMANCE_FEE_BPS = 10_000;
+    /// @notice Hard ceiling for newly opened rounds; historical fee snapshots remain valid.
+    uint256 public constant MAX_PERFORMANCE_FEE_BPS = 3_000;
     /// @notice Minimum lock period duration for each round
     uint256 public constant MIN_LOCK_DURATION = 1;
     /// @notice Minimum settlement timelock duration for each round
@@ -132,6 +132,7 @@ contract YieldVault is Initializable, ERC4626Upgradeable, AccessControlUpgradeab
     error InvalidSettleMode();
     /// @notice Invalid round parameters
     error InvalidRoundParams();
+    error UnapprovedPerformanceFee(uint256 requestedFeeBps, uint256 approvedFeeBps);
 
     // =================== Events ===================
     /// @notice New round entered the open period
@@ -702,6 +703,10 @@ contract YieldVault is Initializable, ERC4626Upgradeable, AccessControlUpgradeab
                 || params.maxLossBps > MAX_LOSS_BPS
         ) {
             revert InvalidRoundParams();
+        }
+        uint256 approvedFee = IYieldVaultFactory(factory).approvedPerformanceFeeBps();
+        if (params.performanceFeeBps != approvedFee) {
+            revert UnapprovedPerformanceFee(params.performanceFeeBps, approvedFee);
         }
         // New cap must accommodate assets already under management (rolled principal + yield).
         if (params.roundCap < totalManagedAssets) {

@@ -620,6 +620,8 @@ contract R4VaultTest is LegacyTopology {
     function _newVault() internal returns (YieldVault v) {
         _upgrade();
         vm.prank(address(tl));
+        factory.setApprovedPerformanceFeeBps(1000);
+        vm.prank(address(tl));
         factory.addCounterpartyToWhitelist(counterparty);
         YieldVault.InitParams memory p = YieldVault.InitParams(
             address(core.stPROS),
@@ -746,6 +748,8 @@ contract R4VaultTest is LegacyTopology {
         assertEq(fresh.owner(), address(tl));
         vm.prank(address(tl));
         fresh.addCounterpartyToWhitelist(counterparty);
+        vm.prank(address(tl));
+        fresh.setApprovedPerformanceFeeBps(1000);
         YieldVault.InitParams memory p = YieldVault.InitParams(
             address(core.stPROS), address(fresh), address(tl), counterparty, counterparty, "Fresh", "F", _round(), ops
         );

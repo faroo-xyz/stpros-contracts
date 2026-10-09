@@ -39,13 +39,19 @@ contract YieldVaultFactory is Initializable, GuardedOwnableUpgradeable, Migratio
     // Appended and packed into slot 4.
     address public timelock;
     bool public creationClosed;
+    /// @notice Timelock-approved fee for newly opened rounds; defaults to zero.
+    /// @dev Packed after creationClosed in slot 4; existing round snapshots are untouched.
+    uint16 public approvedPerformanceFeeBps;
+    uint16 public constant MAX_PERFORMANCE_FEE_BPS = 3_000;
 
     error CreationClosed();
     error InvalidGovernance();
+    error InvalidPerformanceFee(uint256 feeBps);
 
     event TimelockChanged(address indexed previousTimelock, address indexed newTimelock);
     event CreationPermanentlyClosed();
     event VaultRetired(address indexed vault);
+    event ApprovedPerformanceFeeChanged(uint16 previousFeeBps, uint16 newFeeBps);
 
     event BeaconCreated(address indexed beacon, address indexed implementation);
     event YieldVaultCreated(address indexed proxy, address indexed creator);
@@ -88,6 +94,13 @@ contract YieldVaultFactory is Initializable, GuardedOwnableUpgradeable, Migratio
 
     function setTimelock(address timelock_) external onlyOwner {
         _setTimelock(timelock_);
+    }
+
+    /// @notice Approve the fee for future rounds only; current and historical fees stay fixed.
+    function setApprovedPerformanceFeeBps(uint16 feeBps) external onlyOwner {
+        if (feeBps > MAX_PERFORMANCE_FEE_BPS) revert InvalidPerformanceFee(feeBps);
+        emit ApprovedPerformanceFeeChanged(approvedPerformanceFeeBps, feeBps);
+        approvedPerformanceFeeBps = feeBps;
     }
 
     function _setTimelock(address timelock_) internal {

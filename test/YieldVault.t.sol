@@ -17,6 +17,12 @@ contract MockYieldAsset is ERC20 {
 contract MockYieldFactory {
     bool public paused;
     address public timelock;
+    uint16 public approvedPerformanceFeeBps;
+
+    function setApprovedPerformanceFeeBps(uint16 fee) external {
+        require(msg.sender == timelock && fee <= 3000);
+        approvedPerformanceFeeBps = fee;
+    }
 
     constructor(address tl) {
         timelock = tl;
@@ -56,6 +62,8 @@ contract YieldVaultTest is R4UnitTest {
         admin = _newTimelock();
         asset = new MockYieldAsset();
         factory = new MockYieldFactory(admin);
+        vm.prank(admin);
+        factory.setApprovedPerformanceFeeBps(uint16(FEE_BPS));
         YieldVault implementation = new YieldVault();
 
         YieldVault.InitParams memory params = YieldVault.InitParams({
@@ -466,7 +474,7 @@ contract YieldVaultTest is R4UnitTest {
         _deposit(alice, 500 ether);
         _lockAndMature();
 
-        uint256 maxLoss = vault.totalManagedAssets() * vault.maxLossBps() / vault.MAX_PERFORMANCE_FEE_BPS();
+        uint256 maxLoss = vault.totalManagedAssets() * vault.maxLossBps() / 10_000;
 
         vm.expectRevert(abi.encodeWithSelector(YieldVault.LossExceedManaged.selector, maxLoss + 1, 500 ether));
         vm.prank(admin);
