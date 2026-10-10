@@ -30,6 +30,7 @@ export default defineConfig({
       },
     },
     npmFilesToBuild: [
+      "@openzeppelin/contracts/governance/TimelockController.sol",
       "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol",
       "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol",
     ],

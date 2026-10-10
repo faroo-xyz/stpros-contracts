@@ -546,59 +546,8 @@ export const permsTransferOwnerTask = task(
     description: "Override proxy address for the selected target",
     defaultValue: "",
   })
-  .setInlineAction(async (taskArgs, hre) => {
-    const connection = await hre.network.getOrCreate();
-
-    try {
-      const [signer] = await connection.viem.getWalletClients();
-
-      if (signer?.account?.address === undefined) {
-        throw new Error("No signer account available for the selected network");
-      }
-
-      const target = parseOwnableTarget(taskArgs.target);
-      const newOwner = getRequiredAddress(taskArgs.newOwner, "new owner address");
-      const networkDefaults = getNetworkDefaults(connection.networkName);
-      const contractAddress = resolveOwnableTargetAddress(
-        target,
-        networkDefaults,
-        getOptionalAddress(taskArgs.address, "address"),
-      );
-
-      if (newOwner === ZERO_ADDRESS) {
-        throw new Error("newOwner cannot be the zero address");
-      }
-
-      const contract = await connection.viem.getContractAt(
-        getOwnableContractName(target),
-        contractAddress,
-        {
-          client: {
-            wallet: signer,
-          },
-        },
-      );
-      const publicClient = await connection.viem.getPublicClient();
-      const previousOwner = await contract.read.owner();
-
-      if (previousOwner.toLowerCase() === newOwner.toLowerCase()) {
-        throw new Error(`${target} owner is already ${newOwner}`);
-      }
-
-      const hash = await contract.write.transferOwnership([newOwner]);
-      const receipt = await publicClient.waitForTransactionReceipt({ hash });
-      const currentOwner = await contract.read.owner();
-
-      console.log(`[perms:transfer-owner] target=${target}`);
-      console.log(`[perms:transfer-owner] contract=${contractAddress}`);
-      console.log(`[perms:transfer-owner] caller=${signer.account.address}`);
-      console.log(`[perms:transfer-owner] previousOwner=${previousOwner}`);
-      console.log(`[perms:transfer-owner] newOwner=${currentOwner}`);
-      console.log(`[perms:transfer-owner] txHash=${hash}`);
-      console.log(`[perms:transfer-owner] blockNumber=${receipt.blockNumber}`);
-    } finally {
-      await connection.close();
-    }
+  .setInlineAction(async () => {
+    throw new Error("Release tooling required: legacy ownership handoff is disabled; use the reviewed multi-actor release builders. Proxy admin changes and ownership renunciation are not supported.");
   })
   .build();
 
@@ -634,65 +583,8 @@ export const permsTransferProxyAdminTask = task(
     description: "Any transparent proxy used to resolve ProxyAdmin when --proxyAdmin is omitted",
     defaultValue: "",
   })
-  .setInlineAction(async (taskArgs, hre) => {
-    const connection = await hre.network.getOrCreate();
-
-    try {
-      const [signer] = await connection.viem.getWalletClients();
-
-      if (signer?.account?.address === undefined) {
-        throw new Error("No signer account available for the selected network");
-      }
-
-      const newOwner = getRequiredAddress(taskArgs.newOwner, "new owner address");
-      const publicClient = await connection.viem.getPublicClient();
-      const networkDefaults = getNetworkDefaults(connection.networkName);
-
-      if (newOwner === ZERO_ADDRESS) {
-        throw new Error("newOwner cannot be the zero address");
-      }
-
-      let proxyAdmin = getOptionalAddress(taskArgs.proxyAdmin, "proxyAdmin address");
-      if (proxyAdmin === undefined) {
-        const proxy = getOptionalAddress(taskArgs.proxy, "proxy address")
-          ?? networkDefaults?.ORACLE;
-        if (proxy === undefined) {
-          throw new Error("Missing proxy address. Pass --proxy or --proxyAdmin.");
-        }
-        proxyAdmin = await readProxyAdmin(publicClient, proxy);
-        if (proxyAdmin === undefined) {
-          throw new Error(`Could not resolve ProxyAdmin from proxy ${proxy}`);
-        }
-      }
-
-      const proxyAdminContract = await connection.viem.getContractAt(
-        "ProxyAdmin",
-        proxyAdmin,
-        {
-          client: {
-            wallet: signer,
-          },
-        },
-      );
-      const previousOwner = await proxyAdminContract.read.owner();
-
-      if (previousOwner.toLowerCase() === newOwner.toLowerCase()) {
-        throw new Error(`ProxyAdmin owner is already ${newOwner}`);
-      }
-
-      const hash = await proxyAdminContract.write.transferOwnership([newOwner]);
-      const receipt = await publicClient.waitForTransactionReceipt({ hash });
-      const currentOwner = await proxyAdminContract.read.owner();
-
-      console.log(`[perms:transfer-proxy-admin] proxyAdmin=${proxyAdmin}`);
-      console.log(`[perms:transfer-proxy-admin] caller=${signer.account.address}`);
-      console.log(`[perms:transfer-proxy-admin] previousOwner=${previousOwner}`);
-      console.log(`[perms:transfer-proxy-admin] newOwner=${currentOwner}`);
-      console.log(`[perms:transfer-proxy-admin] txHash=${hash}`);
-      console.log(`[perms:transfer-proxy-admin] blockNumber=${receipt.blockNumber}`);
-    } finally {
-      await connection.close();
-    }
+  .setInlineAction(async () => {
+    throw new Error("Release tooling required: legacy ownership handoff is disabled; use the reviewed multi-actor release builders. Proxy admin changes and ownership renunciation are not supported.");
   })
   .build();
 
@@ -737,117 +629,7 @@ export const permsMigrateOwnersTask = task(
     description: "ProxyAdmin contract address",
     defaultValue: "",
   })
-  .setInlineAction(async (taskArgs, hre) => {
-    const connection = await hre.network.getOrCreate();
-
-    try {
-      const [signer] = await connection.viem.getWalletClients();
-
-      if (signer?.account?.address === undefined) {
-        throw new Error("No signer account available for the selected network");
-      }
-
-      const newOwner = getRequiredAddress(taskArgs.newOwner, "new owner address");
-      const networkDefaults = getNetworkDefaults(connection.networkName);
-      const publicClient = await connection.viem.getPublicClient();
-
-      if (newOwner === ZERO_ADDRESS) {
-        throw new Error("newOwner cannot be the zero address");
-      }
-
-      const targets: Array<{ target: OwnableTarget; address: Address }> = [
-        {
-          target: "oracle",
-          address: resolveOwnableTargetAddress(
-            "oracle",
-            networkDefaults,
-            getOptionalAddress(taskArgs.oracle, "oracle address"),
-          ),
-        },
-        {
-          target: "stpros",
-          address: resolveOwnableTargetAddress(
-            "stpros",
-            networkDefaults,
-            getOptionalAddress(taskArgs.stpros, "stpros address"),
-          ),
-        },
-        {
-          target: "factory",
-          address: resolveOwnableTargetAddress(
-            "factory",
-            networkDefaults,
-            getOptionalAddress(taskArgs.factory, "factory address"),
-          ),
-        },
-      ];
-
-      console.log(`[perms:migrate-owners] network=${connection.networkName}`);
-      console.log(`[perms:migrate-owners] caller=${signer.account.address}`);
-      console.log(`[perms:migrate-owners] newOwner=${newOwner}`);
-
-      for (const { target, address } of targets) {
-        const contract = await connection.viem.getContractAt(
-          getOwnableContractName(target),
-          address,
-          {
-            client: {
-              wallet: signer,
-            },
-          },
-        );
-        const previousOwner = await contract.read.owner();
-
-        if (previousOwner.toLowerCase() === newOwner.toLowerCase()) {
-          console.log(`[perms:migrate-owners] skip ${target} owner already ${newOwner}`);
-          continue;
-        }
-
-        const hash = await contract.write.transferOwnership([newOwner]);
-        const receipt = await publicClient.waitForTransactionReceipt({ hash });
-        const currentOwner = await contract.read.owner();
-
-        console.log(`[perms:migrate-owners] ${target} contract=${address}`);
-        console.log(`[perms:migrate-owners] ${target} previousOwner=${previousOwner}`);
-        console.log(`[perms:migrate-owners] ${target} newOwner=${currentOwner}`);
-        console.log(`[perms:migrate-owners] ${target} txHash=${hash}`);
-        console.log(`[perms:migrate-owners] ${target} blockNumber=${receipt.blockNumber}`);
-      }
-
-      let proxyAdmin = getOptionalAddress(taskArgs.proxyAdmin, "proxyAdmin address");
-      if (proxyAdmin === undefined) {
-        proxyAdmin = await readProxyAdmin(publicClient, targets[0].address);
-        if (proxyAdmin === undefined) {
-          throw new Error("Could not resolve ProxyAdmin from oracle proxy");
-        }
-      }
-
-      const proxyAdminContract = await connection.viem.getContractAt(
-        "ProxyAdmin",
-        proxyAdmin,
-        {
-          client: {
-            wallet: signer,
-          },
-        },
-      );
-      const previousProxyAdminOwner = await proxyAdminContract.read.owner();
-
-      if (previousProxyAdminOwner.toLowerCase() === newOwner.toLowerCase()) {
-        console.log(`[perms:migrate-owners] skip proxyAdmin owner already ${newOwner}`);
-      } else {
-        const hash = await proxyAdminContract.write.transferOwnership([newOwner]);
-        const receipt = await publicClient.waitForTransactionReceipt({ hash });
-        const currentProxyAdminOwner = await proxyAdminContract.read.owner();
-
-        console.log(`[perms:migrate-owners] proxyAdmin=${proxyAdmin}`);
-        console.log(`[perms:migrate-owners] proxyAdmin previousOwner=${previousProxyAdminOwner}`);
-        console.log(`[perms:migrate-owners] proxyAdmin newOwner=${currentProxyAdminOwner}`);
-        console.log(`[perms:migrate-owners] proxyAdmin txHash=${hash}`);
-        console.log(`[perms:migrate-owners] proxyAdmin blockNumber=${receipt.blockNumber}`);
-      }
-    } finally {
-      await connection.close();
-    }
+  .setInlineAction(async () => {
+    throw new Error("Release tooling required: legacy ownership handoff is disabled; use the reviewed multi-actor release builders. Proxy admin changes and ownership renunciation are not supported.");
   })
   .build();

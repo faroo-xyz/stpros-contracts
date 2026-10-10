@@ -1,3 +1,4 @@
+import * as releaseTasksModule from "./release/index.js";
 import * as exampleTasksModule from "./example.js";
 import * as stProsTasksModule from "./stPros.js";
 import * as yieldVaultTasksModule from "./yieldVault.js";
@@ -33,6 +34,7 @@ export * from "./upgrade.js";
 export * from "./verifySocialscan.js";
 
 export const appTasks = [
+  ...collectTasks(releaseTasksModule),
   ...collectTasks(exampleTasksModule),
   ...collectTasks(stProsTasksModule),
   ...collectTasks(yieldVaultTasksModule),

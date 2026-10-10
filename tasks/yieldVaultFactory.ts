@@ -623,52 +623,8 @@ export const yvfTransferOwnerTask = task(
     name: "newOwner",
     description: "New owner address",
   })
-  .setInlineAction(async ({ factory, newOwner }, hre) => {
-    const connection = await hre.network.getOrCreate();
-
-    try {
-      const [signer] = await connection.viem.getWalletClients();
-
-      if (signer?.account?.address === undefined) {
-        throw new Error("No signer account available for the selected network");
-      }
-
-      const factoryAddress = getRequiredAddress(factory, "factory address");
-      const newOwnerAddress = getRequiredAddress(newOwner, "new owner address");
-
-      if (newOwnerAddress === "0x0000000000000000000000000000000000000000") {
-        throw new Error("newOwner cannot be the zero address");
-      }
-
-      const factoryContract = await connection.viem.getContractAt(
-        "YieldVaultFactory",
-        factoryAddress,
-        {
-          client: {
-            wallet: signer,
-          },
-        },
-      );
-      const previousOwner = await factoryContract.read.owner();
-
-      if (previousOwner.toLowerCase() === newOwnerAddress.toLowerCase()) {
-        throw new Error(`Factory owner is already ${newOwnerAddress}`);
-      }
-
-      const hash = await factoryContract.write.transferOwnership([newOwnerAddress]);
-      const publicClient = await connection.viem.getPublicClient();
-      const receipt = await publicClient.waitForTransactionReceipt({ hash });
-      const currentOwner = await factoryContract.read.owner();
-
-      console.log(`[yvf:transfer-owner] factory=${factoryAddress}`);
-      console.log(`[yvf:transfer-owner] caller=${signer.account.address}`);
-      console.log(`[yvf:transfer-owner] previousOwner=${previousOwner}`);
-      console.log(`[yvf:transfer-owner] newOwner=${currentOwner}`);
-      console.log(`[yvf:transfer-owner] txHash=${hash}`);
-      console.log(`[yvf:transfer-owner] blockNumber=${receipt.blockNumber}`);
-    } finally {
-      await connection.close();
-    }
+  .setInlineAction(async () => {
+    throw new Error("Release tooling required: legacy ownership handoff is disabled; use the reviewed multi-actor release builders. Proxy admin changes and ownership renunciation are not supported.");
   })
   .build();
 
@@ -698,66 +654,8 @@ export const yvfUpgradeBeaconTask = task(
     name: "implementation",
     description: "New YieldVault implementation address",
   })
-  .setInlineAction(async ({ factory, implementation }, hre) => {
-    const connection = await hre.network.getOrCreate();
-
-    try {
-      const [signer] = await connection.viem.getWalletClients();
-
-      if (signer?.account?.address === undefined) {
-        throw new Error("No signer account available for the selected network");
-      }
-
-      const factoryAddress = getRequiredAddress(factory, "factory address");
-      const implementationAddress = getRequiredAddress(
-        implementation,
-        "implementation address",
-      );
-      const factoryContract = await connection.viem.getContractAt(
-        "YieldVaultFactory",
-        factoryAddress,
-        {
-          client: {
-            wallet: signer,
-          },
-        },
-      );
-      const [oldImplementation, beacon, totalProxies] = await Promise.all([
-        factoryContract.read.currentImplementation(),
-        factoryContract.read.beacon(),
-        factoryContract.read.totalProxies(),
-      ]);
-
-      if (
-        oldImplementation.toLowerCase() === implementationAddress.toLowerCase()
-      ) {
-        console.log(`[yvf:upgrade-beacon] factory=${factoryAddress}`);
-        console.log(`[yvf:upgrade-beacon] beacon=${beacon}`);
-        console.log(
-          `[yvf:upgrade-beacon] implementation already ${implementationAddress}; no upgrade sent`,
-        );
-        console.log(`[yvf:upgrade-beacon] totalProxies=${totalProxies}`);
-        return;
-      }
-
-      const hash = await factoryContract.write.upgradeBeaconTo([
-        implementationAddress,
-      ]);
-      const publicClient = await connection.viem.getPublicClient();
-      const receipt = await publicClient.waitForTransactionReceipt({ hash });
-      const newImplementation = await factoryContract.read.currentImplementation();
-
-      console.log(`[yvf:upgrade-beacon] factory=${factoryAddress}`);
-      console.log(`[yvf:upgrade-beacon] caller=${signer.account.address}`);
-      console.log(`[yvf:upgrade-beacon] beacon=${beacon}`);
-      console.log(`[yvf:upgrade-beacon] oldImplementation=${oldImplementation}`);
-      console.log(`[yvf:upgrade-beacon] newImplementation=${newImplementation}`);
-      console.log(`[yvf:upgrade-beacon] totalProxies=${totalProxies}`);
-      console.log(`[yvf:upgrade-beacon] txHash=${hash}`);
-      console.log(`[yvf:upgrade-beacon] blockNumber=${receipt.blockNumber}`);
-    } finally {
-      await connection.close();
-    }
+  .setInlineAction(async () => {
+    throw new Error("Release tooling required: implementation-only/proxy/beacon upgrades are disabled. Build a reviewed atomic Timelock operation; this legacy task cannot execute.");
   })
   .build();
 

@@ -7,6 +7,13 @@ import ts from "typescript";
 // Exercise the exact inline action attached to each exported task, with an HRE
 // that rejects any access (especially network creation, artifacts and signers).
 const cases = [
+  ["permissions.ts", "permsTransferOwnerTask", "perms:transfer-owner"],
+  ["permissions.ts", "permsTransferProxyAdminTask", "perms:transfer-proxy-admin"],
+  ["permissions.ts", "permsMigrateOwnersTask", "perms:migrate-owners"],
+  ["yieldVaultFactory.ts", "yvfTransferOwnerTask", "yvf:transfer-owner"],
+  ["upgrade.ts", "oracleUpgradeTask", "oracle:upgrade"],
+  ["upgrade.ts", "stProsUpgradeTask", "stpros:upgrade"],
+  ["yieldVaultFactory.ts", "yvfUpgradeBeaconTask", "yvf:upgrade-beacon"],
   ["oracle.ts", "oracleSetPoolInfoTask", "oracle:set-pool-info"],
   ["stPros.ts", "stProsSetOracleTask", "stpros:set-oracle"],
   ["upgrade.ts", "oracleUpgradeV2Task", "oracle:upgrade-v2"],
@@ -45,7 +52,7 @@ for (const [file, exported, command] of cases) {
       throw new Error("task accessed the runtime before refusing");
     } });
     await assert.rejects(sandbox.module.exports({}, forbiddenRuntime), error => {
-      assert.ok(error.message.startsWith(`Deprecated ${command}:`));
+      assert.ok(error.message.startsWith(`Deprecated ${command}:`) || error.message.startsWith("Release tooling required:"));
       return true;
     });
     assert.equal(runtimeReads, 0);

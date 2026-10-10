@@ -440,47 +440,8 @@ export const oracleUpgradeTask = task(
     description: "ProxyAdmin contract address",
     defaultValue: "",
   })
-  .setInlineAction(async (taskArgs, hre) => {
-    const connection = await hre.network.getOrCreate();
-
-    try {
-      const networkName = connection.networkName;
-      const implementation = getRequiredAddress(taskArgs.implementation, "implementation");
-      const proxy =
-        getOptionalAddress(taskArgs.proxy, "oracle proxy")
-        ?? getNetworkOracle(networkName);
-      const proxyAdmin =
-        getOptionalAddress(taskArgs.proxyAdmin, "proxyAdmin address")
-        ?? getNetworkProxyAdmin(networkName);
-
-      if (proxy === undefined) {
-        throw new Error("Missing oracle proxy. Pass --proxy or use mainnet/testnet.");
-      }
-
-      if (proxyAdmin === undefined) {
-        throw new Error("Missing proxyAdmin address. Pass --proxy-admin or use mainnet/testnet.");
-      }
-
-      const [signer] = networkName === "testnet"
-        ? await connection.viem.getWalletClients()
-        : [];
-      const publicClient = networkName === "testnet"
-        ? await connection.viem.getPublicClient()
-        : undefined;
-
-      await runUpgrade({
-        taskLabel: "oracle:upgrade",
-        networkName,
-        proxy,
-        implementation,
-        proxyAdmin,
-        initData: "0x",
-        publicClient,
-        signer,
-      });
-    } finally {
-      await connection.close();
-    }
+  .setInlineAction(async () => {
+    throw new Error("Release tooling required: implementation-only/proxy/beacon upgrades are disabled. Build a reviewed atomic Timelock operation; this legacy task cannot execute.");
   })
   .build();
 
@@ -617,47 +578,8 @@ export const stProsUpgradeTask = task(
     description: "ProxyAdmin contract address",
     defaultValue: "",
   })
-  .setInlineAction(async (taskArgs, hre) => {
-    const connection = await hre.network.getOrCreate();
-
-    try {
-      const networkName = connection.networkName;
-      const implementation = getRequiredAddress(taskArgs.implementation, "implementation");
-      const proxy =
-        getOptionalAddress(taskArgs.proxy, "stPros proxy")
-        ?? getNetworkStPros(networkName);
-      const proxyAdmin =
-        getOptionalAddress(taskArgs.proxyAdmin, "proxyAdmin address")
-        ?? getNetworkProxyAdmin(networkName);
-
-      if (proxy === undefined) {
-        throw new Error("Missing stPros proxy. Pass --proxy or use mainnet/testnet.");
-      }
-
-      if (proxyAdmin === undefined) {
-        throw new Error("Missing proxyAdmin address. Pass --proxy-admin or use mainnet/testnet.");
-      }
-
-      const [signer] = networkName === "testnet"
-        ? await connection.viem.getWalletClients()
-        : [];
-      const publicClient = networkName === "testnet"
-        ? await connection.viem.getPublicClient()
-        : undefined;
-
-      await runUpgrade({
-        taskLabel: "stpros:upgrade",
-        networkName,
-        proxy,
-        implementation,
-        proxyAdmin,
-        initData: "0x",
-        publicClient,
-        signer,
-      });
-    } finally {
-      await connection.close();
-    }
+  .setInlineAction(async () => {
+    throw new Error("Release tooling required: implementation-only/proxy/beacon upgrades are disabled. Build a reviewed atomic Timelock operation; this legacy task cannot execute.");
   })
   .build();
 

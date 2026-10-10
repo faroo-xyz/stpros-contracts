@@ -59,6 +59,6 @@ it needs a design amendment first.
 
 ## Workflow
 
-- Branch from `main`. Do not merge the `dev` (tbPROS) branch.
+- Develop directly on `main`, as approved by the owner. Do not create development branches or merge the `dev` (tbPROS) branch.
 - One reviewable batch per commit boundary, as listed in the implementation
   roadmap of the research repository.
