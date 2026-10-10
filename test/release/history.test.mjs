@@ -49,14 +49,14 @@ test("new holder is discovered through Transfer without a new deposit",async()=>
 });
 test("new withdrawal owner, partial then full claims and FIFO records reconcile",async()=>{
     const f=rpcFixture(688689),d=f.c.addresses,u=address(900),v=address(901);f.deposit();
-    f.log(f.current,d.stpros,TRANSFER,[u,ZERO],[4]);f.log(f.current,d.stpros,WITHDRAW,[u,v,u],[4,4]);
+    f.log(f.current,d.stpros,TRANSFER,[u,ZERO],[4]);f.log(f.current,d.oracle,keccak256(stringToHex("PoolUpdated(address,uint256,uint256,bool)")),[d.asset],[6,6,0]);f.log(f.current,d.stpros,WITHDRAW,[u,v,u],[4,4]);for(const l of f.current.logs.slice(-3))l.transactionHash=hash(990004);
     f.log(f.current,d.stpros,CLAIM,[u,v],[2]);
     Object.assign(f.current.observed.core,{supply:"6",poolT:"6",poolV:"6",queued:"4",completed:"2"});
     f.current.balances[d.stpros][u]="6";
     const r={queued:"2",pending:"2",createdAt:String(f.head.timestamp),unbondingPeriod:"0",receiver:v};
     f.current.withdrawals=[{owner:u,head:"0",tail:"1",records:[r]}];
     assert.equal((await run(f)).status,"PASS");
-    f.log(f.current,d.stpros,TRANSFER,[u,ZERO],[2]);f.log(f.current,d.stpros,WITHDRAW,[u,u,u],[2,2]);
+    f.log(f.current,d.stpros,TRANSFER,[u,ZERO],[2]);f.log(f.current,d.oracle,keccak256(stringToHex("PoolUpdated(address,uint256,uint256,bool)")),[d.asset],[4,4,0]);f.log(f.current,d.stpros,WITHDRAW,[u,u,u],[2,2]);for(const l of f.current.logs.slice(-3))l.transactionHash=hash(990002);
     f.log(f.current,d.stpros,CLAIM,[u,v],[2]);f.log(f.current,d.stpros,CLAIM,[u,u],[2]);
     Object.assign(f.current.observed.core,{supply:"4",poolT:"4",poolV:"4",queued:"6",completed:"6"});
     f.current.balances[d.stpros][u]="4";f.current.withdrawals=[{owner:u,head:"2",tail:"2",records:[]}];

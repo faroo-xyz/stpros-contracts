@@ -1,3 +1,4 @@
+import { requireActionBearingCoverage } from "./timelock-history.mjs";
 import { task } from "hardhat/config";
 import { checkedJson, validateRecordedTopology, preflight, buildU, buildHandoff, p1Runbook, testnetHandoff, expectations, deploymentDefinitions } from "./core.mjs";
 import { readOnlyRpc, recheckObserved, verifyCheckpoint, estimateGas } from "./read-only.mjs";
@@ -28,12 +29,14 @@ function command(name: string, description: string) {
           executionEvidence = checkedJson(args.checkpointReview,args.checkpointReviewHash);
         }
         const result = await verifyCheckpoint(c,inventory,artifacts,readOnlyRpc(args.rpc,c.mode === "simulation"),name === "release:postcheck" ? "R4" : "H",{executionEvidence});
+        if(c.mode === "release") requireActionBearingCoverage(result);
         console.log(JSON.stringify(result,(_,v)=>typeof v==="bigint"?v.toString():v,2)); return;
       }
       let liveVerification: any;
       if(c.mode === "release") {
         if(!args.rpc) throw new Error("Release output requires a fresh pinned RPC recheck");
         liveVerification = await recheckObserved(c, inventory, readOnlyRpc(args.rpc));
+        requireActionBearingCoverage(liveVerification);
       }
       let result: unknown;
       switch(name) {

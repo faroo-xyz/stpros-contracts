@@ -65,6 +65,7 @@ test("F09 V3 remains per record and receiver-bound",async()=>{
 test("F09 V3 rejects aggregation across records",async()=>{const f=queued(688689);claim(f,3,2);await assert.rejects(run(f),/CLAIM_AMOUNT/);});
 
 function upgrade(f) {
+    f.operationHistory(true); f.now = f.head.timestamp + 1;
     const e=expectations(f.c,f.inventory,f.artifacts,"R4"),d=f.c.addresses;
     f.current.observed.proxyAdminOwner=d.timelock;
     for(const p of e.proxies) {

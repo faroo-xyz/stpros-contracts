@@ -129,7 +129,11 @@ export function validateConfig(c) {
         addr(c.implementations?.[name], name);
     const a = c.actors;
     requireThat(![a.gov, a.can, a.guardian, a.ops, c.addresses.timelock].includes(a.deployer), "DEPLOYER_AUTHORITY");
-    requireThat(a.gov !== a.can && a.gov !== a.guardian && a.can !== a.guardian && a.ops !== c.addresses.timelock, "ACTOR_SEPARATION");
+    requireThat(a.gov !== a.can && a.gov !== a.guardian && a.can !== a.guardian && a.ops !== c.addresses.timelock && a.ops !== a.gov && a.ops !== a.can, "ACTOR_SEPARATION");
+    // V3 preserves its existing reporter; the configured replacement is not used.
+    const reporter = addr(c.chainId === 1672 ? a.reporter : c.observed?.core?.reporter, "effective reporter");
+    for (const operational of [reporter, a.keeper])
+        requireThat(![a.gov, a.can, c.addresses.timelock].includes(operational), "OPERATIONAL_TIMELOCK_AUTHORITY");
     requireThat(Array.isArray(c.destinations), "DESTINATIONS_REQUIRED");
     for (const destination of c.destinations)
         addr(destination);
@@ -161,6 +165,7 @@ export function validateConfig(c) {
     if (isTestnetRecovery(c))
         requireThat(c.chainId === 688689 && c.testnetRecovery.ownerApproval, "TESTNET_RECOVERY_APPROVAL");
     requireThat(c.observed?.blockHash && Number.isSafeInteger(c.observed.blockNumber), "PIN_REQUIRED");
+    if (c.chainId === 1672) requireThat(c.observed.vaults?.[c.factories[0].vaults[0].address]?.phase === 3, "MAIN_VAULT_PHASE");
     requireThat(c.review?.artifactSha256 && c.review.inventorySha256 && c.review.sourceCommit, "REVIEW_REQUIRED");
     if (c.mode === "release") {
         requireThat(c.review.approvalReference && c.releaseGates?.independentReview === "CLEAR" && c.releaseGates?.freshFork === "PASS" && c.releaseGates?.fs6 === "PASS", "RELEASE_GATES_INCOMPLETE");
@@ -169,17 +174,22 @@ export function validateConfig(c) {
         requireThat(Number.isSafeInteger(gates.hGas) && Number.isSafeInteger(gates.uGas) && gates.hGas > 0 && gates.uGas > 0 && gates.hGas <= cap && gates.uGas <= cap, "FS6_GAS_GATE");
         requireThat(gates.forkReference && gates.forkBlockHash === c.observed.blockHash && Number.isSafeInteger(c.observed.timestamp) && Number.isSafeInteger(gates.forkTimestamp) && gates.forkTimestamp <= c.observed.timestamp && c.observed.timestamp - gates.forkTimestamp <= 3600, "FRESH_FORK_EVIDENCE");
         requireThat(c.releaseGates.counterpartyConsent === true && c.releaseGates.dappReady === true, "EXTERNAL_GATES_INCOMPLETE");
+        const safeByAddress = new Map();
         for (const role of ["gov", "can", "guardian", "ops", "treasury"]) {
             const safe = c.review.safes?.[role];
             requireThat(safe && safe.address === a[role] && safe.runtimeHash && safe.singleton && safe.singletonHash && safe.nonce !== undefined && safe.owners.length >= safe.threshold && safe.threshold > 0 && safe.modules.length === 0 && safe.guard === ZERO, "SAFE_CONFIGURATION", role);
+            requireThat(!safeByAddress.has(safe.address) || canonical(safeByAddress.get(safe.address)) === canonical(safe), "SAFE_ALIAS_CONFIGURATION");
+            safeByAddress.set(safe.address, safe);
             for (const owner of safe.owners)
                 addr(owner, "Safe owner");
             exactSet(safe.owners, safe.owners, "DUPLICATE_SAFE_OWNER");
             requireThat(!safe.owners.includes(a.deployer), "DEPLOYER_SIGNER", role);
         }
+        if (a.ops === a.guardian) requireThat(canonical(c.review.safes.ops) === canonical(c.review.safes.guardian), "SAFE_ALIAS_CONFIGURATION");
+        for (const role of ["gov", "can"]) requireThat(!c.review.safes[role].owners.some(owner => [reporter, a.keeper].includes(owner)), "OPERATIONAL_SAFE_SIGNER", role);
         requireThat(c.review.safes.gov.threshold === 3 && c.review.safes.gov.owners.length === 5, "GOV_THRESHOLD");
         requireThat(c.review.safes.can.threshold >= 3, "CAN_THRESHOLD");
-        for (const [x, y] of [["gov", "can"], ["gov", "guardian"], ["can", "guardian"]])
+        for (const [x, y] of [["gov", "can"], ["gov", "guardian"], ["can", "guardian"], ["ops", "gov"], ["ops", "can"]])
             requireThat(!c.review.safes[x].owners.some(v => c.review.safes[y].owners.includes(v)), "SAFE_SIGNER_OVERLAP");
     }
     return c;
@@ -270,7 +280,7 @@ export function preflight(c, inventory, artifacts) {
         const x = o.core;
         requireThat(BigInt(x.reserve) === BigInt(x.queued) - BigInt(x.completed) && BigInt(x.escrow) >= BigInt(x.reserve) && BigInt(x.wrapped) - BigInt(x.reserve) >= BigInt(x.supply) - BigInt(x.escrow), "V1_BACKING");
         requireThat(BigInt(x.poolT) === 0n && BigInt(x.poolV) === 0n, "V1_POOL");
-        requireThat([0, 3].includes(o.vaults[c.factories[0].vaults[0].address].phase), "MAIN_VAULT_PHASE");
+        requireThat(o.vaults[c.factories[0].vaults[0].address].phase === 3, "MAIN_VAULT_PHASE");
     }
     return { status: "PASS", scope: "reviewed-input validation; RPC recheck required for release output", deployable: c.mode === "release", simulationOnly: c.mode === "simulation", block: o.blockNumber, blockHash: o.blockHash };
 }
@@ -317,7 +327,7 @@ export function expectations(c, inventory, artifacts, stage) {
         return { proxy, owner: !post && ((c.testnetRecovery?.e2Unavailable && name === "factory") || (c.testnetRecovery?.incompleteT3 && name !== "factory")) ? c.observed.proxies[proxy].owner : d.timelock, implementation, implementationHash, guarded, paused: false };
     });
     const beacons = c.factories.map(f => ({ factory: f.address, beacon: f.beacon, implementation: post ? c.implementations.vault : f.legacyImplementation, implementationHash: post ? keccak256(artifacts.vault.deployedBytecode) : f.legacyRuntimeHash, hardened: post || (c.chainId === 1672 && f === c.factories[1] && ["B", "D"].includes(c.p1Case)), creationClosed: post && c.chainId === 1672 && f === c.factories[1] }));
-    const vaults = c.factories.flatMap(f => f.vaults.map(v => ({ vault: v.address, factory: f.address, round: BigInt(c.observed.vaults[v.address].round), termsHash: c.observed.vaults[v.address].termsHash, phase: (post && v.endState === "RETIRED") || (!post && c.chainId === 1672 && v.endState === "RETIRED" && ["A", "C"].includes(c.p1Case ?? "A")) ? 3 : c.observed.vaults[v.address].phase, hardened: post, retired: post && v.endState === "RETIRED", governed: v.endState === "GOVERNED" })));
+    const vaults = c.factories.flatMap(f => f.vaults.map(v => ({ vault: v.address, factory: f.address, round: BigInt(c.observed.vaults[v.address].round), termsHash: c.observed.vaults[v.address].termsHash, phase: (post && v.endState === "RETIRED") || (!post && c.chainId === 1672 && v.endState === "RETIRED" && ["A", "C"].includes(c.p1Case ?? "A")) ? 3 : c.observed.vaults[v.address].phase, hardened: post, retired: post && v.endState === "RETIRED", governed: v.endState === "GOVERNED", residualRecovery: !!residualVault(c, v) })));
     return { chainId: BigInt(c.chainId), timelock: d.timelock, timelockHash: keccak256(artifacts.timelock.deployedBytecode), minDelay: BigInt(c.policy.minDelay), gov: a.gov, can: a.can, guardian: a.guardian, ops: a.ops, deployer: a.deployer, proxyAdmin: d.proxyAdmin, proxyAdminHash: keccak256(artifacts.proxyAdmin.deployedBytecode), inventoryHash: roleDigest(roles), roles, proxies, beacons, vaults };
 }
 export function coreExpectation(c) { const d = c.addresses, a = c.actors, x = c.observed.core; return { oracle: d.oracle, stpros: d.stpros, bridge: d.bridge, distributor: d.distributor, asset: d.asset, reporter: c.chainId === 1672 ? a.reporter : x.reporter, treasury: c.chainId === 1672 ? a.treasury : x.treasury, keeper: a.keeper, commissionPpm: BigInt(c.chainId === 1672 ? 100000 : x.commissionPpm), aprPpm: BigInt(c.policy.maxAprPpm), maxUpdateAmount: BigInt(c.chainId === 1672 ? c.policy.maxUpdateAmount : x.maxUpdateAmount), interval: BigInt(c.chainId === 1672 ? c.policy.updateInterval : Math.max(x.interval, 3600)), unbondingPeriod: BigInt(x.unbondingPeriod), maxWithdrawCount: BigInt(x.maxWithdrawCount), mainnetV1: c.chainId === 1672, destinations: c.destinations }; }

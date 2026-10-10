@@ -46,7 +46,7 @@ Mainnet primary sequence:
 3. H, **one atomic Safe MultiSend**: PA ownership to TL; StPROS/Oracle/main Factory ownership to TL; vault 001 grants TL ADMIN and revokes all old roles, GOV renounces ADMIN last; schedule U; `assertHandoff` including pending U.
 4. U, **one atomic Timelock batch** after 48h: Oracle V1 upgradeAndCall; immediately StPROS V1 upgradeAndCall; main Factory migration; main beacon upgrade; vault 001 OPS grant; Factory_test migration; B2 upgrade; test-vault retirement; Factory_test closeCreation; `assertR4` last.
 
-For B/D, approved fallback H item 0 migrates Factory_test before PA handoff, and U omits its repeated migration. C/D preserve inventoried stale test-vault roles as explicitly accepted, inert roles after retirement. H checks SETTLED for A/C, and legacy phase for B/D. The governed vault keeps its round/terms; retired vault safety depends on final SETTLED/retired/backing, not freezing terms an owner-accepted stale admin could change during H→U.
+For B/D, approved fallback H item 0 migrates Factory_test before PA handoff, and U omits its repeated migration. C/D preserve inventoried stale test-vault roles as explicitly accepted, inert roles after retirement. The mainnet governed vault must always be SETTLED. For the separate retirement target, H retains the reviewed phase in non-residual cases; owner-approved C/D residuals require explained transitions rather than a frozen phase. The governed vault keeps its round/terms; retired vault safety depends on final SETTLED/retired/backing, not freezing terms an owner-accepted stale admin could change during H→U.
 
 Testnet: T-0 inventories all 15 vaults. T-1 E2 revokes every old role, grants TL ADMIN only for index 14, then renounces E2 ADMIN on each. T-2 E2 transfers Factory; T-3 E1 transfers four core owners; T-4 E1 transfers PA last. T-5 GOV schedules U_t and calls the handoff assertion separately. U_t migrates Oracle V3 with explicit canonical asset, StPROS V2, BridgeVault, SlpDistributor and Factory; upgrades the beacon; grants OPS at index 14 and retires the other 14; full assertR4 is last. Approved E2-unavailable recovery retires all 15 and uses the distinctly named `assertTestnetRecoveryHandoff`; stale roles remain visible and inert after U_t.
 
@@ -137,3 +137,54 @@ read-only RPC responses remain explicit trust assumptions. Large account sets or
 persistent provider slowness can still fail the final freshness gate. Missing
 release proof inputs and future full-fork/transaction-frame preservation/FS-6 gates
 remain release blockers. No new deployment or release approval is granted here.
+
+## Authenticated release inventory and remediation checks
+
+The read-only release checkpoint replays all Timelock `CallScheduled`,
+`CallSalt`, `CallExecuted` and `Cancelled` events from the authenticated
+creation-spanning archive and its gap-free incremental journal. It reconstructs
+single/batch operation IDs, cancellation/re-scheduling and completion, and checks
+on-chain timestamps. The reviewed plan permits no outstanding action-bearing operation before
+scheduling, exactly the frozen U ID at H/execution, and none after U; U must be
+recorded executed after its delay. A removed proposer does not remove its queued
+operations. Unrelated pending action-bearing operations require review and cancellation before
+this release plan can pass. ReleaseAssertions does not enumerate operations.
+
+Reporter and keeper cannot be GOV, CAN or Timelock. Testnet uses the reporter
+preserved from the authenticated Oracle configuration, not an unused replacement
+input. The R4 atomic assertion independently checks this separation. GC-02 C requires OPS distinct from GOV/CAN/Timelock and its reviewed signer-control set disjoint from GOV/CAN. OPS may share the same reviewed GRD Safe. Alias configurations must agree; unproven contract/delegated signer control is INCOMPLETE.
+
+`VaultCheck.residualRecovery` was added by the preceding remediation, changing
+the original frozen ABI. This governance closure retains that calldata shape. Only approved mainnet
+C/D residual retirement targets or testnet E2-unavailable retirement targets may
+set it. GOVERNED vaults cannot use it. Historical state remains strictly checked;
+H permits reconciled residual phase/round/terms transitions, and U still requires
+terminal SETTLED retirement, backing, canonical identity and creation closure
+where specified. New assertion artifacts and newly reviewed H/U calldata are
+required; an already scheduled operation cannot be rewritten.
+
+GC-01 A is now approved: the mainnet GOVERNED historical Vault must be
+SETTLED at input, current pre-schedule, actual H, execution checkpoint and final
+U. OPEN/LOCKED/SETTLE_PROPOSED are rejected, even if a caller supplies matching
+expected phase calldata. Mainnet `Common.vaults` keeps the builder's canonical
+order: GOVERNED first, retirement target second; atomic assertions also enforce
+that classification so clearing a flag cannot disable the phase/round/terms guards.
+Historical rounds, residual recovery, testnet phases
+and the Vault business state machine are unchanged. No arbitrary timing buffer.
+
+GC-03 B is now approved: `actionBearingCoverage: PASS` means creation-to-current
+coverage of operations containing at least one call, under the independently
+reviewed archive/RPC assumptions and pinned runtime. `literalAllOperationIds:
+NOT_CLAIMED` remains explicit. `dependencyVerification` records authoritative
+state for every referenced predecessor, including silent empty IDs. Pure parsing
+returns `UNATTESTED`; only the authenticated checkpoint binds coverage and the
+source runtime. Release CLI checks these scoped statuses and the current history
+anchor; it no longer requires impossible global empty-ID discovery. Interleaved
+nested executions are accumulated by operation, not contiguous event fragments.
+Empty CallSalt/Cancelled metadata is retained without inventing silent history.
+A whole omitted operation cannot be discovered by hashing other supplied rows.
+
+The U predecessor is always zero. Waiting and Ready actions with unresolved
+predecessors still count as outstanding. Any fresh artifact/address or policy
+input change needs a newly reviewed candidate; never mutate an already scheduled
+operation or rebuild its calldata from a post-H state.

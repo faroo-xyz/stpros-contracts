@@ -34,7 +34,7 @@ The performance policy packs into Factory slot 4: timelock bytes 0–19, creatio
 
 ## Approved governance design — not attested deployment state
 
-Mainnet Timelock minimum delay 48 hours; testnet 300 seconds. Use Timelock-first P-1 -> H -> U, GOV-only executor, independent CAN with disjoint signers and threshold >=3. GRD is a fast Safe (2-of-4 recommended); OPS is separate from Timelock and may initially use the reviewed GRD Safe. Remove deployer from GOV before release. Permanently retire Factory_test and its legacy vault. Testnet vault[14] is GOVERNED; other 14 are RETIRED. Do not pause V1 during H->U, because native claims would be interrupted. No live Safes, Timelocks or release transactions are created by the policy implementation task.
+Mainnet Timelock minimum delay 48 hours; testnet 300 seconds. The mainnet governed historical Vault must be effective SETTLED at reviewed input, fresh pre-schedule, atomic H, execution checkpoint and final U (GC-01 A, conversation-approved 2026-10-10). This does not restrict approved residual-retirement or testnet phases or change the Vault state machine. Use Timelock-first P-1 -> H -> U, GOV-only executor, independent CAN with disjoint signers and threshold >=3. GRD is a fast Safe (2-of-4 recommended); OPS is separate from Timelock, GOV and CAN, with reviewed signer/control sets disjoint from GOV/CAN; it may use the same reviewed GRD Safe. Remove deployer from GOV before release. Permanently retire Factory_test and its legacy vault. Testnet vault[14] is GOVERNED; other 14 are RETIRED. Do not pause V1 during H->U, because native claims would be interrupted. No live Safes, Timelocks or release transactions are created by the policy implementation task.
 
 ## Deadline economics
 
@@ -47,3 +47,16 @@ These consequences are approved policy. Signed counterparty agreement remains an
 Actual expected gross APR and selected bounded operational APR; absolute cap/reporting cadence; approved reporter identity/suitability; reviewed Treasury Safe address/code/owners/threshold; GOV/CAN/GRD/OPS Safe identities and signer separation; actual Timelock delays/roles/ownership; deployer removal; Factory/Vault runtime codehash and constructor binding; team authority for migration/retirement; counterparty agreement; and the planned release/fork/monitoring checks. None is inferred, fabricated or declared satisfied here.
 
 Focused test, compilation, storage/ABI/size results are reported in the research repository. Full CI, formal assurance and public-chain release rehearsal remain outside this task. Historical snapshots and deployment records are unchanged. Independent review is required before any commit or release action is separately authorized.
+
+## Release operation inventory (GC-03 B, approved 2026-10-10)
+
+Inventory every successful Timelock schedule with at least one target call,
+including zero-value and empty-calldata calls. Bind ID, shape, order, calldata,
+value, predecessor, salt, delay and lifecycle to the exact OZ 5.6.1 source/runtime
+and complete canonical history; reconcile current timestamps and referenced
+predecessor states. Outstanding includes Waiting and Ready regardless of
+predecessor satisfaction. Pre-schedule none; H/execution only frozen U with zero
+predecessor; post-U none and U Done. Literal discovery of all event-silent empty
+IDs is not claimed. Empty completion can satisfy a visible successor dependency
+and receive attached native value, but cannot hide the successor schedule.
+Archive/RPC completeness assumptions and independent release approvals remain.

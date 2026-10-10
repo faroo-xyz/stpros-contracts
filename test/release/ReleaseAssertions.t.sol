@@ -62,7 +62,7 @@ contract ReleaseAssertionsTest is R4CoreTest {
             (bool ok,bytes memory data)=beacon.staticcall(abi.encodeWithSignature("implementation()"));require(ok);
             address implementation=post?vi:abi.decode(data,(address));
             e.beacons[i]=ReleaseAssertions.BeaconCheck(fs[i],beacon,implementation,implementation.codehash,post,post&&i==1);
-            e.vaults[i]=ReleaseAssertions.VaultCheck(vs[i],fs[i],1,checks.roundTermsHash(vs[i]),3,post,post&&i==1,i==0);
+            e.vaults[i]=ReleaseAssertions.VaultCheck(vs[i],fs[i],1,checks.roundTermsHash(vs[i]),3,post,post&&i==1,i==0,false);
         }
         e.roles=new ReleaseAssertions.RoleCheck[](9);
         e.roles[0]=ReleaseAssertions.RoleCheck(address(tl),bytes32(0),address(tl),true);

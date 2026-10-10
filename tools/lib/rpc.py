@@ -100,12 +100,37 @@ class Client:
         if method not in READ_METHODS:
             raise RpcError(f"method {method} is not an allowed read-only method")
 
+    @staticmethod
+    def _responses(response, expected_ids):
+        """Validate the entire response before accepting results or retrying errors."""
+        if not isinstance(response, list):
+            raise RpcError("invalid JSON-RPC response collection")
+        seen = set()
+        for item in response:
+            if not isinstance(item, dict) or item.get("jsonrpc") != "2.0":
+                raise RpcError("invalid JSON-RPC envelope")
+            rid = item.get("id")
+            if type(rid) is not int or rid not in expected_ids or rid in seen:
+                raise RpcError("wrong, unknown or duplicate JSON-RPC response id")
+            seen.add(rid)
+            if ("result" in item) == ("error" in item):
+                raise RpcError("ambiguous or missing JSON-RPC result/error")
+            if "error" in item:
+                error = item["error"]
+                if not isinstance(error, dict) or type(error.get("code")) is not int or not isinstance(error.get("message"), str):
+                    raise RpcError("invalid JSON-RPC error")
+        if seen != set(expected_ids):
+            raise RpcError("missing JSON-RPC responses")
+        return response
+
     # -- single call ---------------------------------------------------
     def call(self, method, params):
         self._check_method(method)
         delay = 1.0
         for attempt in range(self.max_retries + 1):
-            r = self._post({"jsonrpc": "2.0", "id": self._next_id(), "method": method, "params": params})
+            rid = self._next_id()
+            r = self._post({"jsonrpc": "2.0", "id": rid, "method": method, "params": params})
+            self._responses([r], {rid})
             if "error" not in r:
                 return r["result"]
             err = r["error"]
@@ -126,6 +151,8 @@ class Client:
         """
         for m, _ in calls:
             self._check_method(m)
+        if not calls:
+            return []
         results = [None] * len(calls)
         pending = list(range(len(calls)))
         delay = 1.0
@@ -137,21 +164,10 @@ class Client:
                 ids[rid] = i
                 body.append({"jsonrpc": "2.0", "id": rid, "method": calls[i][0], "params": calls[i][1]})
             resp = self._post(body)
-            if isinstance(resp, dict):  # whole batch rejected
-                err = resp.get("error", {})
-                if err.get("code") in RETRYABLE_RPC_CODES and attempt < self.max_retries:
-                    self.retries += 1
-                    time.sleep(delay)
-                    delay = min(delay * 2, 60)
-                    continue
-                raise RpcError(f"batch rejected: {err}", code=err.get("code"))
+            self._responses(resp, ids)
             failed = []
-            seen = set()
             for item in resp:
-                i = ids.get(item.get("id"))
-                if i is None:
-                    continue
-                seen.add(i)
+                i = ids[item["id"]]
                 if "error" in item:
                     code = item["error"].get("code")
                     if code in RETRYABLE_RPC_CODES:
@@ -162,10 +178,11 @@ class Client:
                         raise e
                 else:
                     results[i] = item["result"]
-            failed += [i for i in pending if i not in seen]
             if not failed:
                 return results
             pending = failed
+            if attempt == self.max_retries:
+                break
             self.retries += 1
             if self.verbose:
                 print(f"  [rpc {self.chain}] {len(failed)} batch items retried in {delay:.0f}s", flush=True)

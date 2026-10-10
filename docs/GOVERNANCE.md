@@ -7,13 +7,13 @@ The research repository's frozen audit roadmap and R1-final + A1 amendments are 
 | GOV | Sole Timelock proposer and executor; mainnet Safe 3/5 after signer rotation |
 | CAN | Independent Safe, threshold at least 3; canceller, never proposer/executor |
 | GRD | Independent fast-response guardian Safe; pause only, cannot unpause or upgrade |
-| OPS | Vault operating role; may share GRD; never Timelock or counterparty/fee recipient |
+| OPS | Vault operating role; may share the same reviewed GRD Safe; never GOV, CAN, Timelock or counterparty/fee recipient |
 | Timelock | Owns shared recorded OZ v4 ProxyAdmin and all core/Factory proxies; LOSS authority |
 | Factory | Owns its existing beacon; only Timelock can upgrade it |
 | Treasury | Reviewed Safe receiving mainnet future-yield commission |
 | Deployer | No retained Timelock role or Safe signer authority after setup |
 
-Mainnet delay is exactly 172,800 seconds; testnet is exactly 300 seconds. Timelock is its own sole default admin, GOV has proposer/executor/canceller, CAN has canceller, and there is no open executor. GOV/CAN/GRD signer sets must be disjoint. The release config supplies actual Safe identities, singleton hashes, owners, thresholds, nonce, empty module lists and zero guard; read-only preflight checks them. Testnet designated multisig alternatives require a separate reviewed adapter; this implementation deliberately supports the stricter Safe profile for release output. Simulations may use labelled synthetic actors.
+Mainnet delay is exactly 172,800 seconds; testnet is exactly 300 seconds. Timelock is its own sole default admin, GOV has proposer/executor/canceller, CAN has canceller, and there is no open executor. GOV/CAN/GRD signer sets must be disjoint. OPS must be address- and signer-control-independent of GOV/CAN; OPS==GRD is allowed only with the same reviewed Safe configuration. Distinct Safe addresses do not establish independent controllers. Contract/delegated signers with unproven control evidence fail with `INCOMPLETE_SAFE_SIGNER_CONTROL`; the current verifier does not guess their controlling keys. The release config supplies actual Safe identities, singleton hashes, owners, thresholds, nonce, empty module lists and zero guard; read-only preflight checks them. Testnet designated multisig alternatives require a separate reviewed adapter; this implementation deliberately supports the stricter Safe profile for release output. Simulations may use labelled synthetic actors.
 
 `ReleaseAssertions` has no storage, privileged function, delegatecall, external state-changing call or administrator. Every function is view/pure. It checks reviewed expectations by STATICCALL. Proxy admin/implementation checks go through the **recorded OZ v4 ProxyAdmin** public `getProxyAdmin`/`getProxyImplementation` wrappers. It never pretends its own SLOAD can inspect another contract. Initializer versions are checked with pinned RPC storage reads at the OZ namespaced initializer slot.
 
@@ -24,3 +24,16 @@ The product policy is unchanged: mainnet launch commission 100,000 ppm on future
 Legacy direct Oracle/StPROS upgrades, beacon upgrades and generic ownership-handoff tasks now refuse before touching the runtime. Previously deprecated initializer/setter tasks still refuse. Release builders never produce `changeProxyAdmin`, `renounceOwnership`, an implementation-only core upgrade, or an unguarded initializer. Other ordinary administrative tasks are not a release workflow; only reviewed Timelock calldata is authorized for an R4 release.
 
 The RPC checks distinguish the approved historical block from the current chain head. They independently bind every selected historical target (including Oracle and testnet BridgeVault/SlpDistributor) to the chain-specific registry; mainnet fresh BridgeVault/SlpDistributor require separate reviewed deployment records. Standalone release builders enforce that registry binding too. Current proxy/Beacon code and upgrade/admin history are checked in addition to getters. No atomic assertion was moved off-chain during review closure; the Solidity refactor preserves its public ABI and only consolidates repeated Vault asset reads.
+
+## Approved governance closure (2026-10-10)
+
+The conversation-approved GC-01 A / GC-02 C / GC-03 B amendment narrows mainnet
+governed-Vault handoff to effective SETTLED throughout reviewed input, fresh
+pre-schedule, H, execution checkpoint and final U. Residual/testnet rules and
+Vault economics remain unchanged. Timelock coverage is explicitly all
+**action-bearing** operations (one or more target calls) plus referenced
+predecessor states; global event-silent empty-ID discovery is not claimed.
+Pending includes Waiting/Ready actions even with blocked predecessors. Pre set
+empty, H exactly frozen U with zero predecessor, post set empty and U Done.
+The source proof, complete authenticated archive/journal and pinned OZ runtime
+are prerequisites; a parser alone does not prove whole-operation completeness.

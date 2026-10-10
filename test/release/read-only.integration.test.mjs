@@ -174,6 +174,7 @@ async function handoffFixture(chain = 1672) {
         if (old !== r.expected)
             f.log(f.current, r.target, keccak256(stringToHex(`${r.expected ? "RoleGranted" : "RoleRevoked"}(bytes32,address,address)`)), [r.role, r.account, f.c.actors.gov], []);
     }
+    f.operationHistory();
     f.current.safes.gov.nonce = 1;
     f.evidence = { operationId: buildU(f.c, f.inventory, f.artifacts).operation.id, forkReference: "SIMULATED-FRESH-FORK", freshFork: "PASS", fs6: "PASS", blockNumber: f.head.number, blockHash: f.head.hash, uGas: 1500000, nonces: { gov: 1, can: 0 } };
     return f;
@@ -216,6 +217,7 @@ test("execution allows reconciled deposits during mandatory delay with original 
 });
 async function r4Fixture(chain = 1672) {
     const f = await handoffFixture(chain);
+    f.operationHistory(true); f.now = f.head.timestamp + 1;
     const { expectations } = await import("../../tasks/release/core.mjs"), e = expectations(f.c, f.inventory, f.artifacts, "R4");
     for (const p of e.proxies) {
         Object.assign(f.current.observed.proxies[p.proxy], { owner: p.owner, implementation: p.implementation, version: 4 });
@@ -242,7 +244,7 @@ test("approved testnet T-3 incomplete recovery verifies actual old owners and re
  const f=await handoffFixture(688689);f.c.testnetRecovery={incompleteT3:true,ownerApproval:"SIMULATED-EXISTING-RECOVERY"};
  for(const key of ["oracle","stpros","bridge","distributor"])f.current.observed.proxies[f.c.addresses[key]].owner=f.c.actors.legacyCoreOwner;
  const {testnetHandoff}=await import("../../tasks/release/core.mjs"),plan=testnetHandoff(f.c,f.inventory,f.artifacts);assert.equal(plan.stages.find(s=>s.stage==="T-3").transactions.length,0);
- f.evidence.operationId=buildU(f.c,f.inventory,f.artifacts).operation.id;
+ f.evidence.operationId=f.operationHistory();
  assert.equal((await verifyCheckpoint(f.c,f.inventory,f.artifacts,f.rpc,"H",{nowSeconds:f.now,executionEvidence:f.evidence})).status,"PASS");
  f.current.observed.proxies[f.c.addresses.oracle].owner=address(9999);await assert.rejects(verifyCheckpoint(f.c,f.inventory,f.artifacts,f.rpc,"H",{nowSeconds:f.now,executionEvidence:f.evidence}),/OWNER_DRIFT/);
 });
@@ -288,7 +290,9 @@ test("post-R4 same-owner request is unbound, partial payout to another receiver 
     const f = await r4Fixture(688689), d = f.c.addresses, u = address(900), v = address(901);
     f.deposit();
     f.log(f.current,d.stpros,TRANSFER,[u,ZERO],[4]);
+    f.log(f.current,d.oracle,keccak256(stringToHex("PoolUpdated(address,uint256,uint256,bool)")),[d.asset],[6,6,0]);
     f.log(f.current,d.stpros,WITHDRAW,[u,u,u],[4,4]);
+    for(const l of f.current.logs.slice(-3)) l.transactionHash=hash(991000);
     f.log(f.current,d.stpros,CLAIM,[u,v],[2]);
     Object.assign(f.current.observed.core,{supply:"6",poolT:"6",poolV:"6",queued:"4",completed:"2"});
     f.current.balances[d.stpros][u]="6";

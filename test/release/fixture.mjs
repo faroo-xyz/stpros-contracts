@@ -16,6 +16,8 @@ export function fixture(chainId=1672) {
   artifacts[name]={deployedBytecode:runtime,immutableReferences:{},abi:name==="assertions"?assertions.abi:[]};
   code[implementations[name]??addresses[name]]=runtime;
  }
+ const timelock=JSON.parse(readFileSync(new URL("../fixtures/r4/TimelockController.json",import.meta.url)));
+ artifacts.timelock={deployedBytecode:timelock.deployedBytecode,abi:timelock.abi,immutableReferences:timelock.immutableReferences};code[addresses.timelock]=timelock.deployedBytecode;
  artifacts.factory.deployedBytecode=`0x7f${"00".repeat(32)}00`;
  artifacts.factory.immutableReferences={"0":[{start:1,length:32}]};
  code[implementations.factory]=`0x7f${implementations.vault.slice(2).padStart(64,"0")}00`;

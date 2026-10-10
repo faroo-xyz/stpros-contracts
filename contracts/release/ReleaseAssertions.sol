@@ -47,6 +47,7 @@ contract ReleaseAssertions {
         bool hardened;
         bool retired;
         bool governed;
+        bool residualRecovery;
     }
 
     struct Common {
@@ -140,6 +141,11 @@ contract ReleaseAssertions {
             "TOPOLOGY_COVERAGE",
             address(0)
         );
+        // Canonical mainnet ordering is governed Vault, then retirement target.
+        // A caller must not disable its SETTLED/round/terms guards by clearing a flag.
+        if (e.chainId == 1672) {
+            _require(e.vaults[0].governed && !e.vaults[1].governed, "MAINNET_VAULT_CLASS", address(0));
+        }
         for (uint256 i; i < e.proxies.length; ++i) {
             for (uint256 j; j < i; ++j) {
                 _require(e.proxies[i].proxy != e.proxies[j].proxy, "DUPLICATE_PROXY", e.proxies[i].proxy);
@@ -187,7 +193,7 @@ contract ReleaseAssertions {
             address(0)
         );
         _require(
-            e.gov != e.can && e.gov != e.guardian && e.can != e.guardian && e.ops != e.timelock
+            e.gov != e.can && e.gov != e.guardian && e.can != e.guardian && e.ops != e.timelock && e.ops != e.gov && e.ops != e.can
                 && e.guardian != e.timelock,
             "ACTOR_SEPARATION",
             e.timelock
@@ -294,10 +300,18 @@ contract ReleaseAssertions {
             // Retired vaults may have had stale legacy admins in owner-approved recovery cases.
             // Their safety condition is terminal retirement + backing, not frozen pre-H terms.
             if (v.governed) {
+                if (e.chainId == 1672)
+                    _require(_uint(v.vault, abi.encodeWithSignature("phase()")) == 3, "MAIN_VAULT_SETTLED", v.vault);
                 _require(_uint(v.vault, abi.encodeWithSignature("roundIndex()")) == v.round, "VAULT_ROUND", v.vault);
                 _require(roundTermsHash(v.vault) == v.termsHash, "VAULT_TERMS", v.vault);
             }
-            _require(_uint(v.vault, abi.encodeWithSignature("phase()")) == v.phase, "VAULT_PHASE", v.vault);
+            _require(!v.residualRecovery || !v.governed, "RESIDUAL_GOVERNED", v.vault);
+            // Explicitly reviewed residual authority remains active until retirement.
+            // H cannot freeze its phase; U must still prove terminal SETTLED retirement.
+            if (!v.residualRecovery || v.hardened)
+                _require(_uint(v.vault, abi.encodeWithSignature("phase()")) == v.phase, "VAULT_PHASE", v.vault);
+            if (v.residualRecovery && v.hardened)
+                _require(v.retired && v.phase == 3, "RESIDUAL_RETIREMENT", v.vault);
             address asset = _addr(v.vault, abi.encodeWithSignature("asset()"));
             if (canonicalShare != address(0)) _require(asset == canonicalShare, "VAULT_ASSET", v.vault);
             uint256 managed = _uint(v.vault, abi.encodeWithSignature("totalManagedAssets()"));
@@ -313,6 +327,12 @@ contract ReleaseAssertions {
     }
 
     function _core(Common calldata e, Core calldata c) private view {
+        _require(
+            c.reporter != e.gov && c.reporter != e.can && c.reporter != e.timelock
+                && c.keeper != e.gov && c.keeper != e.can && c.keeper != e.timelock,
+            "OPERATIONAL_AUTHORITY",
+            e.timelock
+        );
         _require(
             c.oracle != address(0) && c.stpros != address(0) && c.bridge != address(0) && c.distributor != address(0)
                 && c.asset != address(0),

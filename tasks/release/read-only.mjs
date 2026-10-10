@@ -1,3 +1,6 @@
+import { residualReads, termNames, termsHash, residualTopics, replayResidual } from "./residual-replay.mjs";
+import { replayPool, poolTopics } from "./pool-replay.mjs";
+import { replayOperations, operationTopics, checkOperationPlan, PINNED_TIMELOCK_RUNTIME_HASH } from "./timelock-history.mjs";
 import { historySession } from "./history.mjs";
 import { encodeFunctionData, decodeFunctionResult, decodeAbiParameters, parseAbi, keccak256, stringToHex } from "viem";
 import { requireThat, addr, SLOTS, ZERO, canonical, exactSet, expectations, coreExpectation, buildU, verifyRuntime, residualVault, isTestnetRecovery, validateConfig, validateInventory } from "./core.mjs";
@@ -5,9 +8,9 @@ const READS = parseAbi([
     "function bridgeVault() view returns(address)", "function totalManagedAssets() view returns(uint256)", "function owner() view returns(address)", "function guardian() view returns(address)", "function pendingOwner() view returns(address)", "function getMinDelay() view returns(uint256)", "function hasRole(bytes32,address) view returns(bool)", "function getAllProxies() view returns(address[])", "function beacon() view returns(address)", "function implementation() view returns(address)", "function balanceOf(address) view returns(uint256)", "function totalSupply() view returns(uint256)", "function paused() view returns(bool)",
     "function queuedWithdrawal() view returns(uint256)", "function completedWithdrawal() view returns(uint256)", "function withdrawalHead(address) view returns(uint256)", "function withdrawalTail(address) view returns(uint256)", "function maxRedeem(address) view returns(uint256)",
     "function getOwners() view returns(address[])", "function getThreshold() view returns(uint256)", "function nonce() view returns(uint256)", "function getModulesPaginated(address,uint256) view returns(address[],address)", "function getStorageAt(uint256,uint256) view returns(bytes)",
-    "function oracle() view returns(address)", "function weth() view returns(address)", "function vTokenAddresses(address) view returns(bool)", "function keeper() view returns(address)", "function getSlps() view returns(address[])", "function roundTermsHash(address) view returns(bytes32)", "function tokenToVToken(address) view returns(address)", "function asset() view returns(address)", "function poolInfo(address) view returns(uint256,uint256)", "function totalCanWithdrawAmount() view returns(uint256)", "function unbondingPeriod() view returns(uint256)", "function maxWithdrawCount() view returns(uint256)", "function slp() view returns(address)", "function commissionAccount() view returns(address)", "function commissionRatePpm() view returns(uint256)", "function maxUpdateAmount() view returns(uint256)", "function updateInterval() view returns(uint256)", "function phase() view returns(uint8)", "function roundIndex() view returns(uint256)", "function factory() view returns(address)", "function isFactoryVault(address) view returns(bool)", "function isOperationDone(bytes32) view returns(bool)", "function lastUpdateAt(address) view returns(uint256)"
+    "function oracle() view returns(address)", "function weth() view returns(address)", "function vTokenAddresses(address) view returns(bool)", "function keeper() view returns(address)", "function getSlps() view returns(address[])", "function roundTermsHash(address) view returns(bytes32)", "function tokenToVToken(address) view returns(address)", "function asset() view returns(address)", "function poolInfo(address) view returns(uint256,uint256)", "function totalCanWithdrawAmount() view returns(uint256)", "function unbondingPeriod() view returns(uint256)", "function maxWithdrawCount() view returns(uint256)", "function slp() view returns(address)", "function commissionAccount() view returns(address)", "function commissionRatePpm() view returns(uint256)", "function maxUpdateAmount() view returns(uint256)", "function updateInterval() view returns(uint256)", "function phase() view returns(uint8)", "function roundIndex() view returns(uint256)", "function factory() view returns(address)", "function isFactoryVault(address) view returns(bool)", "function getTimestamp(bytes32) view returns(uint256)", "function isOperationDone(bytes32) view returns(bool)", "function lastUpdateAt(address) view returns(uint256)"
 ]);
-const allowed = new Set(["eth_chainId", "eth_getBlockByNumber", "eth_getCode", "eth_getStorageAt", "eth_call", "eth_getLogs", "eth_estimateGas"]);
+const allowed = new Set(["eth_chainId", "eth_getBlockByNumber", "eth_getCode", "eth_getStorageAt", "eth_call", "eth_getLogs", "eth_estimateGas", "eth_getTransactionByHash"]);
 const hex = n => `0x${BigInt(n).toString(16)}`;
 const topic = s => keccak256(stringToHex(s));
 export function readOnlyRpc(url, simulation = false, localOnly = false) {
@@ -162,11 +165,13 @@ async function checkSafes(c, rpc, block, checkNonce) {
     if (c.mode !== "release")
         return;
     const call = reader(rpc, block);
-    await Promise.all(Object.entries(c.review.safes).map(async ([role, s]) => {
+    const unique = [...new Map(Object.entries(c.review.safes).map(([role, s]) => [s.address, [role, s]])).values()];
+    await Promise.all(unique.map(async ([role, s]) => {
         requireThat(keccak256(await rpc("eth_getCode", [s.address, block])) === s.runtimeHash, "SAFE_CODEHASH", role);
         const singleton = await rpc("eth_getStorageAt", [s.address, "0x0", block]);
         requireThat(`0x${singleton.slice(-40)}` === s.singleton && keccak256(await rpc("eth_getCode", [s.singleton, block])) === s.singletonHash, "SAFE_SINGLETON");
         exactSet((await call(s.address, "getOwners")).map(a => a.toLowerCase()), s.owners, "SAFE_OWNERS");
+        for (const owner of s.owners) requireThat(await rpc("eth_getCode", [owner, block]) === "0x", "INCOMPLETE_SAFE_SIGNER_CONTROL", `${role}: contract/delegated signer requires independently established control evidence`);
         requireThat(await call(s.address, "getThreshold") === BigInt(s.threshold), "SAFE_THRESHOLD");
         if (checkNonce)
             requireThat(await call(s.address, "nonce") === BigInt(s.nonce), "SAFE_NONCE");
@@ -184,7 +189,7 @@ async function checkProxy(rpc, block, address, expected, version) {
     requireThat((init & ((1n << 64n) - 1n)) === BigInt(version) && ((init >> 64n) & 255n) === 0n, "INITIALIZER_VERSION", address);
 }
 async function observeState(c, inventory, rpc, block, reviewed, expectedRoles, checkNonce = true) {
-    const call = reader(rpc, block);
+    const call = reader(rpc, block), residualStates = {};
     await Promise.all(Object.entries(c.observed.code).map(async ([address, expected]) => requireThat(await rpc("eth_getCode", [address, block]) === expected, "CODE_DRIFT", address)));
     for (const [address, p] of Object.entries(c.observed.proxies)) {
         await checkProxy(rpc, block, address, p, p.version);
@@ -204,10 +209,13 @@ async function observeState(c, inventory, rpc, block, reviewed, expectedRoles, c
         requireThat(canonical((await call(f.address, "getAllProxies")).map(a => a.toLowerCase())) === canonical(state.vaults), "VAULT_DISCOVERY_DRIFT");
         for (const v of f.vaults) {
             const x = c.observed.vaults[v.address];
-            requireThat(Number(await call(v.address, "phase")) === x.phase && await call(v.address, "roundIndex") === BigInt(x.round), "VAULT_STATE_DRIFT");
+            const phase = Number(await call(v.address, "phase")), round = await call(v.address, "roundIndex");
+            if (c.chainId === 1672 && v.endState === "GOVERNED") requireThat(phase === 3, "MAIN_VAULT_PHASE");
+            if (reviewed || !residualVault(c, v)) requireThat(phase === x.phase && round === BigInt(x.round), "VAULT_STATE_DRIFT");
+            if (residualVault(c, v)) residualStates[v.address] = await residualState(c, rpc, block, v.address, phase, round);
             requireThat(await call(f.address, "isFactoryVault", [v.address]), "VAULT_REGISTRY");
             requireThat((await call(v.address, "factory")).toLowerCase() === f.address && (await call(v.address, "asset")).toLowerCase() === c.addresses.stpros, "VAULT_CANONICAL");
-            requireThat(await call(c.addresses.assertions, "roundTermsHash", [v.address]) === x.termsHash, "VAULT_TERMS_DRIFT");
+            if (reviewed || !residualVault(c, v)) requireThat(await call(c.addresses.assertions, "roundTermsHash", [v.address]) === x.termsHash, "VAULT_TERMS_DRIFT");
         }
     }
     const roles = await scanRoles(c, inventory, rpc, block);
@@ -266,7 +274,16 @@ async function observeState(c, inventory, rpc, block, reviewed, expectedRoles, c
             requireThat(String(await call(d.oracle, name)).toLowerCase() === String(x[field]).toLowerCase(), "ORACLE_CONFIG_DRIFT", field);
     // Initial/preschedule nonce is the independently reviewed signing nonce, at both blocks.
     await checkSafes(c, rpc, block, checkNonce);
-    return { economic, core, vaultAssets, roles };
+    return { economic, core, vaultAssets, roles, residualStates };
+}
+async function residualState(c, rpc, block, target, phase, round) {
+    const call = reader(rpc, block);
+    const terms = await Promise.all(termNames.map(n => call(target, n, [], residualReads)));
+    requireThat(termsHash(terms) === await call(c.addresses.assertions, "roundTermsHash", [target]), "RESIDUAL_TERMS_HASH");
+    const mode = await call(target, "settleMode", [], residualReads), funded = await call(target, "profitFunded", [], residualReads), amount = await call(target, "settleAmount", [], residualReads);
+    const managed = await call(target, "totalManagedAssets");
+    requireThat(await call(c.addresses.stpros, "balanceOf", [target]) >= managed + (phase === 2 && mode === 0 && funded ? amount : 0n), "RESIDUAL_FUNDED_BACKING");
+    return { phase, round, terms };
 }
 // The reviewed block is stable evidence; it is not synonymous with the latest block.
 export async function reviewedContext(c, rpc, stage = "pre", nowSeconds = Math.floor(Date.now() / 1000)) {
@@ -305,7 +322,7 @@ async function reconcileEconomics(c, inventory, rpc, block, before, after, post 
         ((c.chainId === 1672 && legacyVersion === 1) || (c.chainId === 688689 && legacyVersion === 2)), "CLAIM_EVENT_MODEL");
     let r4 = false;
     const accounts = new Map(before.economic.withdrawals.accounts.map(a => [a.owner, structuredClone(a)]));
-    let q = BigInt(before.economic.withdrawals.queued), completed = BigInt(before.economic.withdrawals.completed), pool = before.core.poolT;
+    let q = BigInt(before.economic.withdrawals.queued), completed = BigInt(before.economic.withdrawals.completed);
     for (const l of rows) {
         if (l.topics[0] === upgraded) {
             requireThat(post && !r4 && `0x${l.topics[1].slice(-40)}` === c.implementations.stpros, "UNREVIEWED_UPGRADE_HISTORY");
@@ -314,7 +331,6 @@ async function reconcileEconomics(c, inventory, rpc, block, before, after, post 
             continue;
         }
         if (l.topics[0] === DEPOSIT) {
-            pool += words(l, 2)[0];
             continue;
         }
         const owner = `0x${l.topics[l.topics[0] === WITHDRAW ? 3 : 1].slice(-40)}`;
@@ -335,7 +351,6 @@ async function reconcileEconomics(c, inventory, rpc, block, before, after, post 
             a.records.push(record);
             a.tail = (BigInt(a.tail) + 1n).toString();
             q += amount;
-            pool -= amount;
         }
         else {
             const aggregate = legacyVersion === 1 && !r4;
@@ -372,19 +387,29 @@ async function reconcileEconomics(c, inventory, rpc, block, before, after, post 
     const expected = [...accounts.values()].sort((a, b) => a.owner.localeCompare(b.owner));
     requireThat(canonical(expected) === canonical(after.economic.withdrawals.accounts), "UNRECONCILED_WITHDRAWAL_RECORDS");
     if (c.chainId === 688689) {
-        const update = topic("TokenAmountUpdated(address,uint256,uint256)"), setter = topic("SetTokenAmount(address,uint256,uint256)");
-        for (const l of await rangeLogs(rpc, c.addresses.oracle, from, to, [update, setter])) {
-            requireThat(l.topics[0] !== setter, "UNREVIEWED_POOL_SETTER");
-            requireThat(`0x${l.topics[1].slice(-40)}` === c.addresses.asset, "UNKNOWN_POOL_ACTIVITY");
-            pool += words(l, 2)[0];
-        }
-        requireThat(pool === after.core.poolT, "UNRECONCILED_POOL");
+        const poolRows = (await Promise.all([c.addresses.stpros, c.addresses.oracle].map(target => rangeLogs(rpc, target, from, to, poolTopics)))).flat().sort((a, b) => Number(BigInt(a.blockNumber) - BigInt(b.blockNumber)) || Number(BigInt(a.logIndex) - BigInt(b.logIndex)));
+        replayPool(c, poolRows, before.core, after.core);
     }
     for (const f of c.factories)
         for (const v of f.vaults) {
             let tma = before.vaultAssets[v.address];
-            for (const l of await rangeLogs(rpc, v.address, from, to, [DEPOSIT, WITHDRAW]))
-                tma += (l.topics[0] === DEPOSIT ? 1n : -1n) * words(l, 2)[0];
+            const residual = residualVault(c, v), finalized = topic("SettlementFinalized(uint256,uint8,uint256,uint256,uint256,uint256)");
+            const vaultRows = await rangeLogs(rpc, v.address, from, to, [DEPOSIT, WITHDRAW, ...(residual ? residualTopics : [])]);
+            for (const l of vaultRows) {
+                if ([DEPOSIT, WITHDRAW].includes(l.topics[0])) tma += (l.topics[0] === DEPOSIT ? 1n : -1n) * words(l, 2)[0];
+                else if (l.topics[0] === finalized) {
+                    const [amount, netProfit, fee] = words(l, 4), mode = BigInt(l.topics[2]);
+                    requireThat(mode <= 1n && (mode === 0n ? netProfit + fee === amount : netProfit === 0n && fee === 0n), "RESIDUAL_SETTLEMENT_ACCOUNTING");
+                    tma += mode === 0n ? netProfit : -amount;
+                }
+                requireThat(tma >= 0n, "RESIDUAL_NEGATIVE_ASSETS");
+            }
+            if (residual) {
+                const call = reader(rpc, block), phase = Number(await call(v.address, "phase")), round = await call(v.address, "roundIndex");
+                const state = after.residualStates?.[v.address] ?? await residualState(c, rpc, block, v.address, phase, round);
+                const h = await rpc("eth_getBlockByNumber", [block, false]);
+                await replayResidual(before.residualStates[v.address], state, vaultRows.filter(l => residualTopics.includes(l.topics[0])), BigInt(h.timestamp), post, c.chainId, row => rpc("eth_getTransactionByHash", [row.transactionHash]));
+            }
             requireThat(tma === after.vaultAssets[v.address], "UNRECONCILED_VAULT_ASSETS", v.address);
         }
 }
@@ -433,6 +458,22 @@ async function governanceHistory(c, rpc, block, stage = "pre", proxies = []) {
         }
     }
 }
+async function timelockInventory(c, inventory, rpc, block, pending, doneId) {
+    const call = reader(rpc, block);
+    requireThat(typeof rpc.historyLogs === "function", "TIMELOCK_AUTHENTICATED_HISTORY_REQUIRED");
+    const sourceRuntimeHash = keccak256(await rpc("eth_getCode", [c.addresses.timelock, block]));
+    requireThat(sourceRuntimeHash === PINNED_TIMELOCK_RUNTIME_HASH, "TIMELOCK_PROOF_RUNTIME");
+    const head = await rpc("eth_getBlockByNumber", [block, false]);
+    requireThat(head?.timestamp && BigInt(head.number) === BigInt(block), "TIMELOCK_CHECKPOINT_BLOCK");
+    const rows = await logs(rpc, c.addresses.timelock, inventory.fromBlock, Number(BigInt(block)), operationTopics);
+    const result = await replayOperations(rows, async row => {
+        const h = await rpc("eth_getBlockByNumber", [row.blockNumber, false]);
+        requireThat(h?.hash === row.blockHash, "TIMELOCK_EVENT_BLOCK");
+        return BigInt(h.timestamp);
+    }, id => call(c.addresses.timelock, "getTimestamp", [id]), BigInt(head.timestamp));
+    checkOperationPlan(result, pending, doneId);
+    return {...result, actionBearingCoverage:"PASS", sourceRuntimeHash, assumptions:"Complete independently reviewed creation-to-checkpoint archive and truthful canonical RPC journal; whole-operation omission is not detectable by parsing alone"};
+}
 // Historical authentication and archive views have no 120s deadline. Only the
 // final current-state checkpoint does. A slow pass catches up with the same journal,
 // re-reads authoritative views at the new block, and never mutates the original U.
@@ -463,7 +504,8 @@ export async function recheckObserved(c, inventory, rpc, options = {}) {
         await reconcileEconomics(c, inventory, rpc, context.head.block, historical, current);
         await upgradeHistory(c, rpc, context.head.block);
         await governanceHistory(c, rpc, context.head.block);
-        return { status: "PASS", scope: "authenticated historical archive + independently checked current pre-schedule state", reviewedBlock: c.observed.blockNumber, reviewedHash: c.observed.blockHash, currentBlock: Number(BigInt(context.head.block)), currentHash: context.head.header.hash, economic: current.economic, operationBundle: "UNCHANGED", noncePolicy: "reviewed signing nonce required" };
+        const operations = await timelockInventory(c, inventory, rpc, context.head.block, []);
+        return { status: "PASS", scope: "authenticated history and current pre-schedule checks; action-bearing operation coverage with dependency verification", reviewedBlock: c.observed.blockNumber, reviewedHash: c.observed.blockHash, currentBlock: Number(BigInt(context.head.block)), currentHash: context.head.header.hash, economic: current.economic, timelockOperations: operations, operationBundle: "UNCHANGED", noncePolicy: "reviewed signing nonce required" };
     });
 }
 /// Reuses the frozen pre-H bundle; never rebuild operation calldata from a post-H state.
@@ -471,6 +513,8 @@ export async function verifyCheckpoint(c, inventory, artifacts, rpc, stage = "R4
     requireThat(stage === "H" || stage === "R4", "CHECKPOINT");
     return atFreshCheckpoint(c, inventory, rpc, stage, options, async (rpc, context, historical) => {
     const { header, block } = context.head, call = reader(rpc, block), e = expectations(c, inventory, artifacts, stage), u = buildU(c, inventory, artifacts);
+    if (c.chainId === 1672) for (const v of e.vaults.filter(v => v.governed)) requireThat(Number(await call(v.vault, "phase")) === 3, "MAIN_VAULT_PHASE");
+    const operations = await timelockInventory(c, inventory, rpc, block, stage === "H" ? [u.operation.id] : [], stage === "R4" ? u.operation.id : undefined);
     if (stage === "H") {
         const handoff = structuredClone(c);
         handoff.observed.proxyAdminOwner = c.addresses.timelock;
@@ -513,12 +557,12 @@ export async function verifyCheckpoint(c, inventory, artifacts, rpc, stage = "R4
     }
     const economics = await scanEconomics(c, inventory, rpc, block, true, stage === "R4");
     if (stage === "R4") {
-        const [poolT] = await call(c.addresses.oracle, "poolInfo", [c.addresses.asset]);
+        const [poolT, poolV] = await call(c.addresses.oracle, "poolInfo", [c.addresses.asset]);
         const vaultAssets = Object.fromEntries(await Promise.all(c.factories.flatMap(f => f.vaults).map(async v => [v.address, await call(v.address, "totalManagedAssets")])));
-        await reconcileEconomics(c, inventory, rpc, block, historical, { economic: economics, core: { poolT }, vaultAssets }, true);
+        await reconcileEconomics(c, inventory, rpc, block, historical, { economic: economics, core: { poolT, poolV }, vaultAssets }, true);
     }
     await governanceHistory(c, rpc, block, stage, e.proxies);
-    return { status: "PASS", scope: stage === "H" ? "pending operation, complete authority and implementation recheck before execution" : "post-state invariants, versions, full authority and economic inventory", reviewedBlock: c.observed.blockNumber, reviewedHash: c.observed.blockHash, block: Number(BigInt(block)), blockHash: header.hash, operationId: u.operation.id, economics, roleInventory: roles, residualVaultRoles: { targets: residuals, status: stage === "R4" ? "INFORMATIONAL — verified retired; roles inert" : "OWNER-ACCEPTED EXPOSURE UNTIL U" }, notProven: ["Cross-transaction economic deltas: require execution-frame evidence; pre-H balances cannot be frozen across user activity.", "Binding FS-1 through FS-7 and FS-6 gas gate remain Batch 04."] };
+    return { status: "PASS", scope: stage === "H" ? "action-bearing pending operations, roles and implementation checks; action-bearing operation coverage with dependency verification" : "post-state invariants, versions, roles and economics; action-bearing operation coverage with dependency verification", reviewedBlock: c.observed.blockNumber, reviewedHash: c.observed.blockHash, block: Number(BigInt(block)), blockHash: header.hash, operationId: u.operation.id, economics, timelockOperations: operations, roleInventory: roles, residualVaultRoles: { targets: residuals, status: stage === "R4" ? "INFORMATIONAL — verified retired; roles inert" : "OWNER-ACCEPTED EXPOSURE UNTIL U" }, notProven: ["Cross-transaction economic deltas: require execution-frame evidence; pre-H balances cannot be frozen across user activity.", "Binding FS-1 through FS-7 and FS-6 gas gate remain Batch 04."] };
     });
 }
 export async function estimateGas(c, transactions, actor, rpc) {
