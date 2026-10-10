@@ -13,6 +13,8 @@ Use the allowlisted export and empty-environment runner (see [AGENTS](AGENTS.md)
 
 ```sh
 dest=$(tools/verify/export.sh --with-hardhat | tail -1)
+tools/verify/run.sh "$dest" python3 tools/ci/canonical.py
+# Transitional typings/Rocketh support only:
 tools/verify/run.sh "$dest" node node_modules/hardhat/dist/src/cli.js compile --build-profile production
 tools/verify/run.sh "$dest" node node_modules/typescript/bin/tsc --noEmit
 tools/verify/run.sh "$dest" FOUNDRY_PROFILE=final forge build
@@ -39,14 +41,18 @@ V1/V3 fixtures are historical witnesses. Current ignored `out/`, `artifacts/` an
 `generated/` are local build products, not replacement B0 evidence. Current R4
 reviewed build evidence is version-attributed in Research.
 
+Native production builds use `make build` (isolated automatically), or the native
+command above; see [TOOLCHAIN](docs/TOOLCHAIN.md). Hardhat is retained for supported
+Task execution, typings, Rocketh and explorer verification during migration.
+
 ## Operational boundaries
 
 `tasks/release/` builds unsigned H/U plans and verifies authenticated evidence.
 Follow [UPGRADES](docs/UPGRADES.md) and [RECOVERY](docs/RECOVERY.md); a locally
 passing test is not release approval. All nine old `deploy/` entries refuse and
 retain their CLI tags. `upgrade:testnet` retains an explicit refusing alias for
-the obsolete CounterV2 command. Legacy direct administrator/debug tasks refuse
-before accessing the runtime. Read-only tasks, public deposit/approval commands,
+the obsolete CounterV2 command. The 20 obsolete legacy task names have been removed;
+`deploy` still refuses before runtime access. Read-only tasks, public deposit/approval commands,
 OPS `yv:open-next-round`, and existing unsigned builders retain their semantics.
 They are not blanket authorization to sign or broadcast.
 

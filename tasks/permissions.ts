@@ -16,16 +16,7 @@ const PROXY_ADMIN_ABI = [
     inputs: [],
     outputs: [{ name: "", type: "address" }],
   },
-  {
-    type: "function",
-    name: "transferOwnership",
-    stateMutability: "nonpayable",
-    inputs: [{ name: "newOwner", type: "address" }],
-    outputs: [],
-  },
 ] as const;
-
-type OwnableTarget = "oracle" | "stpros" | "factory";
 
 const BEACON_ABI = [
   {
@@ -75,60 +66,6 @@ function getOptionalAddress(value: string | undefined, label: string): Address |
   }
 
   return value;
-}
-
-function getRequiredAddress(value: string | undefined, label: string): Address {
-  const address = getOptionalAddress(value, label);
-
-  if (address === undefined) {
-    throw new Error(`Missing required ${label}`);
-  }
-
-  return address;
-}
-
-function parseOwnableTarget(value: string): OwnableTarget {
-  const normalized = value.trim().toLowerCase();
-
-  if (normalized === "oracle" || normalized === "stpros" || normalized === "factory") {
-    return normalized;
-  }
-
-  throw new Error(`Invalid target: ${value}. Use oracle, stpros, or factory.`);
-}
-
-function resolveOwnableTargetAddress(
-  target: OwnableTarget,
-  networkDefaults: NetworkDefaults | undefined,
-  override?: Address,
-): Address {
-  if (override !== undefined) {
-    return override;
-  }
-
-  const address = networkDefaults?.[
-    target === "oracle" ? "ORACLE" : target === "stpros" ? "STPROS" : "YIELD_VAULT_FACTORY"
-  ];
-
-  if (address === undefined) {
-    throw new Error(
-      `Missing ${target} address. Pass --address or use mainnet/testnet defaults.`,
-    );
-  }
-
-  return address;
-}
-
-function getOwnableContractName(target: OwnableTarget): "Oracle" | "StPROS" | "YieldVaultFactory" {
-  if (target === "oracle") {
-    return "Oracle";
-  }
-
-  if (target === "stpros") {
-    return "StPROS";
-  }
-
-  return "YieldVaultFactory";
 }
 
 function getNetworkDefaults(networkName: string): NetworkDefaults | undefined {
@@ -513,123 +450,5 @@ export const permsCheckTask = task(
     } finally {
       await connection.close();
     }
-  })
-  .build();
-
-export const permsTransferOwnerTask = task(
-  "perms:transfer-owner",
-  "Transfer Ownable owner on Oracle, StPROS, or YieldVaultFactory",
-)
-  /**
-   * Usage:
-   * pnpm hardhat perms:transfer-owner --network mainnet <target> <newOwner>
-   *
-   * Example:
-   * pnpm hardhat perms:transfer-owner --network mainnet \
-   *   oracle 0x3658e00f5DDb9Fa0c7e9820e8d16C3C17eaB73CA
-   *
-   * Notes:
-   * - target must be one of: oracle, stpros, factory
-   * - Callable only by the current contract owner
-   * - Transfers business/admin permissions (pause, setOracle, createYieldVault, etc.)
-   */
-  .addPositionalArgument({
-    name: "target",
-    description: "Contract target: oracle, stpros, or factory",
-  })
-  .addPositionalArgument({
-    name: "newOwner",
-    description: "New owner address",
-  })
-  .addOption({
-    name: "address",
-    description: "Override proxy address for the selected target",
-    defaultValue: "",
-  })
-  .setInlineAction(async () => {
-    throw new Error("Release tooling required: legacy ownership handoff is disabled; use the reviewed multi-actor release builders. Proxy admin changes and ownership renunciation are not supported.");
-  })
-  .build();
-
-export const permsTransferProxyAdminTask = task(
-  "perms:transfer-proxy-admin",
-  "Transfer ProxyAdmin ownership for transparent proxy upgrades",
-)
-  /**
-   * Usage:
-   * pnpm hardhat perms:transfer-proxy-admin --network mainnet <newOwner>
-   *
-   * Example:
-   * pnpm hardhat perms:transfer-proxy-admin --network mainnet \
-   *   0x3658e00f5DDb9Fa0c7e9820e8d16C3C17eaB73CA \
-   *   --proxy 0x051713fd66845a13bf23baca008c5c22c27ccb58
-   *
-   * Notes:
-   * - Callable only by the current ProxyAdmin owner
-   * - Transfers upgrade permissions for Oracle / StPROS / YieldVaultFactory proxies
-   * - If --proxyAdmin is omitted, it is resolved from the --proxy EIP-1967 admin slot
-   */
-  .addPositionalArgument({
-    name: "newOwner",
-    description: "New ProxyAdmin owner address",
-  })
-  .addOption({
-    name: "proxyAdmin",
-    description: "ProxyAdmin contract address",
-    defaultValue: "",
-  })
-  .addOption({
-    name: "proxy",
-    description: "Any transparent proxy used to resolve ProxyAdmin when --proxyAdmin is omitted",
-    defaultValue: "",
-  })
-  .setInlineAction(async () => {
-    throw new Error("Release tooling required: legacy ownership handoff is disabled; use the reviewed multi-actor release builders. Proxy admin changes and ownership renunciation are not supported.");
-  })
-  .build();
-
-export const permsMigrateOwnersTask = task(
-  "perms:migrate-owners",
-  "Transfer Oracle, StPROS, YieldVaultFactory owners and ProxyAdmin owner to a new address",
-)
-  /**
-   * Usage:
-   * pnpm hardhat perms:migrate-owners --network mainnet <newOwner>
-   *
-   * Example:
-   * pnpm hardhat perms:migrate-owners --network mainnet \
-   *   0x3658e00f5DDb9Fa0c7e9820e8d16C3C17eaB73CA
-   *
-   * Notes:
-   * - Runs, in order: oracle owner, stpros owner, factory owner, proxy admin owner
-   * - Skips targets that already point to newOwner
-   * - Caller must currently hold all relevant owner permissions
-   */
-  .addPositionalArgument({
-    name: "newOwner",
-    description: "New owner address for all contracts and ProxyAdmin",
-  })
-  .addOption({
-    name: "oracle",
-    description: "Oracle proxy address",
-    defaultValue: "",
-  })
-  .addOption({
-    name: "stpros",
-    description: "StPROS proxy address",
-    defaultValue: "",
-  })
-  .addOption({
-    name: "factory",
-    description: "YieldVaultFactory proxy address",
-    defaultValue: "",
-  })
-  .addOption({
-    name: "proxyAdmin",
-    description: "ProxyAdmin contract address",
-    defaultValue: "",
-  })
-  .setInlineAction(async () => {
-    throw new Error("Release tooling required: legacy ownership handoff is disabled; use the reviewed multi-actor release builders. Proxy admin changes and ownership renunciation are not supported.");
   })
   .build();

@@ -150,9 +150,9 @@ case "$DEST/" in
 esac
 
 # Paths that may enter an export.
-ALLOW=(contracts test tools snapshots deployments docs foundry.toml AGENTS.md README.md)
+ALLOW=(contracts test tools snapshots deployments docs foundry.toml AGENTS.md README.md Makefile hardhat.config.ts package.json pnpm-lock.yaml)
 if [ "$WITH_HARDHAT" = 1 ]; then
-  ALLOW+=(hardhat.config.ts package.json pnpm-lock.yaml tsconfig.json tasks deploy rocketh contants scripts)
+  ALLOW+=(tsconfig.json tasks deploy rocketh contants scripts)
 fi
 for a in "${ALLOW[@]}"; do validate_rel "$a"; done
 

@@ -25,14 +25,6 @@ function getRequiredAddress(value: string | undefined, label: string): Address {
   return address;
 }
 
-function getRequiredBigInt(value: string | undefined, label: string): bigint {
-  if (value === undefined || value.trim() === "") {
-    throw new Error(`Missing required ${label}`);
-  }
-
-  return BigInt(value);
-}
-
 function getNetworkOracle(networkName: string): Address | undefined {
   if (networkName === "mainnet") {
     return Mainnet.ORACLE as Address;
@@ -44,34 +36,6 @@ function getNetworkOracle(networkName: string): Address | undefined {
 
   return undefined;
 }
-
-export const oracleSetPoolInfoTask = task(
-  "oracle:set-pool-info",
-  "Deprecated in R4; refuses before connecting to a network",
-)
-  .addPositionalArgument({
-    name: "token",
-    description: "Underlying token address used as the pool key",
-  })
-  .addPositionalArgument({
-    name: "tokenAmount",
-    description: "Token side of the conversion ratio, in raw units",
-  })
-  .addPositionalArgument({
-    name: "vTokenAmount",
-    description: "VToken side of the conversion ratio, in raw units",
-  })
-  .addOption({
-    name: "oracle",
-    description: "Oracle proxy address; defaults to contants/index.ts on mainnet/testnet",
-    defaultValue: "",
-  })
-  .setInlineAction(async () => {
-    throw new Error(
-      "Deprecated oracle:set-pool-info: R4 removed setPoolInfo. Use reviewed Timelock setTokenAmount(token, expectedOldT, newT) calldata; this command cannot send a transaction.",
-    );
-  })
-  .build();
 
 export const oraclePoolInfoTask = task(
   "oracle:pool-info",

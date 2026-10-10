@@ -1,8 +1,6 @@
 import { task } from "hardhat/config";
 import { formatUnits, isAddress, type Address } from "viem";
 
-import { Mainnet, TESTNET } from "../contants/index.js";
-
 const ERC20_METADATA_ABI = [
   {
     type: "function",
@@ -32,84 +30,6 @@ function getRequiredBigInt(value: string | undefined, label: string): bigint {
 
   return BigInt(value);
 }
-
-function getOptionalAddress(value: string | undefined, label: string): Address | undefined {
-  if (value === undefined || value === "") {
-    return undefined;
-  }
-
-  if (!isAddress(value)) {
-    throw new Error(`Invalid ${label}: ${value}`);
-  }
-
-  return value;
-}
-
-function getNetworkStPros(networkName: string): Address | undefined {
-  if (networkName === "mainnet") {
-    return Mainnet.STPROS as Address;
-  }
-
-  if (networkName === "testnet") {
-    return TESTNET.STPROS as Address;
-  }
-
-  return undefined;
-}
-
-export const stProsSetOracleTask = task(
-  "stpros:set-oracle",
-  "Deprecated in R4; refuses before connecting to a network",
-)
-  .addPositionalArgument({
-    name: "stPros",
-    description: "StPROS proxy address",
-  })
-  .addPositionalArgument({
-    name: "oracle",
-    description: "Oracle proxy address",
-  })
-  .setInlineAction(async () => {
-    throw new Error(
-      "Deprecated stpros:set-oracle: R4 removed setOracle. The Oracle dependency is fixed during initialization; this command cannot send a transaction.",
-    );
-  })
-  .build();
-
-export const stProsSetUnbondingPeriodTask = task(
-  "stpros:set-unbonding-period",
-  "Set StPROS global unbonding period for new withdrawal requests",
-)
-  /**
-   * Usage:
-   * pnpm hardhat stpros:set-unbonding-period --network testnet <unbondingPeriodSeconds>
-   *
-   * Example (7 days):
-   * pnpm hardhat stpros:set-unbonding-period --network testnet 604800
-   *
-   * Example with explicit proxy:
-   * pnpm hardhat stpros:set-unbonding-period --network testnet 604800 \
-   *   --st-pros 0xb1437aeea18189eb6d02dc46cd4d28613d582e9a
-   *
-   * Notes:
-   * - unbondingPeriodSeconds is in seconds. 604800 = 7 days, 2592000 = 30 days.
-   * - Max allowed value is 30 days (2592000 seconds).
-   * - Only affects new withdrawal requests; existing queue items keep their snapshotted period.
-   * - The caller must be the owner of StPROS.
-   */
-  .addPositionalArgument({
-    name: "unbondingPeriod",
-    description: "New unbonding period in seconds",
-  })
-  .addOption({
-    name: "stPros",
-    description: "StPROS proxy address; defaults to contants/index.ts on mainnet/testnet",
-    defaultValue: "",
-  })
-  .setInlineAction(async () => {
-    throw new Error("Deprecated stpros:set-unbonding-period: direct legacy administration is disabled. Use independently reviewed Timelock calldata and the R4 governance process.");
-  })
-  .build();
 
 export const stProsPreviewDepositTask = task(
   "stpros:preview-deposit",

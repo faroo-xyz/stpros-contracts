@@ -1,20 +1,9 @@
 import { task } from "hardhat/config";
-import { encodeFunctionData, isAddress, parseEventLogs, type Address } from "viem";
+import { encodeFunctionData, isAddress, type Address } from "viem";
 
 const MAX_PERFORMANCE_FEE_BPS = 10_000n;
 const MIN_LOCK_DURATION = 1n;
 const MIN_SETTLE_TIMELOCK = 1n;
-const PHASE_NAMES = [
-  "OPEN",
-  "LOCKED",
-  "SETTLE_PROPOSED",
-  "SETTLED",
-] as const;
-
-function getEnumName(names: readonly string[], index: number): string {
-  return names[index] ?? `UNKNOWN(${index})`;
-}
-
 type YieldVaultInitParams = {
   asset: Address;
   factory: Address;
@@ -206,58 +195,6 @@ function resolveCreateYieldVaultParams(
   };
 }
 
-export const yvfAddCounterpartyTask = task(
-  "yvf:add-counterparty",
-  "Add a counterparty to YieldVaultFactory whitelist",
-)
-  /**
-   * Usage:
-   * pnpm hardhat yvf:add-counterparty --network testnet 0xc096F8e4B1cc222899752a5504fDE557A147c57b <counterpartyAddress>
-   *
-   * Example:
-   * pnpm hardhat yvf:add-counterparty --network testnet \
-   *   0xFactoryProxyAddress \
-   *   0xCounterpartyAddress
-   */
-  .addPositionalArgument({
-    name: "factory",
-    description: "YieldVaultFactory proxy address",
-  })
-  .addPositionalArgument({
-    name: "counterparty",
-    description: "Counterparty address to whitelist",
-  })
-  .setInlineAction(async () => {
-    throw new Error("Deprecated yvf:add-counterparty: direct legacy administration is disabled. Use independently reviewed Timelock calldata and the R4 governance process.");
-  })
-  .build();
-
-export const yvfRemoveCounterpartyTask = task(
-  "yvf:remove-counterparty",
-  "Remove a counterparty from YieldVaultFactory whitelist",
-)
-  /**
-   * Usage:
-   * pnpm hardhat yvf:remove-counterparty --network testnet 0xc096F8e4B1cc222899752a5504fDE557A147c57b <counterpartyAddress>
-   *
-   * Example:
-   * pnpm hardhat yvf:remove-counterparty --network testnet \
-   *   0xFactoryProxyAddress \
-   *   0xCounterpartyAddress
-   */
-  .addPositionalArgument({
-    name: "factory",
-    description: "YieldVaultFactory proxy address",
-  })
-  .addPositionalArgument({
-    name: "counterparty",
-    description: "Counterparty address to remove",
-  })
-  .setInlineAction(async () => {
-    throw new Error("Deprecated yvf:remove-counterparty: direct legacy administration is disabled. Use independently reviewed Timelock calldata and the R4 governance process.");
-  })
-  .build();
-
 export const yvfListProxiesTask = task(
   "yvf:list-proxies",
   "List all YieldVault proxy addresses created by the factory",
@@ -431,99 +368,6 @@ export const yvfCreateTask = task(
       console.log(JSON.stringify({timelock, target: factoryAddress, value: "0", data:
         encodeFunctionData({abi: artifact.abi, functionName: "createYieldVault", args: [params]})}, null, 2));
     } finally { await connection.close(); }
-  })
-  .build();
-
-export const yvfEmergencyCancelTask = task(
-  "yvf:emergency-cancel",
-  "Emergency-cancel a YieldVault and enable principal redemption",
-)
-  /**
-   * Usage:
-   * pnpm hardhat yvf:emergency-cancel --network testnet <factoryAddress> <vaultAddress>
-   *
-   * Example:
-   * pnpm hardhat yvf:emergency-cancel --network testnet \
-   *   0xFactoryProxyAddress \
-   *   0xVaultProxyAddress
-   *
-   * Notes:
-   * - Callable only by the factory owner.
-   * - Vault must have been created by the factory.
-   * - Vault enters SETTLED without profit/loss; users can redeem principal pro-rata.
-   * - Any funded settlement proposal is refunded before cancellation.
-   */
-  .addPositionalArgument({
-    name: "factory",
-    description: "YieldVaultFactory proxy address",
-  })
-  .addPositionalArgument({
-    name: "vault",
-    description: "YieldVault proxy address to emergency-cancel",
-  })
-  .setInlineAction(async () => {
-    throw new Error("Deprecated yvf:emergency-cancel: direct legacy administration is disabled. Use independently reviewed Timelock calldata and the R4 governance process.");
-  })
-  .build();
-
-export const yvfTransferOwnerTask = task(
-  "yvf:transfer-owner",
-  "Transfer YieldVaultFactory ownership to a new address",
-)
-  /**
-   * Usage:
-   * pnpm hardhat yvf:transfer-owner --network testnet <factoryAddress> <newOwnerAddress>
-   *
-   * Example:
-   * pnpm hardhat yvf:transfer-owner --network testnet \
-   *   0xFactoryProxyAddress \
-   *   0xNewOwnerAddress
-   *
-   * Notes:
-   * - Callable only by the current factory owner.
-   * - Transfers Ownable permissions: createYieldVault, upgradeBeaconTo, emergencyCancel, etc.
-   */
-  .addPositionalArgument({
-    name: "factory",
-    description: "YieldVaultFactory proxy address",
-  })
-  .addPositionalArgument({
-    name: "newOwner",
-    description: "New owner address",
-  })
-  .setInlineAction(async () => {
-    throw new Error("Release tooling required: legacy ownership handoff is disabled; use the reviewed multi-actor release builders. Proxy admin changes and ownership renunciation are not supported.");
-  })
-  .build();
-
-export const yvfUpgradeBeaconTask = task(
-  "yvf:upgrade-beacon",
-  "Upgrade YieldVault beacon to a new implementation",
-)
-  /**
-   * Usage:
-   * pnpm hardhat yvf:upgrade-beacon --network testnet <factoryAddress> <implementationAddress>
-   * 0x181b0b0f4fde940e9fa18ead2d813ff95cd15c49
-   * Example:
-   * pnpm hardhat yvf:upgrade-beacon --network testnet \
-   *   0xFactoryProxyAddress \
-   *   0xNewYieldVaultImplementationAddress
-   *
-   * Notes:
-   * - Callable only by the factory owner.
-   * - Upgrades all existing YieldVault beacon proxies to the new implementation.
-   * - Deploy the new YieldVault implementation first, then pass its address here.
-   */
-  .addPositionalArgument({
-    name: "factory",
-    description: "YieldVaultFactory proxy address",
-  })
-  .addPositionalArgument({
-    name: "implementation",
-    description: "New YieldVault implementation address",
-  })
-  .setInlineAction(async () => {
-    throw new Error("Release tooling required: implementation-only/proxy/beacon upgrades are disabled. Build a reviewed atomic Timelock operation; this legacy task cannot execute.");
   })
   .build();
 

@@ -17,6 +17,7 @@ import re
 import subprocess
 import sys
 import tempfile
+from pathlib import Path
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))
 
@@ -62,7 +63,10 @@ class Resolver:
         ]
 
     def key_to_path(self, key):
-        if key.startswith("project/"):
+        common.refuse_secret_path(key)
+        if not key.endswith(".sol") or os.path.normpath(key) != key:
+            raise ValueError("invalid Solidity source identity")
+        if key.startswith("project/contracts/"):
             return common.repo_path(key[len("project/"):])
         for prefix_key, pkg in self.npm.values():
             if key.startswith(prefix_key):
@@ -83,7 +87,12 @@ class Resolver:
             k = todo.pop()
             if k in seen:
                 continue
-            with open(self.key_to_path(k), encoding="utf-8") as fh:
+            path = Path(self.key_to_path(k))
+            common.refuse_secret_path(str(path))
+            boundary = Path(common.repo_path("contracts" if k.startswith("project/") else "node_modules")).resolve()
+            if not path.resolve().is_relative_to(boundary):
+                raise ValueError("source escaped approved boundary")
+            with open(path, encoding="utf-8") as fh:
                 content = fh.read()
             seen[k] = content
             for imp in IMPORT_RE.findall(content):
@@ -100,7 +109,7 @@ def root_files():
     return sorted(out)
 
 
-def compile_root(root_key, profile, resolver, solc, extra_outputs=()):
+def standard_input(root_key, profile, resolver, extra_outputs=()):
     sources = resolver.closure(root_key)
     settings = {
         "evmVersion": "cancun",
@@ -115,14 +124,24 @@ def compile_root(root_key, profile, resolver, solc, extra_outputs=()):
     }
     std = {"language": "Solidity", "sources": {k: {"content": v} for k, v in sorted(sources.items())},
            "settings": settings}
+    return std
+
+
+def compile_input(std, solc):
+    """Execute only the supplied closure; solc cannot fetch missing imports."""
     with tempfile.TemporaryDirectory() as tmp:
-        r = subprocess.run([solc, "--standard-json"], input=json.dumps(std).encode(), capture_output=True,
-                           cwd=tmp, check=False)
+        r = subprocess.run([solc, "--standard-json", "--no-import-callback"],
+                           input=json.dumps(std).encode(), capture_output=True,
+                           cwd=tmp, env={}, check=True)
     out = json.loads(r.stdout)
     errs = [e for e in out.get("errors", []) if e.get("severity") == "error"]
     if errs:
-        raise SystemExit(f"solc error in {root_key}: {errs[0].get('formattedMessage')}")
+        raise RuntimeError(f"solc error: {errs[0].get('formattedMessage')}")
     return out
+
+
+def compile_root(root_key, profile, resolver, solc, extra_outputs=()):
+    return compile_input(standard_input(root_key, profile, resolver, extra_outputs), solc)
 
 
 _cache = {}

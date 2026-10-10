@@ -14,9 +14,9 @@ and permanent tests.
 | Access and migration | `contracts/access/`, `contracts/upgrade/` | Guardian pause, Timelock ownership, version/admin migration guards; INV-C and recorded-bytecode release tests |
 | Atomic handoff | `contracts/release/ReleaseAssertions.sol` | H/U assertions, GC-01/02 and rollback; `test/release/` |
 | Reviewed planning | `tasks/release/` | Unsigned builders, action-bearing Timelock history/dependencies, authenticated replay and Safe configuration checks |
-| Legacy CLI | `tasks/*.ts`, `deploy/*.ts` | Mixed views/user operations and explicitly refusing privileged aliases; `test/tasks/` |
+| Legacy CLI | `tasks/*.ts`, `deploy/*.ts` | Supported views/user operations and the refusing deploy override; `test/tasks/` |
 | Historical provenance | `tools/release/`, `tools/lib/` | Python archive/fixture/RPC verification, separate from JS release-time replay |
-| Build identity | `tools/snapshot/`, `tools/verify/` | Pinned production compilation, immutable B0 comparison, secret-free export/runner |
+| Build identity | `tools/ci/`, `tools/snapshot/`, `tools/verify/` | Pinned production compilation, immutable B0 comparison, secret-free export/runner |
 | Current models | `test/invariant/` | Bounded stateful A/B/C handlers, independent ghosts, counters and wrong-rule controls |
 | Historical witnesses | `test/helpers/LegacyTopology.sol`, `test/fixtures/legacy/`, `deployments/` | Actual recorded implementations; never replace with current source for historical claims |
 
@@ -26,7 +26,7 @@ model authority addresses only. A/B model authorized Timelock calls directly;
 C executes real delayed operations. Migration/atomic H/U regressions remain in
 `test/release/`, not a second invariant release builder.
 
-`tasks/example.ts` remains a harmless demonstration compatibility command.
+The obsolete demo and legacy privileged task names are removed; see `TOOLCHAIN.md`.
 `test/mocks/MockWPROS.sol` is retained historical test source, not approved for
 native payout fidelity. Use `WPROS9.sol`. The `contants/` spelling and published
 address defaults remain compatibility surfaces; defaults are not authenticated
