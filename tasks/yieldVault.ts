@@ -993,42 +993,8 @@ export const yieldVaultSetPhaseTask = task(
     name: "phase",
     description: "Target phase name or index",
   })
-  .setInlineAction(async ({ vault, phase }, hre) => {
-    const connection = await hre.network.getOrCreate();
-
-    try {
-      const publicClient = await connection.viem.getPublicClient();
-      const [signer1, signer2] = await connection.viem.getWalletClients();
-
-      // if (signer?.account?.address === undefined) {
-      //   throw new Error("No signer account available for the selected network");
-      // }
-
-      const vaultAddress = getRequiredAddress(vault, "vault address");
-      const phaseIndex = parsePhase(phase);
-      const vaultContract = await connection.viem.getContractAt("YieldVault", vaultAddress, {
-        client: {
-          wallet: signer2,
-        },
-      }) as any;
-      const previousPhase = await vaultContract.read.phase();
-      const hash = await vaultContract.write.setPhase([phaseIndex]);
-      const receipt = await publicClient.waitForTransactionReceipt({ hash });
-      const currentPhase = await vaultContract.read.phase();
-
-      console.log(`[yv:set-phase] vault=${vaultAddress}`);
-      console.log(`[yv:set-phase] caller=${signer2.account.address}`);
-      console.log(
-        `[yv:set-phase] previousPhase=${previousPhase} (${getEnumName(PHASE_NAMES, Number(previousPhase))})`,
-      );
-      console.log(
-        `[yv:set-phase] newPhase=${currentPhase} (${getEnumName(PHASE_NAMES, Number(currentPhase))})`,
-      );
-      console.log(`[yv:set-phase] txHash=${hash}`);
-      console.log(`[yv:set-phase] blockNumber=${receipt.blockNumber}`);
-    } finally {
-      await connection.close();
-    }
+  .setInlineAction(async () => {
+    throw new Error("Deprecated yv:set-phase: direct legacy administration is disabled. Use independently reviewed Timelock calldata and the R4 governance process.");
   })
   .build();
 
@@ -1065,52 +1031,8 @@ export const yieldVaultGrantRoleTask = task(
     description: 'Role to grant: "admin" or bytes32 hex (default: admin)',
     defaultValue: "",
   })
-  .setInlineAction(async (taskArgs, hre) => {
-    const connection = await hre.network.getOrCreate();
-
-    try {
-      const [signer] = await connection.viem.getWalletClients();
-
-      if (signer?.account?.address === undefined) {
-        throw new Error("No signer account available for the selected network");
-      }
-
-      const vaultAddress = getRequiredAddress(taskArgs.vault, "vault address");
-      const accountAddress = getRequiredAddress(taskArgs.account, "account address");
-      const role = parseRole(taskArgs.role);
-
-      if (accountAddress === "0x0000000000000000000000000000000000000000") {
-        throw new Error("account cannot be the zero address");
-      }
-
-      const vaultContract = await connection.viem.getContractAt("YieldVault", vaultAddress, {
-        client: {
-          wallet: signer,
-        },
-      });
-      const alreadyHasRole = await vaultContract.read.hasRole([role, accountAddress]);
-
-      if (alreadyHasRole) {
-        throw new Error(
-          `Account ${accountAddress} already has ${getRoleLabel(role)} on vault ${vaultAddress}`,
-        );
-      }
-
-      const hash = await vaultContract.write.grantRole([role, accountAddress]);
-      const publicClient = await connection.viem.getPublicClient();
-      const receipt = await publicClient.waitForTransactionReceipt({ hash });
-      const hasRole = await vaultContract.read.hasRole([role, accountAddress]);
-
-      console.log(`[yv:grant-role] vault=${vaultAddress}`);
-      console.log(`[yv:grant-role] caller=${signer.account.address}`);
-      console.log(`[yv:grant-role] account=${accountAddress}`);
-      console.log(`[yv:grant-role] role=${getRoleLabel(role)}`);
-      console.log(`[yv:grant-role] hasRole=${hasRole}`);
-      console.log(`[yv:grant-role] txHash=${hash}`);
-      console.log(`[yv:grant-role] blockNumber=${receipt.blockNumber}`);
-    } finally {
-      await connection.close();
-    }
+  .setInlineAction(async () => {
+    throw new Error("Deprecated yv:grant-role: direct legacy administration is disabled. Use independently reviewed Timelock calldata and the R4 governance process.");
   })
   .build();
 
@@ -1147,47 +1069,8 @@ export const yieldVaultRevokeRoleTask = task(
     description: 'Role to revoke: "admin" or bytes32 hex (default: admin)',
     defaultValue: "",
   })
-  .setInlineAction(async (taskArgs, hre) => {
-    const connection = await hre.network.getOrCreate();
-
-    try {
-      const [signer] = await connection.viem.getWalletClients();
-
-      if (signer?.account?.address === undefined) {
-        throw new Error("No signer account available for the selected network");
-      }
-
-      const vaultAddress = getRequiredAddress(taskArgs.vault, "vault address");
-      const accountAddress = getRequiredAddress(taskArgs.account, "account address");
-      const role = parseRole(taskArgs.role);
-      const vaultContract = await connection.viem.getContractAt("YieldVault", vaultAddress, {
-        client: {
-          wallet: signer,
-        },
-      });
-      const hadRole = await vaultContract.read.hasRole([role, accountAddress]);
-
-      if (!hadRole) {
-        throw new Error(
-          `Account ${accountAddress} does not have ${getRoleLabel(role)} on vault ${vaultAddress}`,
-        );
-      }
-
-      const hash = await vaultContract.write.revokeRole([role, accountAddress]);
-      const publicClient = await connection.viem.getPublicClient();
-      const receipt = await publicClient.waitForTransactionReceipt({ hash });
-      const hasRole = await vaultContract.read.hasRole([role, accountAddress]);
-
-      console.log(`[yv:revoke-role] vault=${vaultAddress}`);
-      console.log(`[yv:revoke-role] caller=${signer.account.address}`);
-      console.log(`[yv:revoke-role] account=${accountAddress}`);
-      console.log(`[yv:revoke-role] role=${getRoleLabel(role)}`);
-      console.log(`[yv:revoke-role] hasRole=${hasRole}`);
-      console.log(`[yv:revoke-role] txHash=${hash}`);
-      console.log(`[yv:revoke-role] blockNumber=${receipt.blockNumber}`);
-    } finally {
-      await connection.close();
-    }
+  .setInlineAction(async () => {
+    throw new Error("Deprecated yv:revoke-role: direct legacy administration is disabled. Use independently reviewed Timelock calldata and the R4 governance process.");
   })
   .build();
 

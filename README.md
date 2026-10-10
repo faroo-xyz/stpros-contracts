@@ -1,68 +1,55 @@
-# Sample Hardhat 3 Beta Project (`node:test` and `viem`)
+# Faroo contracts — R4
 
-This project showcases a Hardhat 3 Beta project using the native Node.js test runner (`node:test`) and the `viem` library for Ethereum interactions.
+Faroo separates staking NAV/share accounting, native custody, withdrawal queues,
+and round-based YieldVault products. Read [SPEC](docs/SPEC.md) for product rules,
+[GOVERNANCE](docs/GOVERNANCE.md) for authorities, and [CODE_MAP](docs/CODE_MAP.md)
+for source and verification entry points. The frozen design and six-batch roadmap
+live in the sibling `faroo-contracts-reserch/architecture-hardening/` repository.
 
-To learn more about the Hardhat 3 Beta, please visit the [Getting Started guide](https://hardhat.org/docs/getting-started#getting-started-with-hardhat-3). To share your feedback, join our [Hardhat 3 Beta](https://hardhat.org/hardhat3-beta-telegram-group) Telegram group or [open an issue](https://github.com/NomicFoundation/hardhat/issues/new) in our GitHub issue tracker.
+## Local preparation and focused verification
 
-## Project Overview
+Never run Foundry or Hardhat in this checkout: both can load environment files.
+Use the allowlisted export and empty-environment runner (see [AGENTS](AGENTS.md)):
 
-This example project includes:
-
-- A simple Hardhat configuration file.
-- Foundry-compatible Solidity unit tests.
-- TypeScript integration tests using [`node:test`](nodejs.org/api/test.html), the new Node.js native test runner, and [`viem`](https://viem.sh/).
-- Examples demonstrating how to connect to different types of networks, including locally simulating OP mainnet.
-
-## Usage
-
-### Running Tests
-
-To run all the tests in the project, execute the following command:
-
-```shell
-npx hardhat test
+```sh
+dest=$(tools/verify/export.sh --with-hardhat | tail -1)
+tools/verify/run.sh "$dest" node node_modules/hardhat/dist/src/cli.js compile --build-profile production
+tools/verify/run.sh "$dest" node node_modules/typescript/bin/tsc --noEmit
+tools/verify/run.sh "$dest" FOUNDRY_PROFILE=final forge build
+tools/verify/run.sh "$dest" node --test test/tasks/*.test.mjs test/release/*.test.mjs
+tools/verify/run.sh "$dest" FOUNDRY_PROFILE=final FOUNDRY_INVARIANT_RUNS=256 FOUNDRY_INVARIANT_DEPTH=32 FOUNDRY_INVARIANT_FAIL_ON_REVERT=true forge test --match-path 'test/invariant/*.t.sol' -vv
 ```
 
-You can also selectively run the Solidity or `node:test` tests:
+Dependencies must already be installed from the pinned `pnpm-lock.yaml` before
+export. Hardhat compile generates real contract typings and Rocketh artifacts;
+`tsc` in a clean export before that step is not the generated-artifact baseline.
+Node release tests require the preceding Forge build to supply
+`out/ReleaseAssertions.sol/ReleaseAssertions.json`. Select additional Solidity
+unit/regression tests with `--match-path`, `--match-contract` or `--match-test`.
+Do not substitute these commands for the later frozen CI/fork/formal gates.
 
-```shell
-npx hardhat test solidity
-npx hardhat test nodejs
-```
+Final/production compilation is Solidity **0.8.28**, optimizer **200**, **Cancun**.
+Foundry's default unoptimized profile is not the release profile. Deployment
+identity uses the reviewed source names, versioned dependency remappings, literal
+source/IPFS metadata and immutable bindings from `tools/snapshot/build.py`; a
+normal test-build hash alone is not production runtime attestation.
 
-### Make a deployment to Sepolia
+`snapshots/` contains immutable B0 historical evidence. `deployments/` and recorded
+V1/V3 fixtures are historical witnesses. Current ignored `out/`, `artifacts/` and
+`generated/` are local build products, not replacement B0 evidence. Current R4
+reviewed build evidence is version-attributed in Research.
 
-This project includes an example Ignition module to deploy the contract. You can deploy this module to a locally simulated chain or to Sepolia.
+## Operational boundaries
 
-To run the deployment to a local chain:
+`tasks/release/` builds unsigned H/U plans and verifies authenticated evidence.
+Follow [UPGRADES](docs/UPGRADES.md) and [RECOVERY](docs/RECOVERY.md); a locally
+passing test is not release approval. All nine old `deploy/` entries refuse and
+retain their CLI tags. `upgrade:testnet` retains an explicit refusing alias for
+the obsolete CounterV2 command. Legacy direct administrator/debug tasks refuse
+before accessing the runtime. Read-only tasks, public deposit/approval commands,
+OPS `yv:open-next-round`, and existing unsigned builders retain their semantics.
+They are not blanket authorization to sign or broadcast.
 
-```shell
-npx hardhat ignition deploy ignition/modules/CounterExample.ts
-```
-
-To run the deployment to Sepolia, you need an account with funds to send the transaction. The provided Hardhat configuration includes a Configuration Variable called `SEPOLIA_PRIVATE_KEY`, which you can use to set the private key of the account you want to use.
-
-You can set the `SEPOLIA_PRIVATE_KEY` variable using the `hardhat-keystore` plugin or by setting it as an environment variable.
-
-To set the `SEPOLIA_PRIVATE_KEY` config variable using `hardhat-keystore`:
-
-```shell
-npx hardhat keystore set SEPOLIA_PRIVATE_KEY
-```
-
-After setting the variable, you can run the deployment with the Sepolia network:
-
-```shell
-npx hardhat ignition deploy --network sepolia ignition/modules/CounterExample.ts
-```
-
-### Upgrade the proxy (Ignition examples)
-
-Initial deployment writes `CounterProxy`, `ProxyAdmin`, and `implementation-v1` to `deployed_addresses.json`. Use those addresses when upgrading.
-
-**Direct upgrade** (deployer EOA calls `ProxyAdmin.upgradeAndCall`):
-
-```shell
-npx hardhat ignition deploy --network sepolia ignition/modules/CounterUpgradeExample.ts \
-  --parameters '{"CounterUpgradeModule":{"proxy":"<CounterProxy>","proxyAdmin":"<ProxyAdmin>"}}'
-```
+The retained OPS round-opening CLI is a direct wallet command, not Safe execution
+support. Its Safe/operator integration remains deferred pending owner confirmation;
+release-time Safe evidence requirements are unchanged.

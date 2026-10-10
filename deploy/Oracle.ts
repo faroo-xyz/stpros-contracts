@@ -1,26 +1,8 @@
-import { artifacts, deployScript } from "../rocketh/deploy.js";
-
-export default deployScript(
-  async ({ deployViaProxy, namedAccounts, viem }) => {
-    const { deployer, owner } = namedAccounts;
-
-    const deployment = await deployViaProxy(
-      "Oracle",
-      {
-        account: deployer,
-        artifact: artifacts.Oracle as any,
-      },
-      {
-        owner,
-        proxyContract: "SharedAdminOpenZeppelinTransparentProxy",
-        execute: {
-          init: {
-            methodName: "initialize",
-            args: [owner],
-          },
-        },
-      },
-    );
+// Retained CLI tags only. Historical deployment records are append-only.
+// No imports or runtime reads: refusing must precede deployment/wallet access.
+export default Object.assign(
+  async () => {
+    throw new Error("Deprecated deploy/Oracle.ts: legacy deployment is incompatible with R4. Use the reviewed release process; this entry point cannot deploy or overwrite records.");
   },
   { tags: ["Oracle", "Oracle_deploy"] },
 );

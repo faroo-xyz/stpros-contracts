@@ -227,45 +227,8 @@ export const yvfAddCounterpartyTask = task(
     name: "counterparty",
     description: "Counterparty address to whitelist",
   })
-  .setInlineAction(async ({ factory, counterparty }, hre) => {
-    const connection = await hre.network.getOrCreate();
-
-    try {
-      const [signer] = await connection.viem.getWalletClients();
-
-      if (signer?.account?.address === undefined) {
-        throw new Error("No signer account available for the selected network");
-      }
-
-      const factoryAddress = getRequiredAddress(factory, "factory address");
-      const counterpartyAddress = getRequiredAddress(
-        counterparty,
-        "counterparty address",
-      );
-
-      const factoryContract = await connection.viem.getContractAt(
-        "YieldVaultFactory",
-        factoryAddress,
-        {
-          client: {
-            wallet: signer,
-          },
-        },
-      );
-
-      const hash = await factoryContract.write.addCounterpartyToWhitelist([
-        counterpartyAddress,
-      ]);
-      const publicClient = await connection.viem.getPublicClient();
-
-      await publicClient.waitForTransactionReceipt({ hash });
-
-      console.log(`[yvf:add-counterparty] factory=${factoryAddress}`);
-      console.log(`[yvf:add-counterparty] counterparty=${counterpartyAddress}`);
-      console.log(`[yvf:add-counterparty] txHash=${hash}`);
-    } finally {
-      await connection.close();
-    }
+  .setInlineAction(async () => {
+    throw new Error("Deprecated yvf:add-counterparty: direct legacy administration is disabled. Use independently reviewed Timelock calldata and the R4 governance process.");
   })
   .build();
 
@@ -290,45 +253,8 @@ export const yvfRemoveCounterpartyTask = task(
     name: "counterparty",
     description: "Counterparty address to remove",
   })
-  .setInlineAction(async ({ factory, counterparty }, hre) => {
-    const connection = await hre.network.getOrCreate();
-
-    try {
-      const [signer] = await connection.viem.getWalletClients();
-
-      if (signer?.account?.address === undefined) {
-        throw new Error("No signer account available for the selected network");
-      }
-
-      const factoryAddress = getRequiredAddress(factory, "factory address");
-      const counterpartyAddress = getRequiredAddress(
-        counterparty,
-        "counterparty address",
-      );
-
-      const factoryContract = await connection.viem.getContractAt(
-        "YieldVaultFactory",
-        factoryAddress,
-        {
-          client: {
-            wallet: signer,
-          },
-        },
-      );
-
-      const hash = await factoryContract.write.removeCounterpartyFromWhitelist([
-        counterpartyAddress,
-      ]);
-      const publicClient = await connection.viem.getPublicClient();
-
-      await publicClient.waitForTransactionReceipt({ hash });
-
-      console.log(`[yvf:remove-counterparty] factory=${factoryAddress}`);
-      console.log(`[yvf:remove-counterparty] counterparty=${counterpartyAddress}`);
-      console.log(`[yvf:remove-counterparty] txHash=${hash}`);
-    } finally {
-      await connection.close();
-    }
+  .setInlineAction(async () => {
+    throw new Error("Deprecated yvf:remove-counterparty: direct legacy administration is disabled. Use independently reviewed Timelock calldata and the R4 governance process.");
   })
   .build();
 
@@ -535,66 +461,8 @@ export const yvfEmergencyCancelTask = task(
     name: "vault",
     description: "YieldVault proxy address to emergency-cancel",
   })
-  .setInlineAction(async ({ factory, vault }, hre) => {
-    const connection = await hre.network.getOrCreate();
-
-    try {
-      const [signer] = await connection.viem.getWalletClients();
-
-      if (signer?.account?.address === undefined) {
-        throw new Error("No signer account available for the selected network");
-      }
-
-      const factoryAddress = getRequiredAddress(factory, "factory address");
-      const vaultAddress = getRequiredAddress(vault, "vault address");
-      const factoryContract = await connection.viem.getContractAt(
-        "YieldVaultFactory",
-        factoryAddress,
-        {
-          client: {
-            wallet: signer,
-          },
-        },
-      );
-      const vaultContract = await connection.viem.getContractAt(
-        "YieldVault",
-        vaultAddress,
-      );
-      const isFactoryVault = await factoryContract.read.isFactoryVault([vaultAddress]);
-
-      if (!isFactoryVault) {
-        throw new Error(
-          `Vault ${vaultAddress} was not created by factory ${factoryAddress}`,
-        );
-      }
-
-      const previousPhase = await vaultContract.read.phase();
-
-      if (previousPhase === 3) {
-        throw new Error(
-          `Vault is already SETTLED (phase=${previousPhase}); emergency cancel is not allowed`,
-        );
-      }
-
-      const hash = await factoryContract.write.emergencyCancel([vaultAddress]);
-      const publicClient = await connection.viem.getPublicClient();
-      const receipt = await publicClient.waitForTransactionReceipt({ hash });
-      const currentPhase = await vaultContract.read.phase();
-
-      console.log(`[yvf:emergency-cancel] factory=${factoryAddress}`);
-      console.log(`[yvf:emergency-cancel] vault=${vaultAddress}`);
-      console.log(`[yvf:emergency-cancel] caller=${signer.account.address}`);
-      console.log(
-        `[yvf:emergency-cancel] previousPhase=${previousPhase} (${getEnumName(PHASE_NAMES, Number(previousPhase))})`,
-      );
-      console.log(
-        `[yvf:emergency-cancel] newPhase=${currentPhase} (${getEnumName(PHASE_NAMES, Number(currentPhase))})`,
-      );
-      console.log(`[yvf:emergency-cancel] txHash=${hash}`);
-      console.log(`[yvf:emergency-cancel] blockNumber=${receipt.blockNumber}`);
-    } finally {
-      await connection.close();
-    }
+  .setInlineAction(async () => {
+    throw new Error("Deprecated yvf:emergency-cancel: direct legacy administration is disabled. Use independently reviewed Timelock calldata and the R4 governance process.");
   })
   .build();
 

@@ -4,7 +4,9 @@ import path from "node:path";
 import { task } from "hardhat/config";
 import type { HardhatRuntimeEnvironment } from "hardhat/types/hre";
 import { isFullyQualifiedName } from "hardhat/utils/contract-names";
-import { encodeAbiParameters, isAddress, type AbiConstructor } from "viem";
+import { encodeAbiParameters, isAddress, type Abi } from "viem";
+
+type AbiConstructor = Extract<Abi[number], { type: "constructor" }>;
 
 const SOCIALSCAN_API_URLS: Record<number, string> = {
   688689:
@@ -257,8 +259,8 @@ export const verifySocialscanTask = task(
       contract,
     );
 
-    const optimizerEnabled = buildProfile.settings?.optimizer?.enabled ?? false;
-    const optimizerRuns = buildProfile.settings?.optimizer?.runs ?? 200;
+    const optimizerEnabled = compilerInput.settings?.optimizer?.enabled ?? false;
+    const optimizerRuns = compilerInput.settings?.optimizer?.runs ?? 200;
 
     console.log(`[verify:socialscan] address=${address}`);
     console.log(`[verify:socialscan] contract=${contract}`);

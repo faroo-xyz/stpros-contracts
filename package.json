@@ -7,7 +7,7 @@
     "test": "hardhat test",
     "deploy:mainnet": "hardhat --network mainnet --build-profile production deploy --tags",
     "deploy:testnet": "hardhat --network testnet --build-profile production deploy --tags",
-    "upgrade:testnet": "hardhat --network sepolia deploy --tags CounterV2"
+    "upgrade:testnet": "node -e \"throw new Error('Deprecated upgrade:testnet: obsolete CounterV2 route. Use the reviewed R4 release process.')\""
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-network-helpers": "^3.0.9",

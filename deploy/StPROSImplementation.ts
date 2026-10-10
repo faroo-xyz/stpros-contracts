@@ -1,32 +1,8 @@
-import { artifacts, deployScript } from "../rocketh/deploy.js";
-
-export default deployScript(
-  async ({ deploy, namedAccounts }) => {
-    const { deployer } = namedAccounts;
-
-    const deployment = await deploy(
-      "StPROS_Implementation",
-      {
-        account: deployer,
-        artifact: artifacts.StPROS as any,
-        args: [],
-      },
-      { alwaysOverride: true },
-    );
-
-    console.log(`[StPROS_Implementation] address=${deployment.address}`);
-    console.log(
-      "[StPROS_Implementation] prereq: oracle.setVToken(stProsProxy, true)",
-    );
-    console.log(
-      "[StPROS_Implementation] owner multisig: ProxyAdmin.upgradeAndCall(stProsProxy, implementation, initializeV2(slp, bridgeVault))",
-    );
-    console.log(
-      "[StPROS_Implementation] helper calldata: pnpm hardhat stpros:upgrade-v2 --network <network> <stProsProxy> <implementation> <slp> <bridgeVault>",
-    );
-    console.log(
-      "[StPROS_Implementation] helper execute: pnpm hardhat stpros:execute-upgrade-v2 --network <network> <implementation>",
-    );
+// Retained CLI tags only. Historical deployment records are append-only.
+// No imports or runtime reads: refusing must precede deployment/wallet access.
+export default Object.assign(
+  async () => {
+    throw new Error("Deprecated deploy/StPROSImplementation.ts: legacy deployment is incompatible with R4. Use the reviewed release process; this entry point cannot deploy or overwrite records.");
   },
   { tags: ["implementations", "StPROS_impl"] },
 );

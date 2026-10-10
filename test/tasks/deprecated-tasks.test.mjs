@@ -7,6 +7,14 @@ import ts from "typescript";
 // Exercise the exact inline action attached to each exported task, with an HRE
 // that rejects any access (especially network creation, artifacts and signers).
 const cases = [
+  ["deprecatedDeploy.ts", "deprecatedDeployTask", "deploy"],
+  ["stPros.ts","stProsSetUnbondingPeriodTask","stpros:set-unbonding-period"],
+  ["yieldVault.ts","yieldVaultSetPhaseTask","yv:set-phase"],
+  ["yieldVault.ts","yieldVaultGrantRoleTask","yv:grant-role"],
+  ["yieldVault.ts","yieldVaultRevokeRoleTask","yv:revoke-role"],
+  ["yieldVaultFactory.ts","yvfAddCounterpartyTask","yvf:add-counterparty"],
+  ["yieldVaultFactory.ts","yvfRemoveCounterpartyTask","yvf:remove-counterparty"],
+  ["yieldVaultFactory.ts","yvfEmergencyCancelTask","yvf:emergency-cancel"],
   ["permissions.ts", "permsTransferOwnerTask", "perms:transfer-owner"],
   ["permissions.ts", "permsTransferProxyAdminTask", "perms:transfer-proxy-admin"],
   ["permissions.ts", "permsMigrateOwnersTask", "perms:migrate-owners"],

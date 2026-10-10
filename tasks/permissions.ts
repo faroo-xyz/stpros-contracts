@@ -242,13 +242,13 @@ async function safeContractRead<T>(
 
 async function inspectOwnableProxy(
   publicClient: PublicClient,
-  getContractAt: (contractName: string, address: Address) => Promise<{
+  getContractAt: (contractName: "Oracle" | "StPROS" | "YieldVaultFactory", address: Address) => Promise<{
     read: {
       owner: () => Promise<Address>;
       paused: () => Promise<boolean>;
     };
   }>,
-  label: string,
+  label: "Oracle" | "StPROS" | "YieldVaultFactory",
   proxy: Address,
   ownerCapabilities: string[],
   upgradeCapabilities: string[],

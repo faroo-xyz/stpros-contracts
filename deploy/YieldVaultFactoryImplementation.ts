@@ -1,23 +1,8 @@
-import { artifacts, deployScript } from "../rocketh/deploy.js";
-
-export default deployScript(
-  async ({ deploy, namedAccounts }) => {
-    const { deployer } = namedAccounts;
-
-    const deployment = await deploy(
-      "YieldVaultFactory_Implementation",
-      {
-        account: deployer,
-        artifact: artifacts.YieldVaultFactory as any,
-        args: [],
-      },
-      { alwaysOverride: true },
-    );
-
-    console.log(`[YieldVaultFactory_Implementation] address=${deployment.address}`);
-    console.log(
-      "[YieldVaultFactory_Implementation] multisig upgrade: ProxyAdmin.upgrade(factoryProxy, implementation)",
-    );
+// Retained CLI tags only. Historical deployment records are append-only.
+// No imports or runtime reads: refusing must precede deployment/wallet access.
+export default Object.assign(
+  async () => {
+    throw new Error("Deprecated deploy/YieldVaultFactoryImplementation.ts: legacy deployment is incompatible with R4. Use the reviewed release process; this entry point cannot deploy or overwrite records.");
   },
   { tags: ["implementations", "YieldVaultFactory_impl"] },
 );

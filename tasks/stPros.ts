@@ -106,66 +106,8 @@ export const stProsSetUnbondingPeriodTask = task(
     description: "StPROS proxy address; defaults to contants/index.ts on mainnet/testnet",
     defaultValue: "",
   })
-  .setInlineAction(async (taskArgs, hre) => {
-    const connection = await hre.network.getOrCreate();
-
-    try {
-      const [signer] = await connection.viem.getWalletClients();
-
-      if (signer?.account?.address === undefined) {
-        throw new Error("No signer account available for the selected network");
-      }
-
-      const unbondingPeriod = getRequiredBigInt(
-        taskArgs.unbondingPeriod,
-        "unbondingPeriod",
-      );
-      const stProsAddress =
-        getOptionalAddress(taskArgs.stPros, "stPros address")
-        ?? getNetworkStPros(connection.networkName);
-
-      if (stProsAddress === undefined) {
-        throw new Error("Missing stPros proxy. Pass --st-pros or use mainnet/testnet.");
-      }
-
-      const stProsContract = await connection.viem.getContractAt("StPROS", stProsAddress, {
-        client: {
-          wallet: signer,
-        },
-      });
-      const [owner, previousUnbondingPeriod, maxUnbonding] = await Promise.all([
-        stProsContract.read.owner(),
-        stProsContract.read.unbondingPeriod(),
-        stProsContract.read.MAX_UNBONDING(),
-      ]);
-
-      if (unbondingPeriod > maxUnbonding) {
-        throw new Error(
-          `unbondingPeriod ${unbondingPeriod} exceeds MAX_UNBONDING ${maxUnbonding}`,
-        );
-      }
-
-      const hash = await stProsContract.write.setUnbondingPeriod([unbondingPeriod]);
-      const publicClient = await connection.viem.getPublicClient();
-      const receipt = await publicClient.waitForTransactionReceipt({ hash });
-      const currentUnbondingPeriod = await stProsContract.read.unbondingPeriod();
-
-      console.log(`[stpros:set-unbonding-period] stPROS=${stProsAddress}`);
-      console.log(`[stpros:set-unbonding-period] caller=${signer.account.address}`);
-      console.log(`[stpros:set-unbonding-period] owner=${owner}`);
-      console.log(`[stpros:set-unbonding-period] maxUnbonding=${maxUnbonding}`);
-      console.log(
-        `[stpros:set-unbonding-period] previousUnbondingPeriod=${previousUnbondingPeriod}`,
-      );
-      console.log(`[stpros:set-unbonding-period] unbondingPeriod=${unbondingPeriod}`);
-      console.log(
-        `[stpros:set-unbonding-period] currentUnbondingPeriod=${currentUnbondingPeriod}`,
-      );
-      console.log(`[stpros:set-unbonding-period] txHash=${hash}`);
-      console.log(`[stpros:set-unbonding-period] blockNumber=${receipt.blockNumber}`);
-    } finally {
-      await connection.close();
-    }
+  .setInlineAction(async () => {
+    throw new Error("Deprecated stpros:set-unbonding-period: direct legacy administration is disabled. Use independently reviewed Timelock calldata and the R4 governance process.");
   })
   .build();
 
