@@ -67,3 +67,16 @@ export const gasTask=command("release:estimate-gas","Local-only preliminary esti
 export const testnetTask=command("release:testnet-handoff","Build the separate T-0 through T-5 and U_t actor stages");
 export const postcheckTask=command("release:postcheck","Read-only post-state expectations and explicit evidence limits");
 export const authorityTask=command("release:authority","Inspect the complete reviewed role inventory");
+
+// Separate from the compatible legacy single-call LOSS builder and release U.
+export const lossContingencyTask = task("yield-vault:loss-contingency", "Build unsigned reviewed paired LOSS contingency operations")
+  .addOption({name:"plan",description:"Reviewed LOSS plan JSON",defaultValue:""})
+  .addOption({name:"reviewHash",description:"Independent raw SHA-256 approval of plan",defaultValue:""})
+  .addOption({name:"rpc",description:"Explicit read-only RPC",defaultValue:""})
+  .setInlineAction(async (args: {plan:string;reviewHash:string;rpc:string}) => {
+    if(!args.plan || !/^[a-f0-9]{64}$/.test(args.reviewHash) || !args.rpc) throw new Error("BLOCKED: reviewed plan, independent hash and explicit read-only RPC required");
+    const plan = checkedJson(args.plan,args.reviewHash);
+    const { observeLossContingency } = await import("./loss-contingency.mjs");
+    const result = await observeLossContingency(plan,readOnlyRpc(args.rpc,plan.mode === "simulation"),checkedJson("tools/release/registry.json"));
+    console.log(JSON.stringify({...result,planReviewHash:args.reviewHash},null,2));
+  }).build();

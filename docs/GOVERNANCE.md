@@ -37,3 +37,111 @@ Pending includes Waiting/Ready actions even with blocked predecessors. Pre set
 empty, H exactly frozen U with zero predecessor, post set empty and U Done.
 The source proof, complete authenticated archive/journal and pinned OZ runtime
 are prerequisites; a parser alone does not prove whole-operation completeness.
+
+## LOSS contingency planning (LAB-F-01, approved 2026-10-10)
+
+A Guardian pause can make a scheduled LOSS miss the fixed proposal cutoff and
+indirectly change who bears the round outcome. GRD cannot directly transfer custody
+or change NAV. This is an operational mitigation with residual timing/economic
+risk, not a contract-level fix. The effect can reach the approved round loss cap
+(50% maximum); it is not bounded solely by a short outage duration.
+
+For one reviewed LOSS amount and round, prepare and independently schedule both:
+
+| Path | Exact ordered target calls | Required execution state |
+|---|---|---|
+| A | Vault `proposeSettlement(LOSS, approvedAmount, address(0))` | Factory unpaused |
+| B | Factory `setGuardian(reviewedReplacementGuardian)`; Factory `unpause()`; same Vault LOSS call | Factory paused; one atomic Timelock batch |
+
+B rolls back in full if any call fails, including `unpause()` when already
+unpaused. A fails while paused. Neither path works in both pause states. Replacing
+GRD is effective only when B succeeds; approve the exact replacement independently.
+No tooling may invent a Guardian, Safe, signer approval, amount or new round terms.
+
+Compute `D = openDeadline + lockDuration + SETTLEMENT_GRACE` and
+`proposalCutoff = D - settleTimelockWindow`. Schedule **both** operations no later
+than `proposalCutoff - actualMinDelay - reviewedMargin`. The margin is a positive,
+explicitly reviewed operational input, not a release constant. Ensure maturity
+also leaves the margin before cutoff. Exact cutoff is accepted by the contract;
+operators must retain the reviewed margin rather than plan for last-second
+inclusion. If neither reviewed path can safely execute before cutoff, report
+**BLOCKED** and independently re-review; never extend D or silently change amount,
+Guardian, calldata, salts or operation IDs. OPS pre-emption, new pauses, unavailable
+signers, transaction inclusion and other state changes remain risks.
+
+`yield-vault:loss-contingency` is a separate unsigned/read-only task. The existing
+`yield-vault:loss-calldata` retains its single-call JSON interface. The new task
+checks current chain, approved runtimes, Factory proxy admin/implementation,
+Vault beacon/implementation/asset, Factory registry membership and Vault back-link,
+owners, authority getters, round terms, delay, backing and selected operation IDs.
+Release mode binds historical canonical Factory/asset/Beacon/ProxyAdmin identities
+to the existing chain registry and the Timelock to the GC-03 pinned OZ runtime.
+Full runtime hashes (including Factory immutable binding) must be independently
+approved from known source/artifacts, never copied from unchecked observations.
+The pure builder is not a chain attestation; release-oriented output must use the
+observing task. Fresh read-only state is evidence at a pinned block, not a promise
+that it remains unchanged through scheduling or execution.
+
+The task supports new paired plans for effective LOCKED, non-retired rounds only;
+it refuses existing proposals and selected IDs already scheduled or Done.
+Existing proposal replacement, new unregistered Factory deployments, and arbitrary
+proxy topologies need separate review. All artifacts remain `deployable: false`:
+actual Safe identities, signer/control independence, nonces and execution approvals
+are external requirements. Synthetic local identities are simulation-only.
+
+After the selected path executes, **CAN may cancel the unused pending operation;
+GOV retains its approved canceller capability**. Verify the selected ID is Done,
+the unused ID is Unset after cancellation, and the full final operation inventory
+matches the actual execution and cancellation receipts. The unused operation may
+still replace a proposal or act on a later round: LOSS calldata has no round-index
+argument. A currently reverting Ready call is not closed. Waiting and Ready both
+remain pending, including blocked dependencies. Keep the original immutable bundle;
+a changed payload means a new operation requiring new review and the full delay.
+GC-03 action-bearing history and reconciliation remain authoritative. This task's
+two-ID check neither enumerates all operations nor satisfies GC-03 by itself. Paired
+LOSS operations do not bypass the existing H/U release inventory constraints.
+
+Monitor each intended/scheduled LOSS for cutoff, latest scheduling time, actual
+delay, Waiting/Ready/Done/cancelled status, Factory pause and Guardian identity.
+Escalate before the paired scheduling window closes, immediately on a pause near
+cutoff, on a missed cancellation, or on round/amount/role/owner/code/asset drift.
+Unexpected history, a changed Safe/Guardian approval, insufficient backing, revoked
+authority, a stale/reorged observation or failure of either execution simulation
+requires independent re-review. Recheck runtime conditions immediately before
+execution, including finalization's separate pause/window dependency. A Ready
+operation alone is insufficient. No command or runbook here authorizes a mainnet
+or testnet transaction.
+
+### LOSS plan input and read-only usage
+
+Run only in the allowlisted export through `tools/verify/run.sh`:
+
+```bash
+tools/verify/run.sh "$dest" node node_modules/hardhat/dist/src/cli.js yield-vault:loss-contingency --plan /absolute/path/to/reviewed-loss-plan.json --review-hash "$REVIEWED_PLAN_SHA256" --rpc "$PUBLIC_READ_ONLY_RPC"
+```
+
+The operator must independently supply `REVIEWED_PLAN_SHA256` and
+`PUBLIC_READ_ONLY_RPC`. This example does not authorize execution of any
+governance transaction.
+
+No wallet client, signature or transaction is acquired. Missing proof inputs are
+blocked; the owner approval for developing this tool is not a release plan approval.
+The JSON schema is `faroo-loss-contingency-v1`:
+
+| Input fields | Reviewed meaning |
+|---|---|
+| `mode`, `chainId` | `simulation` or `release`; integer chain ID (release: 1672/688689) |
+| `vault`, `factory`, `timelock`, `asset`, `beacon`, `factoryImplementation`, `vaultImplementation`, `proxyAdmin` | Exact lowercase nonzero approved contract identities |
+| `guardian`, `replacementGuardian`, `gov`, `can`, `operator`, `counterparty`, `feeRecipient` | Exact reviewed actors; replacement differs from current GRD and excluded authorities/recipients |
+| `runtimeHashes` | Map keyed by the eight contract identity names above, full runtime Keccak-256 for each |
+| `round` | Exact decimal-string `roundIndex`, `openedAt`, `openWindow`, `openDeadline`, `lockDuration`, `settleTimelockWindow`, `roundCap`, `perAddressCap`, `minSubscription`, `performanceFeeBps`, `maxLossBps` |
+| `approvedLossAmount`, `minDelay` | Nonnegative decimal strings in raw asset units / seconds; observed delay must match |
+| `reviewedAt`, `expiresAt`, `reviewReference` | Independently approved Unix-second strings and evidence reference; review expires within one hour |
+| `marginSeconds`, `marginReviewReference` | Positive decimal seconds and independent operational-margin decision |
+| `predecessor`, `saltA`, `saltB` | Zero bytes32 predecessor; distinct reviewed bytes32 salts |
+| optional `frozenOperationIds` | Exact `{ "A": "0x…", "B": "0x…" }`; any reconstructed ID mismatch blocks, never rewrites |
+
+Fresh heads are at most 120 seconds old with at most 30 seconds future clock skew;
+scans must finish within a 120-second head advance and recheck the canonical hash.
+Those are observation freshness limits, not the independently chosen scheduling
+margin. Fresh observations never renew an expired plan or existing operation.

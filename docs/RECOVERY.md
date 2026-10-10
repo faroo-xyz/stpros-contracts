@@ -73,3 +73,63 @@ predecessor states, including blocked dependencies. Empty completion or funding
 does not exempt a nonempty successor from inventory. Full empty-ID history is
 not claimed. Preserve the frozen U identity; cancellation and a new reviewed
 schedule are separate governed operations, not edits to an existing operation.
+
+## BridgeVault custody recovery and FIFO resumption (LAB-OBS-01)
+
+Outstanding withdrawal liabilities are `Q - C`, where `Q = queuedWithdrawal`
+and `C = completedWithdrawal`. Reconcile this value with the sum of every current
+record's pending amount and the complete history of requests and prior payments.
+BridgeVault's **current available balance** is distinct from this liability and
+from Oracle-reported NAV. For the canonical native-backed WPROS registration,
+`BridgeVault.getBalance(asset)` measures native liquidity; donated WPROS does not
+become available native liquidity until successfully unwrapped. Verify actual
+registration, asset and BridgeVault identity before using either balance.
+
+The funding frontier is `F = current BridgeVault balance + C`. For a mature record
+with queued baseline `q` and pending amount `p`, the accounting release is bounded
+by `min(F - q, p)` when `F > q`. This is an interval-accounting calculation, not a
+reservation of available custody. `canWithdrawalAmount` is **advisory**: pause,
+registration, timing, intervening claims and privileged custody recovery can prevent
+payment even when the preview is positive.
+
+Example from the local regression: Alice has [0,10), Bob [10,20), with 20 PROS
+funded. Bob receives 10 first. An authorized 5-PROS recovery leaves custody 5 and
+C=10, so F=15. Alice's calculated release remains 10, but the entire claim reverts
+because custody is only 5. Re-funding by 4 still leaves custody 9 and still reverts;
+custody of 10 pays her full 10. Rights and queue records are preserved, and the
+custody check prevents overpayment. Partial liquidity need not produce a partial
+claim when the currently calculated release is larger than custody. This accepted
+operational limitation does not add skipping, repricing or reordering of records,
+and receiver semantics remain unchanged.
+
+Conservative recovery workflow:
+
+1. Pause affected BridgeVault operations where appropriate and coordinate custody
+   outflows; pausing StPROS/Oracle alone does not pause claims.
+2. At a pinned block record Q, C, Q−C, actual native/wrapped balances, registrations,
+   current BridgeVault/asset identities and every outstanding record.
+3. Reconcile queue intervals, receiver bindings, maturity snapshots, previous
+   out-of-order payments and all recovery outflows against complete history.
+4. Restore independently reviewed liquidity. The conservative all-queue condition
+   is available custody **at least Q−C** for the relevant asset liabilities, with
+   no conflicting claims on the same reserve. Account for new requests and other
+   registered liabilities; a single observed preview is not total solvency proof.
+5. Confirm complete record sums and current balances again, and verify the relevant
+   complete claim calls are fully payable, including multi-record aggregate release,
+   registration, pause and native/wrapped payout requirements. Document any partial
+   resumption as a separately reviewed liquidity limitation, not restored solvency.
+6. Only after reconciliation and payment checks pass may authorized governance
+   unpause BridgeVault and resume operations. Continue checking as claims execute.
+
+Alert on custody below Q−C, frontier reductions after recovery/repointing, positive
+previews exceeding payable custody, repeated `InsufficientBalance` or stalled mature
+records, unexpected receiver/registration changes, and queue/history reconciliation
+failures. External SLP/bridge solvency and future funding remain separate evidence
+requirements. Neither the preview nor a local regression proves them. Keep claims
+paused or report **BLOCKED** when identities, reconciliation or full release funding
+are unresolved; do not modify tickets to force resumption.
+
+For LOSS recovery, use the paired-path controls in [GOVERNANCE.md](GOVERNANCE.md#loss-contingency-planning-lab-f-01-approved-2026-10-10).
+An expired scheduling window, existing proposal replacement, or an unused stale
+Ready operation needs explicit re-review/cancellation; there is no universal
+pause-state-independent call and no deadline bypass.
