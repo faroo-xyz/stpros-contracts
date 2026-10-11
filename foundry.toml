@@ -1,38 +1,31 @@
-# Foundry configuration for verification tooling (B0).
-#
-# Hardhat stays the build and deployment tool. Foundry (forge, anvil, halmos)
-# must only run inside the .env-free export produced by tools/verify/export.sh,
-# because Foundry auto-loads `.env` from the working directory and its parents.
-#
-#   dest=$(tools/verify/export.sh | tail -1)
-#   tools/verify/run.sh "$dest" forge test
-#
-# Profiles:
-#   default  - solc 0.8.28, cancun, optimizer off (matches Hardhat's default profile)
-#   final    - solc 0.8.28, cancun, optimizer 200 runs (matches Hardhat's production profile)
-
+# Native verification profile. Run only inside the approved isolated export.
+# Canonical artifact identity is independently enforced by tools/ci/canonical.py.
 [profile.default]
 src = "contracts"
 test = "test"
-script = "script"
 out = "out"
 cache_path = "cache_forge"
 # forge test clears its cheatcode-snapshot directory on start; keep it away from
 # the tracked B0 baselines in snapshots/.
 snapshots = "cache_forge/snapshots"
-libs = ["node_modules"]
+libs = ["lib"]
 solc_version = "0.8.28"
 auto_detect_solc = false
 evm_version = "cancun"
-optimizer = false
+optimizer = true
+optimizer_runs = 200
+via_ir = false
+bytecode_hash = "ipfs"
 ffi = false
 remappings = [
-  "@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/",
-  "@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/",
-  "forge-std/=node_modules/forge-std/src/",
+  "@openzeppelin/contracts/=lib/openzeppelin-contracts/",
+  "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+  "forge-std/=lib/forge-std/src/",
 ]
 # Legacy fixtures (recorded deployment bytecode) and deployed-state snapshots are read-only inputs.
 fs_permissions = [
+  { access = "read", path = "./cache/native-r4" },
+  { access = "read-write", path = "./cache_forge/rehearsal" },
   { access = "read", path = "./test/fixtures" },
   { access = "read", path = "./snapshots/deployed" },
   # Bounded test coverage output inside the isolated export only.

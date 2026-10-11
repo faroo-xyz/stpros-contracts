@@ -1,5 +1,8 @@
 {
   "origin": "Copied from the frozen Node reference, not candidate output",
   "referenceSha256": "9b902b6c43ca538215a0cafa00c5aca1d5d098b582ff2563c2eaabc717e8837a",
-  "witnessesSha256": "603280b822745a5a5ddcda9eb89f8eccc340e3eaf337a039108f318af5ae8f18"
+  "originalWitnessesSha256": "603280b822745a5a5ddcda9eb89f8eccc340e3eaf337a039108f318af5ae8f18",
+  "witnessesSha256": "bdd362a5800a10be80151d6f70335dd27dcf7318ef19e527103635138293ab53",
+  "selection": "22 unchanged original values required by retained Solidity upgrade/Keccak witnesses; original complete fixture archived in Research.",
+  "primitivesSha256": "63110d61809d00b2ff370e2dc136e5a501df01ae792efa935df6a370c34a769e"
 }

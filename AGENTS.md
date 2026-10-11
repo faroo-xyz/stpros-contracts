@@ -8,7 +8,7 @@ it needs a design amendment first.
 ## Secrets and isolation
 
 - Never read, open, search or print `.env`, `.env.*`, keys or credentials.
-- `hardhat.config.ts` imports `dotenv/config`, and **every Foundry binary
+- **Every Foundry binary
   (`forge`, `cast`, `anvil`, and Halmos through forge) loads `.env` from its
   working directory and every parent directory at startup, for every
   subcommand, including offline ones such as `cast keccak` or `forge --version`.**
@@ -21,7 +21,9 @@ it needs a design amendment first.
   ```
 
   Python tools call Foundry binaries only through `common.run_foundry`
-  (fresh temporary directory, empty environment).
+  (fresh temporary directory, empty environment). Test-only Anvil rehearsals may
+  start their own loopback node inside an approved export with a clean environment
+  and zero generated accounts; no public RPC or signing material is accepted.
 - RPC endpoints are passed explicitly and are the public read-only ones
   (`tools/lib/rpc.py`): `https://rpc.pharos.xyz` (mainnet, chain 1672) and
   `https://atlantic.dplabs-internal.com` (testnet, chain 688689). Both reject
@@ -33,8 +35,7 @@ it needs a design amendment first.
   Local forks (`anvil`, `vm.createSelectFork`) may impersonate accounts; nothing
   is ever sent to a public endpoint except read-only calls.
 - `deployments/` is append-only. Never overwrite or delete a historical record.
-  The deploy scripts pass `alwaysOverride: true`; a redeploy would overwrite the
-  record of the previous implementation, so archive it first.
+  Native tooling prepares definitions and verifies state; it has no deployment route.
 
 ## Legacy fidelity
 
@@ -62,3 +63,16 @@ it needs a design amendment first.
 - Develop directly on `main`, as approved by the owner. Do not create development branches or merge the `dev` (tbPROS) branch.
 - One reviewable batch per commit boundary, as listed in the implementation
   roadmap of the research repository.
+
+## Native tooling scope
+
+- The owner retired application Tasks, ordinary view CLIs, wallet operations and
+  their unsigned-intent replacements. Only build, upgrade/deployment preparation,
+  read-only release verification and reviewed LOSS recovery preparation remain.
+- Solidity dependencies are exact-byte vendored under `lib/`. Compiler input
+  source names, IPFS metadata and all 13 protected artifact identities remain
+  fixed by `tools/ci/r4-reference.json`. Never refresh artifact hashes to pass.
+- Historical Node references and retired tooling belong in Research. Production
+  does not depend on that repository. Do not restore a duplicate framework CLI.
+- Use an explicit verified deletion manifest for cleanup. Unknown ignored local
+  material and protected storage are never blanket-deleted.

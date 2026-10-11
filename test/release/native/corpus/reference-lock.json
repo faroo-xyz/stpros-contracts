@@ -1,10 +1,24 @@
 {
-  "origin": "SYNTHETIC TEST ONLY; original Node/viem functions; captured before Python release implementation",
-  "sourceCommit": "4d9d48db1facb2ae54242f902a1344536ba21dfb",
-  "sourceTree": "410a1c76416fc10595cffa3633ef82243646c4bd",
-  "researchCommit": "ad27d2eb1989d3b0858c075eb9538e3b7c1a33a2",
+  "caseCount": 391,
+  "files": {
+    "corpus/abi-schemas.json": "84f756ccad86d91116bac61898d5f89a2f402831da50b7df1aa6d083fc9c28c7",
+    "corpus/governance-closure.test.mjs.json.gz": "b11947ce1f4d5ff605a1e11389309d96005f1fdb7ec41982080e9120aefe9421",
+    "corpus/history.test.mjs.json.gz": "bbb34d7155634818b1fd940a4a90b047f2c87a8269fc5e0be6ab4d3060f4ef9e",
+    "corpus/index.json": "5d354311c438d3c06f8749452d53e83a6b759e4fdf898ab9575809fea5170b33",
+    "corpus/read-only.integration.test.mjs.json.gz": "2a6d5a92d70a16d24c9c6b172b1755ce1805dadc57dc7af8dd7838fd39a42201",
+    "corpus/reference-cli.mjs.json.gz": "99e103ae54c684e963a19875f0ad59de4b078bc7935f9c48b828197d3ec66948",
+    "corpus/reference-rich-plans.mjs.json.gz": "b857215da0e80b0743edb07a2c772e88a56ffe93b4a65325d8c82aed0d032d1a",
+    "corpus/reference-supplement.mjs.json.gz": "7b5a7322517c25f6d04a44340e7eeffd8477b13c012d60ba682459e552e4de82",
+    "corpus/release-tooling.test.mjs.json.gz": "d2341d139f62310bc58a7234d2dc8fae945818d67f43a55f264c3139240813a4",
+    "corpus/remediation.test.mjs.json.gz": "d8666f080d1a248e0cee2e33fa962f912c1163e33414f6e9a9e97a4e52ff5c5c",
+    "corpus/withdrawal-events.test.mjs.json.gz": "c0cbead99535a187a66c8842f3293f0f77b48c21ffb69fdf82c60d68b853186a"
+  },
   "node": "v22.20.0",
-  "caseCount": 509,
+  "origin": "SYNTHETIC TEST ONLY; original Node/viem functions; captured before Python release implementation",
+  "originalReferenceSha256": "bf0049a12b14a4a10f11705a32d21552f2d5da5de1000c67de4aba86e707d4cc",
+  "researchCommit": "ad27d2eb1989d3b0858c075eb9538e3b7c1a33a2",
+  "selection": "One original invocation per named security property, all artifact/recovery supplement, explicit witness and wrong-rule cases, plus missing/duplicate/order/identity boundaries. Full corpus retained in Research.",
+  "sourceCommit": "4d9d48db1facb2ae54242f902a1344536ba21dfb",
   "sourceSha256": {
     "package.json": "f656bbe2a2282425ef684fde924053d6a558eae0f6549db8776ffd63e751d351",
     "pnpm-lock.yaml": "5b5ba09fdf1b387fb3087d3f0bc53b166e84e6ab9395c2ef5cc09627eb3880b5",
@@ -45,23 +59,5 @@
     "test/release/withdrawal-events.test.mjs": "ef9a461047e92eca7962462d95d8bb941983d79c5ea51d7b85c41cd5b1a881d2",
     "tools/release/registry.json": "f093386eccd9cd3b98ea9936d5ef5e4890c4254951b5728f58a00557d8ec0a14"
   },
-  "files": {
-    "corpus/governance-closure.test.mjs.json.gz": "85881f4083963d48d462a630a3de0704556526f2eb5622478d9141129de94dae",
-    "corpus/history.test.mjs.json.gz": "e4cb38c336aedb0c4b584903c54b4161390a42b8ce373ae74b8af8f8fbca5dcb",
-    "corpus/read-only.integration.test.mjs.json.gz": "29ad690c239402f2186480135d555c2e7aab80954d3ec64e669751e5768c6332",
-    "corpus/release-tooling.test.mjs.json.gz": "6c35f7dae04d4b6a369aebef41b090ee6e4a299515ce1041a71f3c692486edd1",
-    "corpus/remediation.test.mjs.json.gz": "ae438cc6dedc0876cacf1c3f8d2ca9411351de17ec34489f40eb181510fd2422",
-    "corpus/withdrawal-events.test.mjs.json.gz": "52fcc421d6b4dc00ef13922a8a713b1be63fed57f352bd43d6ed29f29b8b0ff5",
-    "corpus/reference-cli.mjs.json.gz": "eaa8637c5214e3c90c58ad13363682f3398ed6bc87cd93b9ca15a60038603b46",
-    "corpus/reference-supplement.mjs.json.gz": "bedf6b7588c846de784bc528ee81c7c53a56f59f11aedb0c6a42b52ee50aba37",
-    "corpus/reference-rich-plans.mjs.json.gz": "b7015fb9937fb3a0ed34c07963d8e906647d0b89052dc6fff8b45fb3d1c53b13",
-    "corpus/index.json": "1d368c1fdd1340d5259082458819427a4386e9535e0d6ddd8ee9d5a911c3ef14",
-    "reference/capture-hooks.mjs": "c2fb5818c6c2fd631b6d26208ef182b35b454d03b83b8e87932163266759d93c",
-    "reference/capture-runtime.mjs": "0b17c35ef235cac3c980f10ff3bd3bcea7e8801f20fd2d8d41774fb6233c0e90",
-    "reference/capture-schemas.mjs": "4af5a61159ddac2101195135e43a7269c5a2622e259b0f22b04d3e099d071728",
-    "reference/reference-cli.mjs": "7af42ae28e735596790ad4aeb52a0738ddccce9c2d3fe4921b27029f0ecd7a57",
-    "reference/reference-rich-plans.mjs": "a59d27326e14f167a07716cd22669c46e564ea12e756ecf92d29bd32c395264f",
-    "reference/reference-supplement.mjs": "a37b57f7a95f1ce7a0f52d1a7affde327c06d07592760e9707a24f94996afcd8",
-    "corpus/abi-schemas.json": "84f756ccad86d91116bac61898d5f89a2f402831da50b7df1aa6d083fc9c28c7"
-  }
+  "sourceTree": "410a1c76416fc10595cffa3633ef82243646c4bd"
 }

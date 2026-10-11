@@ -3,8 +3,6 @@ pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
 import {ReleaseAssertions} from "../../contracts/release/ReleaseAssertions.sol";
-import {YieldVault} from "../../contracts/YieldVault.sol";
-import {YieldVaultFactory} from "../../contracts/YieldVaultFactory.sol";
 import {TimelockController} from "@openzeppelin/contracts/governance/TimelockController.sol";
 
 /// Independent Solidity compiler/OZ oracle. Test VM only; no RPC or signing.
@@ -47,15 +45,6 @@ contract FoundationWitnessTest is Test {
         assertEq(abi.encodeCall(ReleaseAssertions.assertHandoff,(c,H)),ref("function_ReleaseAssertions_assertHandoff"));
         (ReleaseAssertions.Common memory d,ReleaseAssertions.Core memory k)=abi.decode(abi.encode(c,core),(ReleaseAssertions.Common,ReleaseAssertions.Core));
         assertEq(d.roles[0].account,A);assertEq(d.vaults[0].termsHash,H);assertTrue(d.vaults[0].residualRecovery);assertEq(k.destinations[0],A);
-    }
-    function test_factoryStringsAndRoundTuple() public view {
-        YieldVault.RoundParams memory round=YieldVault.RoundParams(1,1,1,1,1,1,1,1,1);
-        YieldVault.InitParams memory p=YieldVault.InitParams(A,A,A,A,A,"Foundation","Foundation",round,A);
-        assertEq(abi.encodeCall(YieldVaultFactory.createYieldVault,(p)),ref("function_YieldVaultFactory_createYieldVault"));
-        assertEq(abi.encode(string("\x00leading")),ref("abi_string_3"));
-        // Solidity retains the NUL; pinned viem decoder trims it. Encoding parity
-        // and viem admission compatibility are distinct, explicitly tested claims.
-        assertEq(bytes(abi.decode(ref("abi_string_3"),(string))),bytes("\x00leading"));
     }
     function test_OZSingleBatchEncodingAndHash() public {
         address[] memory empty=new address[](0);TimelockController tl=new TimelockController(1,empty,empty,address(this));

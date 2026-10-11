@@ -2,10 +2,10 @@
   "compiler": "solc, the solidity compiler commandline interface\nVersion: 0.8.28+commit.7893614a.Darwin.appleclang\n",
   "compilerSha256": "81515b0e53deaa266d549545ccaac0a5a96e6d4e8201c77f673b2c710976d9ea",
   "configSha256": {
-    "foundry.toml": "0ca80cc67ff440ef88917b699d1b01331b5260eaf202c03973a6e90820c164ea",
-    "hardhat.config.ts": "ee318b667f1b21233511d0c39b2dfe1802f69be556c68c42040225cb9e99e130",
-    "package.json": "f656bbe2a2282425ef684fde924053d6a558eae0f6549db8776ffd63e751d351",
-    "pnpm-lock.yaml": "5b5ba09fdf1b387fb3087d3f0bc53b166e84e6ab9395c2ef5cc09627eb3880b5"
+    "foundry.toml": "33fe134d1595c743ae54d57a6ee22e7db6d10f9128f768b6fa046f38d53be57b",
+    "lib/DEPENDENCIES.json": "3a48a5a1a78f2038b994e3a89895a8fb3ef2748b30de272903dd88b09a6333ff",
+    "tools/ci/canonical.py": "308e5099d2c377d46d3c220ae1471ae224768a68cbe87cee56d9652f41f7354e",
+    "tools/snapshot/build.py": "cd534a35860fadeba8044b1cb6d8c6382d1e4bd85d47df64e6640382cc03a866"
   },
   "contracts": {
     "BeaconProxy": {
@@ -566,6 +566,10 @@
     "path": "audits/2026-10-10-1cc190a/remediation/governance-implementation/evidence/build-final.json",
     "researchHead": "64cf64e46ac796dbeb615a518b8e9e42513e9ae0",
     "sha256": "a2a9a5e61e8a8a6a6b621987494bc7ff26d6928742392410eea124671f094883"
+  },
+  "nativeBindingMigration": {
+    "originalReferenceSha256": "3a885dc98ce450afd108f5e00600f4af96e6b0a8190f45be434d99a3aae44cb3",
+    "policy": "Only configuration binding migrated; all original compiler, settings, source closures and artifact field hashes unchanged."
   },
   "productionRoots": [
     "project/contracts/BridgeVault.sol",

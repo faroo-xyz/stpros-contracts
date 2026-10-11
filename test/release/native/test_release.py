@@ -136,7 +136,7 @@ class NativeReleaseTests(unittest.TestCase):
                     cli.main(list(args))
                 self.assertEqual(result.exception.code, 2)
         groups = cli.parser()._subparsers._group_actions[0].choices
-        self.assertEqual(set(groups), {'release', 'artifact'})
+        self.assertEqual(set(groups), {'release', 'artifact', 'loss'})
         self.assertEqual(set(groups['release']._subparsers._group_actions[0].choices), set(cli.RELEASE_ACTIONS))
         self.assertEqual(set(groups['artifact']._subparsers._group_actions[0].choices), {'normalize'})
 

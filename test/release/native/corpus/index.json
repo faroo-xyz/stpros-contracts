@@ -8,28 +8,12 @@
     "sha256": "8771f6895db6fdf8468defa1fc9e6b424cc9f6cc44e75233c50d08e4f0342039"
   },
   {
-    "id": "governance-closure.test.mjs:0002",
-    "test": "GC01 input and fresh observation reject mainnet phase 0",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "throw",
-    "file": "governance-closure.test.mjs.json.gz",
-    "sha256": "f71e68a72737ac6a26a4dbaf06757ab716b783bd67422015f9420512f9291fac"
-  },
-  {
     "id": "governance-closure.test.mjs:0003",
     "test": "GC01 input and fresh observation reject mainnet phase 1",
     "function": "core.mjs.preflight",
     "outcome": "throw",
     "file": "governance-closure.test.mjs.json.gz",
     "sha256": "0963176cade679ac46fb29372217d02e3436bd0fe1f32ff37c651201c3a4e437"
-  },
-  {
-    "id": "governance-closure.test.mjs:0004",
-    "test": "GC01 input and fresh observation reject mainnet phase 1",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "throw",
-    "file": "governance-closure.test.mjs.json.gz",
-    "sha256": "0b7a603e174212f0879e84fc5cd04ad1417f328b369a03b7ad228d062b382350"
   },
   {
     "id": "governance-closure.test.mjs:0005",
@@ -40,44 +24,12 @@
     "sha256": "6013762b0739ad0675e6dfda809e3f25ce621160f8a48b7b3e2f44f1102307f5"
   },
   {
-    "id": "governance-closure.test.mjs:0006",
-    "test": "GC01 input and fresh observation reject mainnet phase 2",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "throw",
-    "file": "governance-closure.test.mjs.json.gz",
-    "sha256": "0ff8ba48d1f3f09c346a7f8fa4f3dc7d03e5bc83f42b057a7a3b7bb73a9869b9"
-  },
-  {
     "id": "governance-closure.test.mjs:0007",
     "test": "GC01 SETTLED accepted and frozen U unchanged by checking",
     "function": "core.mjs.buildU",
     "outcome": "return",
     "file": "governance-closure.test.mjs.json.gz",
     "sha256": "18da75d622ac90eeaa4bcef04cbb333fca1cbb12d11d20ed3a409850474c243e"
-  },
-  {
-    "id": "governance-closure.test.mjs:0008",
-    "test": "GC01 SETTLED accepted and frozen U unchanged by checking",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "return",
-    "file": "governance-closure.test.mjs.json.gz",
-    "sha256": "c65203644607e644ae33e7d76ebfb8829b20e34fc48041a05a8b79320a1b4e7a"
-  },
-  {
-    "id": "governance-closure.test.mjs:0009",
-    "test": "GC01 SETTLED accepted and frozen U unchanged by checking",
-    "function": "timelock-history.mjs.requireActionBearingCoverage",
-    "outcome": "return",
-    "file": "governance-closure.test.mjs.json.gz",
-    "sha256": "5f2331b3ff43c83c3c3091f69419109d06f28389b8ba4c54a6ab9f2adc17c649"
-  },
-  {
-    "id": "governance-closure.test.mjs:0010",
-    "test": "GC01 SETTLED accepted and frozen U unchanged by checking",
-    "function": "core.mjs.buildU",
-    "outcome": "return",
-    "file": "governance-closure.test.mjs.json.gz",
-    "sha256": "3ddfaa4b931276386ab232f90ad002d90c74c4d0d2540578de502c0ef9b9ecf9"
   },
   {
     "id": "governance-closure.test.mjs:0011",
@@ -232,28 +184,12 @@
     "sha256": "0cd12ae3962c9ea03892ae2645b05f98e48c5149bb96005e2c633f325bc91c6b"
   },
   {
-    "id": "governance-closure.test.mjs:0030",
-    "test": "GC03 single zero reconstructs identity and lifecycle",
-    "function": "timelock-history.mjs.checkOperationPlan",
-    "outcome": "return",
-    "file": "governance-closure.test.mjs.json.gz",
-    "sha256": "35a95ce8fe227c1b06bb01252832cdb015597270f3089337448bcb9446eb9a2b"
-  },
-  {
     "id": "governance-closure.test.mjs:0031",
     "test": "GC03 single salt reconstructs identity and lifecycle",
     "function": "timelock-history.mjs.replayOperations",
     "outcome": "return",
     "file": "governance-closure.test.mjs.json.gz",
     "sha256": "750a9f995a29f862b6a720092b8a36ad2d5a7135dde138e86ef2f2da0c8fbaf3"
-  },
-  {
-    "id": "governance-closure.test.mjs:0032",
-    "test": "GC03 single salt reconstructs identity and lifecycle",
-    "function": "timelock-history.mjs.checkOperationPlan",
-    "outcome": "return",
-    "file": "governance-closure.test.mjs.json.gz",
-    "sha256": "2df46acfa9756b386925f21325e0b9875ab74406c7666aa11218d2f06d38ee86"
   },
   {
     "id": "governance-closure.test.mjs:0033",
@@ -264,28 +200,12 @@
     "sha256": "fbf60a4486b03b55573aee8643e2cd2e662ea3e14bf306878bfc0d0c6cce62f1"
   },
   {
-    "id": "governance-closure.test.mjs:0034",
-    "test": "GC03 batch one reconstructs identity and lifecycle",
-    "function": "timelock-history.mjs.checkOperationPlan",
-    "outcome": "return",
-    "file": "governance-closure.test.mjs.json.gz",
-    "sha256": "cc57747b1e8227da1bfd01acd6e09876c80a149a5af17a20abe73d3c25e54103"
-  },
-  {
     "id": "governance-closure.test.mjs:0035",
     "test": "GC03 batch many salt reconstructs identity and lifecycle",
     "function": "timelock-history.mjs.replayOperations",
     "outcome": "return",
     "file": "governance-closure.test.mjs.json.gz",
     "sha256": "f170165f8d072fbbe951a66038400cfb20d2bd46f9db5dea90235e5fe0a3039f"
-  },
-  {
-    "id": "governance-closure.test.mjs:0036",
-    "test": "GC03 batch many salt reconstructs identity and lifecycle",
-    "function": "timelock-history.mjs.checkOperationPlan",
-    "outcome": "return",
-    "file": "governance-closure.test.mjs.json.gz",
-    "sha256": "99f5c49f64d4c9d1efa5535a934c4a47f5c62724a85c778b438e70c0e1856fe0"
   },
   {
     "id": "governance-closure.test.mjs:0037",
@@ -312,14 +232,6 @@
     "sha256": "720185054acabc0fec3bfd091a194e93af844a7c50db53e02159c3bf792b8356"
   },
   {
-    "id": "governance-closure.test.mjs:0040",
-    "test": "GC03 pending action with predecessor timestamp 0 remains outstanding",
-    "function": "timelock-history.mjs.checkOperationPlan",
-    "outcome": "throw",
-    "file": "governance-closure.test.mjs.json.gz",
-    "sha256": "1219611e90c19c2e35a377cb0cbc9a3aa70a7de637d05c279897179c625c93e4"
-  },
-  {
     "id": "governance-closure.test.mjs:0041",
     "test": "GC03 pending action with predecessor timestamp 1 remains outstanding",
     "function": "timelock-history.mjs.replayOperations",
@@ -328,28 +240,12 @@
     "sha256": "b1d67a98a4aa4ef1fa20510372f99f37ce8e1b87c9454a35a531ac4877989260"
   },
   {
-    "id": "governance-closure.test.mjs:0042",
-    "test": "GC03 pending action with predecessor timestamp 1 remains outstanding",
-    "function": "timelock-history.mjs.checkOperationPlan",
-    "outcome": "throw",
-    "file": "governance-closure.test.mjs.json.gz",
-    "sha256": "562d45d756e6a320e2767f8b86fbae169a3bdbfdda7f2ca7efc8ea3ce2e9dfb0"
-  },
-  {
     "id": "governance-closure.test.mjs:0043",
     "test": "GC03 pending action with predecessor timestamp 2000 remains outstanding",
     "function": "timelock-history.mjs.replayOperations",
     "outcome": "return",
     "file": "governance-closure.test.mjs.json.gz",
     "sha256": "67e66a73309ab9ab2bc5943875c44c62a4d7005b7a76fa1c3a9b188d4708b00c"
-  },
-  {
-    "id": "governance-closure.test.mjs:0044",
-    "test": "GC03 pending action with predecessor timestamp 2000 remains outstanding",
-    "function": "timelock-history.mjs.checkOperationPlan",
-    "outcome": "throw",
-    "file": "governance-closure.test.mjs.json.gz",
-    "sha256": "7d2db300604a3e246d15fff3286b31d4fd008280c5fcfe3fab156e10dba5ceac"
   },
   {
     "id": "governance-closure.test.mjs:0045",
@@ -366,14 +262,6 @@
     "outcome": "throw",
     "file": "governance-closure.test.mjs.json.gz",
     "sha256": "e7f1a6dd25e252202e9b46f34f8560c93a049726d521849f98a7030adb5d88a9"
-  },
-  {
-    "id": "governance-closure.test.mjs:0047",
-    "test": "GC03 executed action requires referenced predecessor Done",
-    "function": "timelock-history.mjs.replayOperations",
-    "outcome": "return",
-    "file": "governance-closure.test.mjs.json.gz",
-    "sha256": "e70697dd8cf8acca5918adbbc3aff34553628e98b2d1468b6868383d9400dae5"
   },
   {
     "id": "governance-closure.test.mjs:0048",
@@ -552,14 +440,6 @@
     "sha256": "84c17fe8ec6cb4812d3287326006f16db7978c54997a390bb5893ab3bdc6408f"
   },
   {
-    "id": "governance-closure.test.mjs:0070",
-    "test": "GC03 historical zero-delay cancel/reschedule can continue the same executing batch",
-    "function": "timelock-history.mjs.replayOperations",
-    "outcome": "throw",
-    "file": "governance-closure.test.mjs.json.gz",
-    "sha256": "e334ff66b17010522bd9ad2d05359e288237338d926d7ed9ec0e81fb5d3003d1"
-  },
-  {
     "id": "history.test.mjs:0001",
     "test": "B0-scale 1672: authenticated historical windows, only three incremental log requests",
     "function": "read-only.mjs.recheckObserved",
@@ -672,14 +552,6 @@
     "sha256": "8a5b03c09b68c946cfca32cd769f0c2cbbcfe37624802ebdecf77b643e48fd0f"
   },
   {
-    "id": "history.test.mjs:0015",
-    "test": "new withdrawal owner, partial then full claims and FIFO records reconcile",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "return",
-    "file": "history.test.mjs.json.gz",
-    "sha256": "156d6d59c42dd71f913165793a8ada2c82b25cb531c497263a96c505e0fa85ba"
-  },
-  {
     "id": "history.test.mjs:0016",
     "test": "recorded V1 unbound claim-time receiver and full reserve payout",
     "function": "read-only.mjs.recheckObserved",
@@ -752,28 +624,12 @@
     "sha256": "148aef93fc9523c0bed61a836903198f97d953522cf9fb7954abf459f56e092e"
   },
   {
-    "id": "read-only.integration.test.mjs:0002",
-    "test": "complete release preflight 1672, newer head=false, reaches every Safe",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "return",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "1f9261e31e2c6ce3e3545e2fdb0f40a49077f3ad515af4664739507fe8459e16"
-  },
-  {
     "id": "read-only.integration.test.mjs:0003",
     "test": "complete release preflight 1672, newer head=true, reaches every Safe",
     "function": "core.mjs.preflight",
     "outcome": "return",
     "file": "read-only.integration.test.mjs.json.gz",
     "sha256": "05e46e1418b81ba8305ac4c232ac78ed7b33cd0bf712ef5dfb4a010d5dd00374"
-  },
-  {
-    "id": "read-only.integration.test.mjs:0004",
-    "test": "complete release preflight 1672, newer head=true, reaches every Safe",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "return",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "c9de26bcab8701c37f22f05aad18a2fcc3895105aab0311b345f89ff2780c5a9"
   },
   {
     "id": "read-only.integration.test.mjs:0005",
@@ -784,28 +640,12 @@
     "sha256": "64ecf22880e495b7bd254bd201cb998ae105f96ecf8e41e071aea793f90935f1"
   },
   {
-    "id": "read-only.integration.test.mjs:0006",
-    "test": "complete release preflight 688689, newer head=false, reaches every Safe",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "return",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "27c9095244f93065fb98345df358160446ff7f37be594677dd671ae4c37eb7db"
-  },
-  {
     "id": "read-only.integration.test.mjs:0007",
     "test": "complete release preflight 688689, newer head=true, reaches every Safe",
     "function": "core.mjs.preflight",
     "outcome": "return",
     "file": "read-only.integration.test.mjs.json.gz",
     "sha256": "d9d870ca6a04b40fd79af8ec54a00e5439a0fe36848a47c2f330d01d9bcad751"
-  },
-  {
-    "id": "read-only.integration.test.mjs:0008",
-    "test": "complete release preflight 688689, newer head=true, reaches every Safe",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "return",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "4e032910b3aa9d17c72ab86b0ac72a2e3c838290358c30c1e7bde834ecbbdd9d"
   },
   {
     "id": "read-only.integration.test.mjs:0009",
@@ -1024,44 +864,12 @@
     "sha256": "f3c008de7c3967fd039a4f71aadc35e0c6651bd0d46a8312537b9e9be6b1abc5"
   },
   {
-    "id": "read-only.integration.test.mjs:0036",
-    "test": "permitted 1672 deposit is reconciled without regenerating approved calldata",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "return",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "485b5110f8f7ac161c67fa233ec1b5b767592894a782cc4a8616a14c8199b81a"
-  },
-  {
-    "id": "read-only.integration.test.mjs:0037",
-    "test": "permitted 1672 deposit is reconciled without regenerating approved calldata",
-    "function": "core.mjs.buildU",
-    "outcome": "return",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "0f9c4f76ca56f26f557ff010d2421506daeae4e09cf3f49e3b44b0813dc713f7"
-  },
-  {
     "id": "read-only.integration.test.mjs:0038",
     "test": "permitted 688689 deposit is reconciled without regenerating approved calldata",
     "function": "core.mjs.buildU",
     "outcome": "return",
     "file": "read-only.integration.test.mjs.json.gz",
     "sha256": "9fcb54aeaf041da880c2003344914a394f95d4511b342f795a982dea012e943e"
-  },
-  {
-    "id": "read-only.integration.test.mjs:0039",
-    "test": "permitted 688689 deposit is reconciled without regenerating approved calldata",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "return",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "36d646e40764b0c980b30abe9ac0451e071fbe742dff849e882c3e5c10bf02c1"
-  },
-  {
-    "id": "read-only.integration.test.mjs:0040",
-    "test": "permitted 688689 deposit is reconciled without regenerating approved calldata",
-    "function": "core.mjs.buildU",
-    "outcome": "return",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "d794b66a82b0e219f07a832a5baed760859505a5f969115c6ae7c6dd5f38e8c9"
   },
   {
     "id": "read-only.integration.test.mjs:0041",
@@ -1086,14 +894,6 @@
     "outcome": "return",
     "file": "read-only.integration.test.mjs.json.gz",
     "sha256": "646da296f7e85109dd6600dddea3a7659b782040f885fea72c568b4a8ec592d4"
-  },
-  {
-    "id": "read-only.integration.test.mjs:0044",
-    "test": "recorded V3 equivalent partial claim advances per-record queued but preserves global queued",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "return",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "73cf4765375d078df39f2f7231536a025e43de34a90d02bf0ff532f73b0c8f86"
   },
   {
     "id": "read-only.integration.test.mjs:0045",
@@ -1360,52 +1160,12 @@
     "sha256": "0ec0efd468936e80f17661de88cf0b5e8c00e5315125c9e222b8b8e04e8db2f5"
   },
   {
-    "id": "read-only.integration.test.mjs:0078",
-    "test": "execution checkpoint requires fresh independently reviewed fork evidence",
-    "function": "core.mjs.buildU",
-    "outcome": "return",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "c2472abb3a19f3f843788c524a93adf5de641fc9302a067484e5ec8a26e1b81b"
-  },
-  {
-    "id": "read-only.integration.test.mjs:0079",
-    "test": "execution checkpoint requires fresh independently reviewed fork evidence",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "throw",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "58295a7070d1bd0ea345252ab431c2c7d0631a69ba13fb0b632aec9c083a4909"
-  },
-  {
-    "id": "read-only.integration.test.mjs:0080",
-    "test": "execution checkpoint requires fresh independently reviewed fork evidence",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "throw",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "55770c18be7a8f3ad361dbea549993b9d2dc1561c3061ce5b6cb5fc758352fe6"
-  },
-  {
     "id": "read-only.integration.test.mjs:0081",
     "test": "testnet execution rechecks Oracle configuration rather than relying only on assertHandoff",
     "function": "core.mjs.expectations",
     "outcome": "return",
     "file": "read-only.integration.test.mjs.json.gz",
     "sha256": "06bae51a0533dbb19456da1a743ac995e33e10781922600feeb90209e146b918"
-  },
-  {
-    "id": "read-only.integration.test.mjs:0082",
-    "test": "testnet execution rechecks Oracle configuration rather than relying only on assertHandoff",
-    "function": "core.mjs.buildU",
-    "outcome": "return",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "81e6107985ebe852cc5b0a08f37a449146d2e7293793e877b62ca6ddefcea2c1"
-  },
-  {
-    "id": "read-only.integration.test.mjs:0083",
-    "test": "testnet execution rechecks Oracle configuration rather than relying only on assertHandoff",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "throw",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "ba28841732a2f87335aa09383ee5d0787f4b39b8428cff39e86de1ee2233b546"
   },
   {
     "id": "read-only.integration.test.mjs:0084",
@@ -1430,22 +1190,6 @@
     "outcome": "return",
     "file": "read-only.integration.test.mjs.json.gz",
     "sha256": "9032986ac9e4a563e581d58505b79befa49308f54b9217952e2aab756807bd11"
-  },
-  {
-    "id": "read-only.integration.test.mjs:0087",
-    "test": "execution allows reconciled deposits during mandatory delay with original operation ID",
-    "function": "core.mjs.buildU",
-    "outcome": "return",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "3a8c77527124b91edc9e12c86fce1651baccc80e4262c4d28b04ae9326169d2e"
-  },
-  {
-    "id": "read-only.integration.test.mjs:0088",
-    "test": "execution allows reconciled deposits during mandatory delay with original operation ID",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "return",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "b01ad6937fd14e1a7084345fe6d13311b40848b981f197e57c0ce3dbaf8da7c6"
   },
   {
     "id": "read-only.integration.test.mjs:0089",
@@ -1536,28 +1280,12 @@
     "sha256": "cf2072c90a81514e01734d67cae83108ff25b1716e3bab4bfd47d8d26532fd81"
   },
   {
-    "id": "read-only.integration.test.mjs:0100",
-    "test": "all other preflight checks pass for coherent 1672 oracle substitution, registry still rejects",
-    "function": "core.mjs.preflight",
-    "outcome": "throw",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "26a8216dd245603f4611da254e34342f3df92d918b9a0b469b274e936f7eecdc"
-  },
-  {
     "id": "read-only.integration.test.mjs:0101",
     "test": "all other preflight checks pass for coherent 688689 oracle substitution, registry still rejects",
     "function": "core.mjs.preflight",
     "outcome": "return",
     "file": "read-only.integration.test.mjs.json.gz",
     "sha256": "7e17e7ea3c546c0d8b1cbed0956878bba96882d167236d7962ad625ac61ef7cb"
-  },
-  {
-    "id": "read-only.integration.test.mjs:0102",
-    "test": "all other preflight checks pass for coherent 688689 oracle substitution, registry still rejects",
-    "function": "core.mjs.preflight",
-    "outcome": "throw",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "ea62e22c5bd1200468ca94015110c65ea0e3c109e9336e8baf2f488e6b741a95"
   },
   {
     "id": "read-only.integration.test.mjs:0103",
@@ -1568,28 +1296,12 @@
     "sha256": "5aa8b9ea6484e767e0670bf0a3e69106eb201aa338b1d83d89bbbaa1fbdb05d1"
   },
   {
-    "id": "read-only.integration.test.mjs:0104",
-    "test": "all other preflight checks pass for coherent 688689 bridge substitution, registry still rejects",
-    "function": "core.mjs.preflight",
-    "outcome": "throw",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "1f532669d66e702449712b8d42f781818acb86f5618864e55f2a12f928e9436b"
-  },
-  {
     "id": "read-only.integration.test.mjs:0105",
     "test": "all other preflight checks pass for coherent 688689 distributor substitution, registry still rejects",
     "function": "core.mjs.preflight",
     "outcome": "return",
     "file": "read-only.integration.test.mjs.json.gz",
     "sha256": "cc5e82d20fd70577549a3c1f489f37f3b49a30076bc368b3df34aba09c4e5ad5"
-  },
-  {
-    "id": "read-only.integration.test.mjs:0106",
-    "test": "all other preflight checks pass for coherent 688689 distributor substitution, registry still rejects",
-    "function": "core.mjs.preflight",
-    "outcome": "throw",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "b73a1ee3819706552551c592a4d07897579348a9493795a6ad187a39dc925885"
   },
   {
     "id": "read-only.integration.test.mjs:0107",
@@ -1624,36 +1336,12 @@
     "sha256": "e092b7c6663cb25886e8e8cc856c7f5a2129f170703b8e6937886117816f11af"
   },
   {
-    "id": "read-only.integration.test.mjs:0111",
-    "test": "post-R4 same-owner request is unbound, partial payout to another receiver reconciles",
-    "function": "core.mjs.buildU",
-    "outcome": "return",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "825adb9d76028330350ca1c9740f10710d0899c53ba3a81569b2d5f82473d558"
-  },
-  {
-    "id": "read-only.integration.test.mjs:0112",
-    "test": "post-R4 same-owner request is unbound, partial payout to another receiver reconciles",
-    "function": "core.mjs.expectations",
-    "outcome": "return",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "d2b6dda6f9b1ac819de9611515fb02c3c2c52f6b84d363790ffff1dba49f62ae"
-  },
-  {
     "id": "read-only.integration.test.mjs:0113",
     "test": "post-R4 same-owner request is unbound, partial payout to another receiver reconciles",
     "function": "read-only.mjs.verifyCheckpoint",
     "outcome": "return",
     "file": "read-only.integration.test.mjs.json.gz",
     "sha256": "6ad5714843427fb0447b8789c4bfdfca84ec11c1f23461eac390b195a054e5ef"
-  },
-  {
-    "id": "read-only.integration.test.mjs:0114",
-    "test": "post-R4 same-owner request is unbound, partial payout to another receiver reconciles",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "throw",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "b747c5a5ee6a84070823f617968f1c6caebc85b37ff47e5dc801a73082c5e981"
   },
   {
     "id": "read-only.integration.test.mjs:0115",
@@ -1672,22 +1360,6 @@
     "sha256": "6c6f754125d8cb3ec2c2f8d3ca50c3bfd72021f6bd1455c5d308b56a37dd0bca"
   },
   {
-    "id": "read-only.integration.test.mjs:0117",
-    "test": "execution rejects a former reviewed admin regrant followed by revoke",
-    "function": "core.mjs.buildU",
-    "outcome": "return",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "eb8f6a9f345600dfbaa13aaeb43cd72f195337fc217a444f0602811efd742259"
-  },
-  {
-    "id": "read-only.integration.test.mjs:0118",
-    "test": "execution rejects a former reviewed admin regrant followed by revoke",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "throw",
-    "file": "read-only.integration.test.mjs.json.gz",
-    "sha256": "2e01ec50de2d1df073b1faf39dc3c9e05fcb963686edac0ecb061e58d319791a"
-  },
-  {
     "id": "release-tooling.test.mjs:0001",
     "test": "mainnet H/U frozen order, full second beacon retirement and Safe format",
     "function": "core.mjs.buildU",
@@ -1704,36 +1376,12 @@
     "sha256": "61793a1e35756511a34641cef9e4f61a6a52ebdef420559c9c2ae03e07b0edbc"
   },
   {
-    "id": "release-tooling.test.mjs:0003",
-    "test": "mainnet H/U frozen order, full second beacon retirement and Safe format",
-    "function": "core.mjs.preflight",
-    "outcome": "return",
-    "file": "release-tooling.test.mjs.json.gz",
-    "sha256": "50e512fc12b1cce30513bc1d67604ebd4797d3d235200ac0daba09ed56130eea"
-  },
-  {
-    "id": "release-tooling.test.mjs:0004",
-    "test": "mainnet H/U frozen order, full second beacon retirement and Safe format",
-    "function": "core.mjs.verifyOperation",
-    "outcome": "return",
-    "file": "release-tooling.test.mjs.json.gz",
-    "sha256": "317de59bd00612e1fe1a63fd6ab91c9749e6c740f78d31b3265e6a6ff9d5236a"
-  },
-  {
     "id": "release-tooling.test.mjs:0005",
     "test": "reject mutated operation id",
     "function": "core.mjs.buildU",
     "outcome": "return",
     "file": "release-tooling.test.mjs.json.gz",
     "sha256": "81084039205bf41cd8cfa1390e2215c80e7aa3a9713a8bcb4d534ac3b6182e90"
-  },
-  {
-    "id": "release-tooling.test.mjs:0006",
-    "test": "reject mutated operation id",
-    "function": "core.mjs.verifyOperation",
-    "outcome": "throw",
-    "file": "release-tooling.test.mjs.json.gz",
-    "sha256": "158c2c145413ff4c16fc1e1e506fe2be76933407f391677eff3c141c9ac20815"
   },
   {
     "id": "release-tooling.test.mjs:0007",
@@ -1744,28 +1392,12 @@
     "sha256": "a0717cc0fb0489dffe6ddbca0b9b32020cf7bfa311cf0afaa70f8ade6f44c4e0"
   },
   {
-    "id": "release-tooling.test.mjs:0008",
-    "test": "reject mutated operation salt",
-    "function": "core.mjs.verifyOperation",
-    "outcome": "throw",
-    "file": "release-tooling.test.mjs.json.gz",
-    "sha256": "8598bf42b5ddd067756f06aec177588a763531d13615d8d8890cbd44e5423e06"
-  },
-  {
     "id": "release-tooling.test.mjs:0009",
     "test": "reject mutated operation predecessor",
     "function": "core.mjs.buildU",
     "outcome": "return",
     "file": "release-tooling.test.mjs.json.gz",
     "sha256": "d953a7557db7f45101468523ed6ef485e952d25924a94f6ec77d9f259ceaaa11"
-  },
-  {
-    "id": "release-tooling.test.mjs:0010",
-    "test": "reject mutated operation predecessor",
-    "function": "core.mjs.verifyOperation",
-    "outcome": "throw",
-    "file": "release-tooling.test.mjs.json.gz",
-    "sha256": "0041da40a9ed2c488e4f686394d5d7b9132f80b463f6032df7d7487602383512"
   },
   {
     "id": "release-tooling.test.mjs:0011",
@@ -1776,14 +1408,6 @@
     "sha256": "995663f4b554528a8d04db9c459ce699745edcaff5f4576b8bd71a6ab1b7e004"
   },
   {
-    "id": "release-tooling.test.mjs:0012",
-    "test": "reject mutated operation targets",
-    "function": "core.mjs.verifyOperation",
-    "outcome": "throw",
-    "file": "release-tooling.test.mjs.json.gz",
-    "sha256": "b45d6d2ec049b7cedd7c8e068bc20b96c3575fcab6aa07f70bb45935b0f6b91f"
-  },
-  {
     "id": "release-tooling.test.mjs:0013",
     "test": "reject mutated operation values",
     "function": "core.mjs.buildU",
@@ -1792,28 +1416,12 @@
     "sha256": "e5e7ed917cdab43e9594a5128db84f904df46fae7df37cd492f201d3c9200ae1"
   },
   {
-    "id": "release-tooling.test.mjs:0014",
-    "test": "reject mutated operation values",
-    "function": "core.mjs.verifyOperation",
-    "outcome": "throw",
-    "file": "release-tooling.test.mjs.json.gz",
-    "sha256": "bc9dfdbf776d80dc11399452f734a4101ce9f735dcf8970552af6c2a3a56af8e"
-  },
-  {
     "id": "release-tooling.test.mjs:0015",
     "test": "reject mutated operation payloads",
     "function": "core.mjs.buildU",
     "outcome": "return",
     "file": "release-tooling.test.mjs.json.gz",
     "sha256": "0eb6d1ad3b458f9dd64e4a425729333f70bf4e2850ab9ea999f0435175c3458a"
-  },
-  {
-    "id": "release-tooling.test.mjs:0016",
-    "test": "reject mutated operation payloads",
-    "function": "core.mjs.verifyOperation",
-    "outcome": "throw",
-    "file": "release-tooling.test.mjs.json.gz",
-    "sha256": "b786a160fde4fb061fc041e5fd5ce8fdd67db59f43b01b7a299582266dc65bd3"
   },
   {
     "id": "release-tooling.test.mjs:0017",
@@ -1944,36 +1552,12 @@
     "sha256": "1e53bc8fe90d215ed418f7d947205bb186789ed8af6214530ffbec6e6e3f600f"
   },
   {
-    "id": "release-tooling.test.mjs:0033",
-    "test": "testnet T0 through T5, canonical V3 token, 15-vault reconciliation",
-    "function": "core.mjs.testnetHandoff",
-    "outcome": "return",
-    "file": "release-tooling.test.mjs.json.gz",
-    "sha256": "c0a8e8459401f933ce9367f3396d89b1ce4ee992d1c0aa4cb8a842ed4f79d8c6"
-  },
-  {
-    "id": "release-tooling.test.mjs:0034",
-    "test": "testnet T0 through T5, canonical V3 token, 15-vault reconciliation",
-    "function": "core.mjs.expectations",
-    "outcome": "return",
-    "file": "release-tooling.test.mjs.json.gz",
-    "sha256": "9b7f1b2659b26c1c806cd81189fba558312ccd9752c78853bdafb2097732d7aa"
-  },
-  {
     "id": "release-tooling.test.mjs:0035",
     "test": "testnet E2-unavailable approved recovery retires all, retains inert inventoried roles",
     "function": "core.mjs.testnetHandoff",
     "outcome": "return",
     "file": "release-tooling.test.mjs.json.gz",
     "sha256": "63b46dd28fa43ac3d72dffbc0d85f217bdd7ccb80b03a9bb5818c078a161ae13"
-  },
-  {
-    "id": "release-tooling.test.mjs:0036",
-    "test": "testnet E2-unavailable approved recovery retires all, retains inert inventoried roles",
-    "function": "core.mjs.expectations",
-    "outcome": "return",
-    "file": "release-tooling.test.mjs.json.gz",
-    "sha256": "315f58306c9b12ef789376df21cdc183c57aa19b2cf1c91ab38ce886b416153e"
   },
   {
     "id": "release-tooling.test.mjs:0037",
@@ -2152,28 +1736,12 @@
     "sha256": "3779d760f55ae8496334d27803ce8d3bfe9467f83ff335362656856eac7fe570"
   },
   {
-    "id": "release-tooling.test.mjs:0059",
-    "test": "fresh and malformed reviewed artifact production settings",
-    "function": "artifacts.mjs.freezeArtifact",
-    "outcome": "return",
-    "file": "release-tooling.test.mjs.json.gz",
-    "sha256": "a6d4bb8235f4288ca8f198c23c17f18f568aa86cef74bdffa093fdf264bdcac4"
-  },
-  {
     "id": "release-tooling.test.mjs:0060",
     "test": "recorded target binding refuses an arbitrary canonical target even with coherent config",
     "function": "core.mjs.validateRecordedTopology",
     "outcome": "return",
     "file": "release-tooling.test.mjs.json.gz",
     "sha256": "0da6291c146122e5d733c47e094d00de995e0aeaad96d985a75fb56b9579a95a"
-  },
-  {
-    "id": "release-tooling.test.mjs:0061",
-    "test": "recorded target binding refuses an arbitrary canonical target even with coherent config",
-    "function": "core.mjs.validateRecordedTopology",
-    "outcome": "throw",
-    "file": "release-tooling.test.mjs.json.gz",
-    "sha256": "2439b39bef438c1795a555a8b9e05107b9ff4c244dc8184bd4c43e4a5d07d59d"
   },
   {
     "id": "release-tooling.test.mjs:0062",
@@ -2184,28 +1752,12 @@
     "sha256": "942b2a33d3c51c12fb23faf6c43167fb7450123b445b84516b167e407a344824"
   },
   {
-    "id": "release-tooling.test.mjs:0063",
-    "test": "approved C residual role churn cannot veto terminal retirement calldata",
-    "function": "core.mjs.buildU",
-    "outcome": "return",
-    "file": "release-tooling.test.mjs.json.gz",
-    "sha256": "0ac81e4393f024e2b545113438e6c434758678e4b26323665f9afad2df9af187"
-  },
-  {
     "id": "remediation.test.mjs:0001",
     "test": "supplement",
     "function": "core.mjs.operation",
     "outcome": "return",
     "file": "remediation.test.mjs.json.gz",
     "sha256": "b333da8b12f44bfd565cd1bed435d118ff9ca15085dc748d8ce8d1db03d863bb"
-  },
-  {
-    "id": "remediation.test.mjs:0002",
-    "test": "supplement",
-    "function": "core.mjs.operation",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "18fa5e09a6ef2083506286627f53a05298a3e3e8efcf2a11314dfcd2b6734e89"
   },
   {
     "id": "remediation.test.mjs:0003",
@@ -2318,30 +1870,6 @@
     "outcome": "return",
     "file": "remediation.test.mjs.json.gz",
     "sha256": "4029c019aefb6e34c9a42ea804d45ccd9d8c005aa8d015d23a0c6e62d46ccb9f"
-  },
-  {
-    "id": "remediation.test.mjs:0017",
-    "test": "Timelock multi-call IDs, cancellation, reschedule, execution, plan",
-    "function": "timelock-history.mjs.checkOperationPlan",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "29100872665512a59c6d1daf570ca76b51e0b38a9cde7b2f65ddc9c9182e4e47"
-  },
-  {
-    "id": "remediation.test.mjs:0018",
-    "test": "Timelock multi-call IDs, cancellation, reschedule, execution, plan",
-    "function": "timelock-history.mjs.checkOperationPlan",
-    "outcome": "throw",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "8e6a3449e0a5467e8d64e6b93abe76bdfdd1183f23d1b4c215f999cb906a3b5a"
-  },
-  {
-    "id": "remediation.test.mjs:0019",
-    "test": "Timelock multi-call IDs, cancellation, reschedule, execution, plan",
-    "function": "timelock-history.mjs.checkOperationPlan",
-    "outcome": "throw",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "1eab6a9d345e51b04f83ac6e6a38a4636ec7abe7a5b00519cef1d5cd8ee1facd"
   },
   {
     "id": "remediation.test.mjs:0020",
@@ -2528,76 +2056,12 @@
     "sha256": "948797f8d1b662cfaca4d1cd81c1dedaf9af59a250cc4b14c54fb887b5548c1a"
   },
   {
-    "id": "remediation.test.mjs:0043",
-    "test": "approved residual 1672/C reconciles real round transition; unexplained terms rejected",
-    "function": "core.mjs.buildU",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "7b7b7baffdd59616c2517a497516dcb1f116abcc64584b2a4e3f70e4606bd0c3"
-  },
-  {
-    "id": "remediation.test.mjs:0044",
-    "test": "approved residual 1672/C reconciles real round transition; unexplained terms rejected",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "e557ef76abc68dbdad486bf913bf894db6ead8fdec8c939147777c8757848591"
-  },
-  {
-    "id": "remediation.test.mjs:0045",
-    "test": "approved residual 1672/C reconciles real round transition; unexplained terms rejected",
-    "function": "core.mjs.buildU",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "24f26ea3aecec14ed175b1401daebaf8d55d8379d617aa9a925d368d37d78f9c"
-  },
-  {
-    "id": "remediation.test.mjs:0046",
-    "test": "approved residual 1672/C reconciles real round transition; unexplained terms rejected",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "throw",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "45b683d92a6cd663fd54d483cee02e8a25dd8bd4277bcdb4f2b2ead6ef94703b"
-  },
-  {
     "id": "remediation.test.mjs:0047",
     "test": "approved residual 1672/D reconciles real round transition; unexplained terms rejected",
     "function": "residual-replay.mjs.termsHash",
     "outcome": "return",
     "file": "remediation.test.mjs.json.gz",
     "sha256": "7b96fbdeaded0ca536c8a1a6db123b86c7df5b08ff6d1f87e2015e8e90e28f0b"
-  },
-  {
-    "id": "remediation.test.mjs:0048",
-    "test": "approved residual 1672/D reconciles real round transition; unexplained terms rejected",
-    "function": "core.mjs.buildU",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "ebb3d3d7496d3197449947224fe6242dcbd281c4b0565a8c96318ba0d0b82a68"
-  },
-  {
-    "id": "remediation.test.mjs:0049",
-    "test": "approved residual 1672/D reconciles real round transition; unexplained terms rejected",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "f8d2ade7afc707c33b30cb52c61616f5756e83880373319d5b131adac4b91157"
-  },
-  {
-    "id": "remediation.test.mjs:0050",
-    "test": "approved residual 1672/D reconciles real round transition; unexplained terms rejected",
-    "function": "core.mjs.buildU",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "8f239a650e322d73a466510559a3e06fcc359f8b4a99bb167e637b7910f6a6ff"
-  },
-  {
-    "id": "remediation.test.mjs:0051",
-    "test": "approved residual 1672/D reconciles real round transition; unexplained terms rejected",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "throw",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "ba0f3a884c4a9fb307c416d37021b836ae1cdb02e6999e50b475728073e25707"
   },
   {
     "id": "remediation.test.mjs:0052",
@@ -2608,60 +2072,12 @@
     "sha256": "d60383a5975a2726038ce9369801d176043801ad82e328bc60c1983d683b9db8"
   },
   {
-    "id": "remediation.test.mjs:0053",
-    "test": "approved residual 688689/A reconciles real round transition; unexplained terms rejected",
-    "function": "core.mjs.buildU",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "335934c8c46ea0bf061679ba098dafe040d70a181ef4493fab87faaa95b10863"
-  },
-  {
-    "id": "remediation.test.mjs:0054",
-    "test": "approved residual 688689/A reconciles real round transition; unexplained terms rejected",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "a2372addebb7313c4c97e58bfcf611b086b09d3db5b6ac9c3037ccaa803d2408"
-  },
-  {
-    "id": "remediation.test.mjs:0055",
-    "test": "approved residual 688689/A reconciles real round transition; unexplained terms rejected",
-    "function": "core.mjs.buildU",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "7a123ba523e0399bac3953a964e827c97eaf6e31dcae00580019a1eab0de25ff"
-  },
-  {
-    "id": "remediation.test.mjs:0056",
-    "test": "approved residual 688689/A reconciles real round transition; unexplained terms rejected",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "throw",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "63f342f3cdbba36a5e0cb0570d65bfcc488991ef8013be29ffcf15a288fd6afd"
-  },
-  {
     "id": "remediation.test.mjs:0057",
     "test": "unexplained residual terms without events fail; governed never takes exception",
     "function": "residual-replay.mjs.termsHash",
     "outcome": "return",
     "file": "remediation.test.mjs.json.gz",
     "sha256": "3d0a0f345a75bd4ca379940d0e39834e257ca3242331d57939358b4724ab21a9"
-  },
-  {
-    "id": "remediation.test.mjs:0058",
-    "test": "unexplained residual terms without events fail; governed never takes exception",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "throw",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "45b5e03b77288208269a303aebdb958a1b54e23533d14ae25ec389460ea0489f"
-  },
-  {
-    "id": "remediation.test.mjs:0059",
-    "test": "unexplained residual terms without events fail; governed never takes exception",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "throw",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "ec3f460f58a9cff77fba71e89572c94e89b17480a939a3318fd4fab1e748902d"
   },
   {
     "id": "remediation.test.mjs:0060",
@@ -2680,108 +2096,12 @@
     "sha256": "6214d06e3316ef7d6e1ae5784c973576160257fb336127286927ebbab06f3603"
   },
   {
-    "id": "remediation.test.mjs:0062",
-    "test": "residual 1672/C H checkpoint accepts reconstructed changed terms and keeps U fixed",
-    "function": "residual-replay.mjs.termsHash",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "23057f73828bb1fd68a72e2d69feda0627ca9a29174ffa0c2616d27cf0ca8e9c"
-  },
-  {
-    "id": "remediation.test.mjs:0063",
-    "test": "residual 1672/C H checkpoint accepts reconstructed changed terms and keeps U fixed",
-    "function": "core.mjs.buildU",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "7c20fd3d37ac81dd0fb592a03a70c255d8cd01848bd9001baaf937e76e7cb793"
-  },
-  {
-    "id": "remediation.test.mjs:0064",
-    "test": "residual 1672/C H checkpoint accepts reconstructed changed terms and keeps U fixed",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "592225f408fce841ed199e4d94b5b96a357aa458bfc050d7fac5c15ab26e2da5"
-  },
-  {
-    "id": "remediation.test.mjs:0065",
-    "test": "residual 1672/C H checkpoint accepts reconstructed changed terms and keeps U fixed",
-    "function": "core.mjs.buildU",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "15a615a99d21504f56d2eb3d751d98912034b27b2c891463937a90edbbb11923"
-  },
-  {
-    "id": "remediation.test.mjs:0066",
-    "test": "residual 1672/C H checkpoint accepts reconstructed changed terms and keeps U fixed",
-    "function": "residual-replay.mjs.termsHash",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "f9b6c4670c8790837ae321506e3fe7ae78b864e29db8daf17fbc937e587678bd"
-  },
-  {
-    "id": "remediation.test.mjs:0067",
-    "test": "residual 1672/C H checkpoint accepts reconstructed changed terms and keeps U fixed",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "throw",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "fc6d7893eb45559a7111212722f2967215e04ee3a96b92baea7efcd9cb191dc7"
-  },
-  {
     "id": "remediation.test.mjs:0068",
     "test": "residual 1672/D H checkpoint accepts reconstructed changed terms and keeps U fixed",
     "function": "core.mjs.expectations",
     "outcome": "return",
     "file": "remediation.test.mjs.json.gz",
     "sha256": "eb1811baa2d769eb9ac7cd2c16342bbc516610cabfe261a7464469f0d5f7ef74"
-  },
-  {
-    "id": "remediation.test.mjs:0069",
-    "test": "residual 1672/D H checkpoint accepts reconstructed changed terms and keeps U fixed",
-    "function": "residual-replay.mjs.termsHash",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "ca72e8311467a12b8515c2817c89b38752bdecb2a2fe34b9d854f16cd08008bc"
-  },
-  {
-    "id": "remediation.test.mjs:0070",
-    "test": "residual 1672/D H checkpoint accepts reconstructed changed terms and keeps U fixed",
-    "function": "core.mjs.buildU",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "67bab6619872e8c94e8aba63d630bfbfc068a8e9fb31dc6824f7d6e06f3b0005"
-  },
-  {
-    "id": "remediation.test.mjs:0071",
-    "test": "residual 1672/D H checkpoint accepts reconstructed changed terms and keeps U fixed",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "4c16ff81f4be58f3b19a046d2a5486c4eccf5a98cf205a8f3b2f1ae4fdee470a"
-  },
-  {
-    "id": "remediation.test.mjs:0072",
-    "test": "residual 1672/D H checkpoint accepts reconstructed changed terms and keeps U fixed",
-    "function": "core.mjs.buildU",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "bb7bfde56bf48f4dbb8e247b15e53dc13fb39805114e9035455bed5c1cce1af0"
-  },
-  {
-    "id": "remediation.test.mjs:0073",
-    "test": "residual 1672/D H checkpoint accepts reconstructed changed terms and keeps U fixed",
-    "function": "residual-replay.mjs.termsHash",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "405197f9958de175560a79ac93da3d2cb7df8e0d6a0e2299605f43c269c7ba76"
-  },
-  {
-    "id": "remediation.test.mjs:0074",
-    "test": "residual 1672/D H checkpoint accepts reconstructed changed terms and keeps U fixed",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "throw",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "bdc80a0cad007a7b76f3e9d956e8def18b7ca3260355e778291431514d088101"
   },
   {
     "id": "remediation.test.mjs:0075",
@@ -2792,54 +2112,6 @@
     "sha256": "b2fee5cf19f7a08bda57d20698ad0e64d96be27ee90562bfa52f284dc0ba3851"
   },
   {
-    "id": "remediation.test.mjs:0076",
-    "test": "residual 688689/A H checkpoint accepts reconstructed changed terms and keeps U fixed",
-    "function": "residual-replay.mjs.termsHash",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "e9b68ca69c4c3fd2db30b77c0bc0ed5c43fe96348678c4ac90978181809501ca"
-  },
-  {
-    "id": "remediation.test.mjs:0077",
-    "test": "residual 688689/A H checkpoint accepts reconstructed changed terms and keeps U fixed",
-    "function": "core.mjs.buildU",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "4fb7935904845ee24ae31de2642de8ed02f3e792d95e18fc90e38e89ac600dca"
-  },
-  {
-    "id": "remediation.test.mjs:0078",
-    "test": "residual 688689/A H checkpoint accepts reconstructed changed terms and keeps U fixed",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "8bbdf91a755e039f3d2723665053a234f57674e20c1db175c69873775a68ba9f"
-  },
-  {
-    "id": "remediation.test.mjs:0079",
-    "test": "residual 688689/A H checkpoint accepts reconstructed changed terms and keeps U fixed",
-    "function": "core.mjs.buildU",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "ad9493a6aa55905d16f5b687cb0ef9f777774f1885e364cffec00df4b40c5e1a"
-  },
-  {
-    "id": "remediation.test.mjs:0080",
-    "test": "residual 688689/A H checkpoint accepts reconstructed changed terms and keeps U fixed",
-    "function": "residual-replay.mjs.termsHash",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "375ad2d86c47fc044e747b1ca4d564c058b96627d990b0a69b7a4bef8694a7b8"
-  },
-  {
-    "id": "remediation.test.mjs:0081",
-    "test": "residual 688689/A H checkpoint accepts reconstructed changed terms and keeps U fixed",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "throw",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "e6ac37883af86f5025259ab43e61ddb884590556ea2662bf1757c5886369e498"
-  },
-  {
     "id": "remediation.test.mjs:0082",
     "test": "zero-supply dust normalization passes complete testnet post-U checkpoint; wrong balances fail",
     "function": "core.mjs.expectations",
@@ -2848,68 +2120,12 @@
     "sha256": "4e6e429452b6d33913358882164c542a0989475fc04aee09e543c9e12c09bbc8"
   },
   {
-    "id": "remediation.test.mjs:0083",
-    "test": "zero-supply dust normalization passes complete testnet post-U checkpoint; wrong balances fail",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "5210362f4b8a60fc45f2a20c495b624dcda52ebe6ab3ba0e4dc68a126f030b09"
-  },
-  {
-    "id": "remediation.test.mjs:0084",
-    "test": "zero-supply dust normalization passes complete testnet post-U checkpoint; wrong balances fail",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "952d565d2bf2a0934c09be307bd0bf5454b183b11e55848ad23438bbcbf921f5"
-  },
-  {
-    "id": "remediation.test.mjs:0085",
-    "test": "zero-supply dust normalization passes complete testnet post-U checkpoint; wrong balances fail",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "throw",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "f1c32093c92c1fa784890c53204d65f580c2512fe82ce4f901ee7efa408a2577"
-  },
-  {
     "id": "remediation.test.mjs:0086",
     "test": "post-U rejects unrelated operation even when expected U is done",
     "function": "core.mjs.expectations",
     "outcome": "return",
     "file": "remediation.test.mjs.json.gz",
     "sha256": "a6b2cabce2c20c8b5e5bacdc6d28b90bfc6d7039feb2e86c10596bd93da1935d"
-  },
-  {
-    "id": "remediation.test.mjs:0087",
-    "test": "post-U rejects unrelated operation even when expected U is done",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "cb833842fcb528f1fef276d4f362c4a88ef7cc6c64473556a309d3530ccaf3e5"
-  },
-  {
-    "id": "remediation.test.mjs:0088",
-    "test": "post-U rejects unrelated operation even when expected U is done",
-    "function": "core.mjs.buildU",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "6616a157092618f4b0974f08e9a3a3a12ead4b18f320092da0ba7f633fcecb6b"
-  },
-  {
-    "id": "remediation.test.mjs:0089",
-    "test": "post-U rejects unrelated operation even when expected U is done",
-    "function": "core.mjs.operation",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "7ff758b118a58927938300f96246fe8403de3ca12422568f33033de07325b4e3"
-  },
-  {
-    "id": "remediation.test.mjs:0090",
-    "test": "post-U rejects unrelated operation even when expected U is done",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "throw",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "75300b37c704bd08a84053d71d8f330d6843d4a3aa12cc48e3d6152c82587471"
   },
   {
     "id": "remediation.test.mjs:0091",
@@ -2928,14 +2144,6 @@
     "sha256": "3be0782a4e93b54cee3146da30838fd9335f45f246a5931df657c317acf16b99"
   },
   {
-    "id": "remediation.test.mjs:0093",
-    "test": "parsing alone never authorizes action-bearing release coverage",
-    "function": "timelock-history.mjs.requireActionBearingCoverage",
-    "outcome": "throw",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "24a8ad07212af301d5d37acdcca0ea50c1c21aa8bcdb1d65ef5931754106c35a"
-  },
-  {
     "id": "remediation.test.mjs:0094",
     "test": "residual funded profit backing cannot be excluded from the current checkpoint",
     "function": "read-only.mjs.recheckObserved",
@@ -2952,52 +2160,12 @@
     "sha256": "36f241cf515b19b49ba0164a3671f1cc9e47ffb9696014420ea445ed28998c1d"
   },
   {
-    "id": "remediation.test.mjs:0096",
-    "test": "residual zero-profit round can return to SETTLED with new authenticated terms",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "c9358c2e84349bdd431c3c4369be1ab39850d6236708524c66c205cb188f7039"
-  },
-  {
-    "id": "remediation.test.mjs:0097",
-    "test": "residual zero-profit round can return to SETTLED with new authenticated terms",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "throw",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "87ea632e12290ad2579eec0f81d1218f09d7048fb9b98bb37407ebe563aca87c"
-  },
-  {
     "id": "remediation.test.mjs:0098",
     "test": "GC02 signer rotation is detected at H checkpoint",
     "function": "core.mjs.expectations",
     "outcome": "return",
     "file": "remediation.test.mjs.json.gz",
     "sha256": "d5fdd7fb7841496f7565d15a2e2766aee6bed796d0ca872cd2b1586bd25d1553"
-  },
-  {
-    "id": "remediation.test.mjs:0099",
-    "test": "GC02 signer rotation is detected at H checkpoint",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "a09587338314a8ced71b9e9f6d788aac30bbc1e3e817f0747a9f8ae42cbd3b8a"
-  },
-  {
-    "id": "remediation.test.mjs:0100",
-    "test": "GC02 signer rotation is detected at H checkpoint",
-    "function": "timelock-history.mjs.requireActionBearingCoverage",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "8e19b7d8934f253e2994ee767d02dc697f9be986a1fdf9e040abfe7e07c92ff4"
-  },
-  {
-    "id": "remediation.test.mjs:0101",
-    "test": "GC02 signer rotation is detected at H checkpoint",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "throw",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "0a545081d88e2b5a16e62dd822ca55411f08b18f297181ecb1b697407af7c25a"
   },
   {
     "id": "remediation.test.mjs:0102",
@@ -3008,44 +2176,12 @@
     "sha256": "d59bef6b6503d8df8a18187de4b3a4a2e8e27880e10e5d194bf5dfb7c1ee9038"
   },
   {
-    "id": "remediation.test.mjs:0103",
-    "test": "GC02 signer rotation is detected at R4 checkpoint",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "a8828e8cf1ad5317821474f08963f8108b87c4c784f3615790dc64852f17689a"
-  },
-  {
-    "id": "remediation.test.mjs:0104",
-    "test": "GC02 signer rotation is detected at R4 checkpoint",
-    "function": "timelock-history.mjs.requireActionBearingCoverage",
-    "outcome": "return",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "e8a5406dca59f460e35a484f5abde15f4587401bb4b0e06339d7efa32da8a9eb"
-  },
-  {
-    "id": "remediation.test.mjs:0105",
-    "test": "GC02 signer rotation is detected at R4 checkpoint",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "throw",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "7c694a79c4deb6631ec843570bc6c81351994a74f23387346359a6be9680c21e"
-  },
-  {
     "id": "remediation.test.mjs:0106",
     "test": "GC01 execution checkpoint rejects mainnet governed phase 0",
     "function": "core.mjs.expectations",
     "outcome": "return",
     "file": "remediation.test.mjs.json.gz",
     "sha256": "926233c023d433641d72bb2a89d62691aa95192dd455b55588ab73e16cf0f005"
-  },
-  {
-    "id": "remediation.test.mjs:0107",
-    "test": "GC01 execution checkpoint rejects mainnet governed phase 0",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "throw",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "ed488fe045247edeb2f1549bc3ebccc4dc925d05f60c4ca102b2189ff8922144"
   },
   {
     "id": "remediation.test.mjs:0108",
@@ -3056,28 +2192,12 @@
     "sha256": "53e739664807d7de401dfae8765160859e16c9c58615ba89ae9b47556bd595ef"
   },
   {
-    "id": "remediation.test.mjs:0109",
-    "test": "GC01 execution checkpoint rejects mainnet governed phase 1",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "throw",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "3634b0ff0936ca7f5a0e9504ebcfb9c2104fab033ac97765785b340aab587e62"
-  },
-  {
     "id": "remediation.test.mjs:0110",
     "test": "GC01 execution checkpoint rejects mainnet governed phase 2",
     "function": "core.mjs.expectations",
     "outcome": "return",
     "file": "remediation.test.mjs.json.gz",
     "sha256": "c85305bb82ddb3722b1605abe5529299c437b73e6b582e4c9fae96ff9a78be05"
-  },
-  {
-    "id": "remediation.test.mjs:0111",
-    "test": "GC01 execution checkpoint rejects mainnet governed phase 2",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "throw",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "c23c3f59725b3788aa44314467a770046122a7e33f051cf6059df651d4528f38"
   },
   {
     "id": "remediation.test.mjs:0112",
@@ -3104,28 +2224,12 @@
     "sha256": "0e07096cc179ac6ff83fcd964b9b14120854dd74f1c55818008f3d9695c7c29b"
   },
   {
-    "id": "remediation.test.mjs:0115",
-    "test": "Safe forwarding remains evidence-required for 688689 residual activity",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "throw",
-    "file": "remediation.test.mjs.json.gz",
-    "sha256": "4710cc05986954a48159d274e88ea4ffc5aecd9e2655a8e29f983ad1e52d7f60"
-  },
-  {
     "id": "withdrawal-events.test.mjs:0001",
     "test": "F09 V1 aggregate completion of two records preserves the remaining snapshot",
     "function": "read-only.mjs.recheckObserved",
     "outcome": "return",
     "file": "withdrawal-events.test.mjs.json.gz",
     "sha256": "75ceccaec3c1ba2ec5355dbff67820150d6185539ee7b609c8da5232d845db28"
-  },
-  {
-    "id": "withdrawal-events.test.mjs:0002",
-    "test": "F09 V1 aggregate completion of two records preserves the remaining snapshot",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "return",
-    "file": "withdrawal-events.test.mjs.json.gz",
-    "sha256": "9bee7f5d4319982482357086b334d90a980e49ce9ed122177f69c25a0b0bb4f0"
   },
   {
     "id": "withdrawal-events.test.mjs:0003",
@@ -3142,14 +2246,6 @@
     "outcome": "return",
     "file": "withdrawal-events.test.mjs.json.gz",
     "sha256": "6a3ee6cd9398667489413e6f0d0042c97bb2826039439703af7218db45224f08"
-  },
-  {
-    "id": "withdrawal-events.test.mjs:0005",
-    "test": "F09 V1 later unmatured records remain untouched",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "throw",
-    "file": "withdrawal-events.test.mjs.json.gz",
-    "sha256": "67d60f50b8c64313dda3f35a9b20abfd31e520e0a903a2ef92c71868023133d8"
   },
   {
     "id": "withdrawal-events.test.mjs:0006",
@@ -3208,14 +2304,6 @@
     "sha256": "84bffaefff1c532dbae9555e6ee7e21fda91659253fb6493f5f2b9f17711b755"
   },
   {
-    "id": "withdrawal-events.test.mjs:0013",
-    "test": "F09 V3 remains per record and receiver-bound",
-    "function": "read-only.mjs.recheckObserved",
-    "outcome": "throw",
-    "file": "withdrawal-events.test.mjs.json.gz",
-    "sha256": "033b51e557366e986ed8b6be1285ebb4cd4738e10f48498353f52081bd0ca477"
-  },
-  {
     "id": "withdrawal-events.test.mjs:0014",
     "test": "F09 V3 rejects aggregation across records",
     "function": "read-only.mjs.recheckObserved",
@@ -3232,44 +2320,12 @@
     "sha256": "a8cbd74532113bcecad1b8a5d581ec33dc63a9a0f297e8ad5a51488854007409"
   },
   {
-    "id": "withdrawal-events.test.mjs:0016",
-    "test": "F09 1672 claims immediately before/after authenticated upgrade use different event models",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "return",
-    "file": "withdrawal-events.test.mjs.json.gz",
-    "sha256": "25480edc7d071332fd953d73d2e1cd35d2b44b29d54f148b946b2d734dbbc914"
-  },
-  {
-    "id": "withdrawal-events.test.mjs:0017",
-    "test": "F09 1672 claims immediately before/after authenticated upgrade use different event models",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "throw",
-    "file": "withdrawal-events.test.mjs.json.gz",
-    "sha256": "79869c0e4fe3cf412b128d0c403418534ebc0488159038cd46f1d9ca96f0da7e"
-  },
-  {
     "id": "withdrawal-events.test.mjs:0018",
     "test": "F09 688689 claims immediately before/after authenticated upgrade use different event models",
     "function": "core.mjs.expectations",
     "outcome": "return",
     "file": "withdrawal-events.test.mjs.json.gz",
     "sha256": "6ea7f1518196426fd3dac72049f3711fb0df6b35aae086d0ea6475693873c84d"
-  },
-  {
-    "id": "withdrawal-events.test.mjs:0019",
-    "test": "F09 688689 claims immediately before/after authenticated upgrade use different event models",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "return",
-    "file": "withdrawal-events.test.mjs.json.gz",
-    "sha256": "b04f0489bf7308c7089bda93f646b5b4c73aa4ad634000fdc02c85524cee0753"
-  },
-  {
-    "id": "withdrawal-events.test.mjs:0020",
-    "test": "F09 688689 claims immediately before/after authenticated upgrade use different event models",
-    "function": "read-only.mjs.verifyCheckpoint",
-    "outcome": "throw",
-    "file": "withdrawal-events.test.mjs.json.gz",
-    "sha256": "42aa6413bfe7f6c0414ed7f0707b6c2e827b566da4ebd815b47ce99b6875598b"
   },
   {
     "id": "withdrawal-events.test.mjs:0021",

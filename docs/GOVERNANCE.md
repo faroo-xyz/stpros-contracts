@@ -117,7 +117,7 @@ or testnet transaction.
 Run only in the allowlisted export through `tools/verify/run.sh`:
 
 ```bash
-tools/verify/run.sh "$dest" node node_modules/hardhat/dist/src/cli.js yield-vault:loss-contingency --plan /absolute/path/to/reviewed-loss-plan.json --review-hash "$REVIEWED_PLAN_SHA256" --rpc "$PUBLIC_READ_ONLY_RPC"
+tools/verify/run.sh "$dest" python3 -m tools.release.native loss contingency --plan /absolute/path/to/reviewed-loss-plan.json --review-hash "$REVIEWED_PLAN_SHA256" --rpc "$PUBLIC_READ_ONLY_RPC"
 ```
 
 The operator must independently supply `REVIEWED_PLAN_SHA256` and

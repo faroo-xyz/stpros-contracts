@@ -198,7 +198,7 @@ abstract contract LegacyTopology is Test {
 
     /// @notice Mainnet V1 vault side as deployed: factory proxy `initialize(owner)` (which
     ///         creates the beacon around an embedded YieldVault), then
-    ///         `upgradeBeaconTo(recorded YieldVault)` as deploy/YieldVaultImplementation.ts does.
+    ///         `upgradeBeaconTo(recorded YieldVault)` as recorded by the historical deployment tool.
     function _deployMainnetVaultsV1(LegacyV1 memory core) internal returns (LegacyVaultsV1 memory v) {
         v.factoryImpl = _deployRecorded("mainnet", "YieldVaultFactory_V1");
         v.factory = ILegacyYieldVaultFactoryV1(

@@ -24,6 +24,20 @@ class NativeBuild(unittest.TestCase):
         cls.output = native.snapshot_build.compile_input(cls.std, cls.solc)
         cls.artifact = native.artifact(cls.root, 'YieldVaultFactory', cls.std, cls.output)
 
+    def test_original_artifact_hashes_are_unchanged(self):
+        encoded = json.dumps(self.lock['contracts'], sort_keys=True, separators=(',', ':')).encode()
+        self.assertEqual(native.sha(encoded), '23b97c06c771f86118292add069d3ccd8c317852034029ff32f9c813a26025c5')
+
+    def test_configuration_and_vendor_drift_refused_before_build(self):
+        native.configuration(self.lock)
+        original = Path.read_bytes
+        for target in ['foundry.toml', 'lib/openzeppelin-contracts/proxy/transparent/ProxyAdmin.sol']:
+            def changed(path):
+                return b'changed' if path == native.ROOT / target else original(path)
+            with self.subTest(target=target), patch.object(Path, 'read_bytes', changed):
+                with self.assertRaisesRegex(ValueError, 'drift'):
+                    native.configuration(self.lock)
+
     def test_positive_exact_compiler_input_and_artifact(self):
         native.dependencies(self.resolver, self.lock)
         native.validate_input(self.std, self.root, self.ref, self.lock)

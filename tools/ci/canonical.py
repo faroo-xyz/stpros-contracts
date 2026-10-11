@@ -50,6 +50,19 @@ def dependencies(resolver, lock):
             'unreviewed dependency version')
 
 
+def configuration(lock):
+    for path, digest in lock['configSha256'].items():
+        common.refuse_secret_path(path)
+        require(sha((ROOT / path).read_bytes()) == digest, f'configuration drift: {path}')
+    vendor = json.loads((ROOT / 'lib/DEPENDENCIES.json').read_text())
+    for path, digest in vendor['files'].items():
+        common.refuse_secret_path(path)
+        require(path.startswith('lib/') and '..' not in Path(path).parts, 'invalid vendor path')
+        source = ROOT / path
+        require(not source.is_symlink() and source.resolve().is_relative_to((ROOT/'lib').resolve()), 'vendor escape')
+        require(sha(source.read_bytes()) == digest, f'vendored source drift: {path}')
+
+
 def validate_input(std, root, reference, lock):
     require(std['language'] == 'Solidity', 'compiler language drift')
     settings = {k: v for k, v in std['settings'].items() if k != 'outputSelection'}
@@ -118,8 +131,7 @@ def main():
     dest = ROOT / 'cache/native-r4'
     (dest / 'manifest.json').unlink(missing_ok=True)
     lock = json.loads(LOCK.read_text())
-    for path, digest in lock['configSha256'].items():
-        require(sha((ROOT / path).read_bytes()) == digest, f'configuration drift: {path}')
+    configuration(lock)
     solc = args.solc or snapshot_build.find_solc()
     common.refuse_secret_path(solc)
     compiler_identity(solc, lock)

@@ -1,4 +1,4 @@
-"""Hardhat-faithful solc builds of the HEAD contracts for snapshot generators.
+"""Native solc builds with the recorded compiler source-unit identities.
 
 The standard-JSON input mirrors what Hardhat 3 produced for the recorded
 deployments (see any deployments/*/*.json metadata): source keys
@@ -25,16 +25,16 @@ import common  # noqa: E402
 
 SOLC_VERSION = "0.8.28"
 PROFILES = {
-    # hardhat.config.ts: default = { version: "0.8.28" } (solc defaults: optimizer off)
+    # Historical B0 profile; retained only for immutable snapshot comparisons.
     "default": {"optimizer": {"enabled": False, "runs": 200}},
-    # hardhat.config.ts: production = optimizer enabled, runs 200
+    # Reviewed current production profile; bytecode identity is frozen.
     "production": {"optimizer": {"enabled": True, "runs": 200}},
 }
 IMPORT_RE = re.compile(r'^\s*import\s+(?:[^"\']*?\s+from\s+)?["\']([^"\']+)["\']\s*;', re.M)
 
 
 def npm_version(pkg):
-    return common.read_json(common.repo_path("node_modules", pkg, "package.json"))["version"]
+    return common.read_json(common.repo_path("lib/DEPENDENCIES.json"))["packages"][pkg]["version"]
 
 
 def find_solc():
@@ -70,7 +70,8 @@ class Resolver:
             return common.repo_path(key[len("project/"):])
         for prefix_key, pkg in self.npm.values():
             if key.startswith(prefix_key):
-                return common.repo_path("node_modules", pkg, key[len(prefix_key):])
+                directory = common.read_json(common.repo_path("lib/DEPENDENCIES.json"))["packages"][pkg]["directory"]
+                return common.repo_path(directory, key[len(prefix_key):])
         raise KeyError(key)
 
     def resolve(self, from_key, imp):
@@ -89,7 +90,7 @@ class Resolver:
                 continue
             path = Path(self.key_to_path(k))
             common.refuse_secret_path(str(path))
-            boundary = Path(common.repo_path("contracts" if k.startswith("project/") else "node_modules")).resolve()
+            boundary = Path(common.repo_path("contracts" if k.startswith("project/") else "lib")).resolve()
             if not path.resolve().is_relative_to(boundary):
                 raise ValueError("source escaped approved boundary")
             with open(path, encoding="utf-8") as fh:

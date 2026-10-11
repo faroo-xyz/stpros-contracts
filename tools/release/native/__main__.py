@@ -1,7 +1,8 @@
-"""Additive unsigned release construction and read-only checkpoint CLI.
+"""Unsigned release construction and read-only checkpoint CLI.
 
 Run inside an approved export. Inputs are explicit JSON paths and independent
 hashes; no environment-file discovery, wallet, signing or execution API exists.
+Only release preparation, artifact normalization and reviewed LOSS contingency remain.
 """
 import argparse
 import asyncio
@@ -9,7 +10,7 @@ import re
 import sys
 
 from ...lib import release_json as j
-from . import inputs, plans, checkpoint as observations, timelock
+from . import inputs, plans, checkpoint as observations, timelock, loss
 from .rpc import ReleaseRpc
 from ._shared import UNDEFINED, field, require, pretty_json, string
 
@@ -88,8 +89,18 @@ async def run_release(action, *, release_config='', review_hash='', rpc_url='', 
     return result
 
 
+async def run_loss(*, plan='', review_hash='', rpc_url='', rpc_factory=ReleaseRpc, clock=loss.wall_clock_seconds):
+    if not plan or not isinstance(review_hash, str) or not re.fullmatch('[a-f0-9]{64}', review_hash) or not rpc_url:
+        raise j.ReleaseError('BLOCKED: reviewed plan, independent hash and explicit read-only RPC required')
+    value = j.checked_json(plan, review_hash)
+    rpc = rpc_factory(rpc_url, field(value, 'mode') == 'simulation')
+    registry = j.checked_json('tools/release/registry.json')
+    result = await loss.observe_loss_contingency(value, rpc, registry, clock)
+    return {**result, 'planReviewHash': review_hash}
+
+
 def parser():
-    command = argparse.ArgumentParser(description=__doc__)
+    command = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     groups = command.add_subparsers(dest='group', required=True)
     release = groups.add_parser('release', help='Unsigned release artifacts and read-only verification')
     actions = release.add_subparsers(dest='action', required=True)
@@ -108,10 +119,16 @@ def parser():
     normalization.add_argument('--compiler-output', required=True)
     normalization.add_argument('--source', required=True)
     normalization.add_argument('--contract', required=True)
+    contingency = groups.add_parser('loss', allow_abbrev=False).add_subparsers(dest='action', required=True).add_parser('contingency', allow_abbrev=False)
+    contingency.add_argument('--plan', required=True)
+    contingency.add_argument('--review-hash', required=True)
+    contingency.add_argument('--rpc', required=True)
     return command
 
 
 async def dispatch(args):
+    if args.group == 'loss':
+        return await run_loss(plan=args.plan, review_hash=args.review_hash, rpc_url=args.rpc)
     if args.group == 'release':
         return await run_release(args.action, release_config=args.release_config, review_hash=args.review_hash,
                                  rpc_url=args.rpc, checkpoint=args.checkpoint, checkpoint_review=args.checkpoint_review,

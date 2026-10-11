@@ -10,7 +10,7 @@ current HEAD source as a stand-in:
       == solc(metadata.sources, metadata.settings)    (--recompile)
   metadata.sources[*].keccak256 == keccak(literal content)
       -> git blob(s) and the commits that contain them (newest first)
-      -> npm sources compared with the installed node_modules package
+      -> npm sources compared with the vendored reviewed source package
 
 Modes
   --legacy-format           print the original match.py report
@@ -176,12 +176,13 @@ def npm_installed_path(src_key):
     else:
         name, ver = parts[1].rsplit("@", 1)
         rest = parts[2:]
-    base = common.repo_path("node_modules", name)
-    try:
-        installed = json.load(open(os.path.join(base, "package.json")))["version"]
-    except OSError:
-        installed = None
-    return os.path.join(base, *rest), (ver, installed)
+    packages = common.read_json(common.repo_path("lib/DEPENDENCIES.json"))["packages"]
+    package = packages.get(name)
+    if package is None:
+        return None, (ver, None)
+    base = common.repo_path(package["directory"])
+    return os.path.join(base, *rest), (ver, package["version"])
+
 
 
 # ------------------------------------------------------------ main analysis

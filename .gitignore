@@ -1,34 +1,20 @@
-# Node modules
-/node_modules
-.pnpm-store/
-
-# Compilation output
-/dist
-
-# pnpm deploy output
-/bundle
-
-# Hardhat Build Artifacts
-/artifacts
-
-# Hardhat compilation (v2) support directory
+# Native outputs (execution belongs in isolated exports)
 /cache
+/out
+/cache_forge
+__pycache__/
+.DS_Store
 
-# Typechain output
-/types
+# Existing local installation / research data, excluded from native exports
+/node_modules
+/.pnpm-store/
+/tools/release/.cache/
 
-# Environment files
+# Protected environment material
 .env
 .env.*
 
-# Hardhat coverage reports
-/coverage
-
-# Gas snapshot files
-/.gas-snapshot
-
-# Snapshot cheatcodes output (top-level group files).
-# The B0 baselines below are tracked and checked by tools/snapshot/*.py --check.
+# Preserve reviewed historical snapshots while ignoring cheatcode outputs
 /snapshots/*
 !/snapshots/README.md
 !/snapshots/abi/
@@ -37,18 +23,3 @@
 !/snapshots/bytecode.json
 !/snapshots/capabilities.json
 !/snapshots/gas.json
-
-# Foundry output (runs only inside the .env-free export, tools/verify/export.sh)
-/out
-/cache_forge
-
-# Python bytecode
-__pycache__/
-
-# Windowed log-scanner cache (tools/release/logscan.py)
-/tools/release/.cache/
-
-# Generated files
-/generated
-
-.DS_Store
