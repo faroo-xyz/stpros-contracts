@@ -1,0 +1,22 @@
+[
+  {
+    "undefined": true,
+    "text": null,
+    "wire": null
+  },
+  {
+    "undefined": false,
+    "text": "{\"x\":undefined}",
+    "wire": "{}"
+  },
+  {
+    "undefined": false,
+    "text": "[,null]",
+    "wire": "[null,null]"
+  },
+  {
+    "undefined": false,
+    "text": "{\"x\":null}",
+    "wire": "{\"x\":null}"
+  }
+]

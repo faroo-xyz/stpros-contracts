@@ -1,0 +1,9 @@
+{
+  "reason": "Additive coverage; original 192-case corpus is unchanged; all outputs from original baseline only",
+  "sourceCommit": "e4015a8ceccb5b3fb9e1b4f66bd0396cd3e622b7",
+  "files": {
+    "supplement-cases.json": "36327bec36653fb997454c1b1ce40bf7f9099cc23a871596ee90a3c0a9bd1ffe",
+    "supplement-reference.json": "9915462e9a805d3f7489185a8d47a533e4c130ddaddafcfbca714a1bc1823268",
+    "b0-reference.json": "8d3c2abaa54fb31efe95424aab033a5b6ff411130ced981fe3e604c1a11eedb7"
+  }
+}

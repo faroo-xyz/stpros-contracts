@@ -1,0 +1,942 @@
+[
+  {
+    "id": "decode-function-ReleaseAssertions-assertR4",
+    "abi": [
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "chainId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "timelock",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "timelockHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint256",
+                "name": "minDelay",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "gov",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "can",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "guardian",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "ops",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "deployer",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "proxyAdmin",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "proxyAdminHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "inventoryHash",
+                "type": "bytes32"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "address",
+                    "name": "target",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "role",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "account",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "expected",
+                    "type": "bool"
+                  }
+                ],
+                "internalType": "struct ReleaseAssertions.RoleCheck[]",
+                "name": "roles",
+                "type": "tuple[]"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "address",
+                    "name": "proxy",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "owner",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "implementation",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "implementationHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "guarded",
+                    "type": "bool"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "paused",
+                    "type": "bool"
+                  }
+                ],
+                "internalType": "struct ReleaseAssertions.ProxyCheck[]",
+                "name": "proxies",
+                "type": "tuple[]"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "address",
+                    "name": "factory",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "beacon",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "implementation",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "implementationHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "hardened",
+                    "type": "bool"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "creationClosed",
+                    "type": "bool"
+                  }
+                ],
+                "internalType": "struct ReleaseAssertions.BeaconCheck[]",
+                "name": "beacons",
+                "type": "tuple[]"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "address",
+                    "name": "vault",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "factory",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "round",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "termsHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "uint8",
+                    "name": "phase",
+                    "type": "uint8"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "hardened",
+                    "type": "bool"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "retired",
+                    "type": "bool"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "governed",
+                    "type": "bool"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "residualRecovery",
+                    "type": "bool"
+                  }
+                ],
+                "internalType": "struct ReleaseAssertions.VaultCheck[]",
+                "name": "vaults",
+                "type": "tuple[]"
+              }
+            ],
+            "internalType": "struct ReleaseAssertions.Common",
+            "name": "e",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "oracle",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "stpros",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "bridge",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "distributor",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "asset",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "reporter",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "treasury",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "keeper",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "commissionPpm",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "aprPpm",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxUpdateAmount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "interval",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "unbondingPeriod",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxWithdrawCount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bool",
+                "name": "mainnetV1",
+                "type": "bool"
+              },
+              {
+                "internalType": "address[]",
+                "name": "destinations",
+                "type": "address[]"
+              }
+            ],
+            "internalType": "struct ReleaseAssertions.Core",
+            "name": "c",
+            "type": "tuple"
+          }
+        ],
+        "name": "assertR4",
+        "outputs": [],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
+    "data": "0xdd915fef000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000005e000000000000000000000000000000000000000000000000000000000000000010000000000000000000000001212121212121212121212121212121212121212abababababababababababababababababababababababababababababababab0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000121212121212121212121212121212121212121200000000000000000000000012121212121212121212121212121212121212120000000000000000000000001212121212121212121212121212121212121212000000000000000000000000121212121212121212121212121212121212121200000000000000000000000012121212121212121212121212121212121212120000000000000000000000001212121212121212121212121212121212121212abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002a00000000000000000000000000000000000000000000000000000000000000380000000000000000000000000000000000000000000000000000000000000046000000000000000000000000000000000000000000000000000000000000000010000000000000000000000001212121212121212121212121212121212121212abababababababababababababababababababababababababababababababab000000000000000000000000121212121212121212121212121212121212121200000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000121212121212121212121212121212121212121200000000000000000000000012121212121212121212121212121212121212120000000000000000000000001212121212121212121212121212121212121212abababababababababababababababababababababababababababababababab000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000121212121212121212121212121212121212121200000000000000000000000012121212121212121212121212121212121212120000000000000000000000001212121212121212121212121212121212121212abababababababababababababababababababababababababababababababab000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000121212121212121212121212121212121212121200000000000000000000000012121212121212121212121212121212121212120000000000000000000000000000000000000000000000000000000000000001abababababababababababababababababababababababababababababababab00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000121212121212121212121212121212121212121200000000000000000000000012121212121212121212121212121212121212120000000000000000000000001212121212121212121212121212121212121212000000000000000000000000121212121212121212121212121212121212121200000000000000000000000012121212121212121212121212121212121212120000000000000000000000001212121212121212121212121212121212121212000000000000000000000000121212121212121212121212121212121212121200000000000000000000000012121212121212121212121212121212121212120000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000010000000000000000000000001212121212121212121212121212121212121212"
+  },
+  {
+    "id": "decode-function-ReleaseAssertions-assertHandoff",
+    "abi": [
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "chainId",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "timelock",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "timelockHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint256",
+                "name": "minDelay",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "gov",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "can",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "guardian",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "ops",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "deployer",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "proxyAdmin",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "proxyAdminHash",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "inventoryHash",
+                "type": "bytes32"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "address",
+                    "name": "target",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "role",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "account",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "expected",
+                    "type": "bool"
+                  }
+                ],
+                "internalType": "struct ReleaseAssertions.RoleCheck[]",
+                "name": "roles",
+                "type": "tuple[]"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "address",
+                    "name": "proxy",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "owner",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "implementation",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "implementationHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "guarded",
+                    "type": "bool"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "paused",
+                    "type": "bool"
+                  }
+                ],
+                "internalType": "struct ReleaseAssertions.ProxyCheck[]",
+                "name": "proxies",
+                "type": "tuple[]"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "address",
+                    "name": "factory",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "beacon",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "implementation",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "implementationHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "hardened",
+                    "type": "bool"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "creationClosed",
+                    "type": "bool"
+                  }
+                ],
+                "internalType": "struct ReleaseAssertions.BeaconCheck[]",
+                "name": "beacons",
+                "type": "tuple[]"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "address",
+                    "name": "vault",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "address",
+                    "name": "factory",
+                    "type": "address"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "round",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "bytes32",
+                    "name": "termsHash",
+                    "type": "bytes32"
+                  },
+                  {
+                    "internalType": "uint8",
+                    "name": "phase",
+                    "type": "uint8"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "hardened",
+                    "type": "bool"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "retired",
+                    "type": "bool"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "governed",
+                    "type": "bool"
+                  },
+                  {
+                    "internalType": "bool",
+                    "name": "residualRecovery",
+                    "type": "bool"
+                  }
+                ],
+                "internalType": "struct ReleaseAssertions.VaultCheck[]",
+                "name": "vaults",
+                "type": "tuple[]"
+              }
+            ],
+            "internalType": "struct ReleaseAssertions.Common",
+            "name": "e",
+            "type": "tuple"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "pendingOperation",
+            "type": "bytes32"
+          }
+        ],
+        "name": "assertHandoff",
+        "outputs": [],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
+    "data": "0xdcf45cf70000000000000000000000000000000000000000000000000000000000000040abababababababababababababababababababababababababababababababab00000000000000000000000000000000000000000000000000000000000000010000000000000000000000001212121212121212121212121212121212121212abababababababababababababababababababababababababababababababab0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000121212121212121212121212121212121212121200000000000000000000000012121212121212121212121212121212121212120000000000000000000000001212121212121212121212121212121212121212000000000000000000000000121212121212121212121212121212121212121200000000000000000000000012121212121212121212121212121212121212120000000000000000000000001212121212121212121212121212121212121212abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002a00000000000000000000000000000000000000000000000000000000000000380000000000000000000000000000000000000000000000000000000000000046000000000000000000000000000000000000000000000000000000000000000010000000000000000000000001212121212121212121212121212121212121212abababababababababababababababababababababababababababababababab000000000000000000000000121212121212121212121212121212121212121200000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000121212121212121212121212121212121212121200000000000000000000000012121212121212121212121212121212121212120000000000000000000000001212121212121212121212121212121212121212abababababababababababababababababababababababababababababababab000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000121212121212121212121212121212121212121200000000000000000000000012121212121212121212121212121212121212120000000000000000000000001212121212121212121212121212121212121212abababababababababababababababababababababababababababababababab000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000121212121212121212121212121212121212121200000000000000000000000012121212121212121212121212121212121212120000000000000000000000000000000000000000000000000000000000000001abababababababababababababababababababababababababababababababab00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001"
+  },
+  {
+    "id": "decode-function-YieldVaultFactory-createYieldVault",
+    "abi": [
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "asset",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "factory",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "admin",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "counterparty",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "feeRecipient",
+                "type": "address"
+              },
+              {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "symbol",
+                "type": "string"
+              },
+              {
+                "components": [
+                  {
+                    "internalType": "uint256",
+                    "name": "openWindow",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "lockDuration",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "settleTimelockWindow",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "roundCap",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "perAddressCap",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "minSubscription",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "performanceFeeBps",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "maxLossBps",
+                    "type": "uint256"
+                  },
+                  {
+                    "internalType": "uint256",
+                    "name": "openedAt",
+                    "type": "uint256"
+                  }
+                ],
+                "internalType": "struct YieldVault.RoundParams",
+                "name": "firstRound",
+                "type": "tuple"
+              },
+              {
+                "internalType": "address",
+                "name": "operator",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct YieldVault.InitParams",
+            "name": "params",
+            "type": "tuple"
+          }
+        ],
+        "name": "createYieldVault",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "proxyAddr",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ],
+    "data": "0x115c8628000000000000000000000000000000000000000000000000000000000000002000000000000000000000000012121212121212121212121212121212121212120000000000000000000000001212121212121212121212121212121212121212000000000000000000000000121212121212121212121212121212121212121200000000000000000000000012121212121212121212121212121212121212120000000000000000000000001212121212121212121212121212121212121212000000000000000000000000000000000000000000000000000000000000022000000000000000000000000000000000000000000000000000000000000002600000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000001212121212121212121212121212121212121212000000000000000000000000000000000000000000000000000000000000000a466f756e646174696f6e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a466f756e646174696f6e00000000000000000000000000000000000000000000"
+  },
+  {
+    "id": "decode-function-Oracle-migrateFromV1",
+    "abi": [
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "reporter",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "vToken",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxUpdateAmount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "updateInterval",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "maxAprPpm",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "commissionAccount",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "commissionRatePpm",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "guardian",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "timelock",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct Oracle.OracleV1Migration",
+            "name": "p",
+            "type": "tuple"
+          }
+        ],
+        "name": "migrateFromV1",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ],
+    "data": "0x55a5cfa1000000000000000000000000121212121212121212121212121212121212121200000000000000000000000012121212121212121212121212121212121212120000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000001212121212121212121212121212121212121212000000000000000000000000000000000000000000000000000000000000000100000000000000000000000012121212121212121212121212121212121212120000000000000000000000001212121212121212121212121212121212121212"
+  },
+  {
+    "id": "decode-function-Oracle-migrateFromV3",
+    "abi": [
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "token",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "aprPpm",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "guardian_",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "timelock_",
+            "type": "address"
+          }
+        ],
+        "name": "migrateFromV3",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ],
+    "data": "0x7f3daf920000000000000000000000001212121212121212121212121212121212121212000000000000000000000000000000000000000000000000000000000000000100000000000000000000000012121212121212121212121212121212121212120000000000000000000000001212121212121212121212121212121212121212"
+  },
+  {
+    "id": "decode-function-StPROS-migrateFromV1",
+    "abi": [
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "slp_",
+            "type": "address"
+          },
+          {
+            "internalType": "address payable",
+            "name": "bridgeVault_",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "guardian_",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "timelock_",
+            "type": "address"
+          }
+        ],
+        "name": "migrateFromV1",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ],
+    "data": "0x55221bd30000000000000000000000001212121212121212121212121212121212121212000000000000000000000000121212121212121212121212121212121212121200000000000000000000000012121212121212121212121212121212121212120000000000000000000000001212121212121212121212121212121212121212"
+  },
+  {
+    "id": "decode-function-TimelockController-scheduleBatch",
+    "abi": [
+      {
+        "inputs": [
+          {
+            "internalType": "address[]",
+            "name": "targets",
+            "type": "address[]"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "values",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "bytes[]",
+            "name": "payloads",
+            "type": "bytes[]"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "predecessor",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "salt",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "delay",
+            "type": "uint256"
+          }
+        ],
+        "name": "scheduleBatch",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ],
+    "data": "0x8f2a0bb000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000140abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000001212121212121212121212121212121212121212000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000021234000000000000000000000000000000000000000000000000000000000000"
+  },
+  {
+    "id": "decode-function-TimelockController-schedule",
+    "abi": [
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "target",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "value",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "data",
+            "type": "bytes"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "predecessor",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "salt",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "delay",
+            "type": "uint256"
+          }
+        ],
+        "name": "schedule",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ],
+    "data": "0x01d5062a0000000000000000000000001212121212121212121212121212121212121212000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000c0abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000021234000000000000000000000000000000000000000000000000000000000000"
+  },
+  {
+    "id": "decode-function-noargs",
+    "abi": [
+      {
+        "type": "function",
+        "name": "closeCreation",
+        "inputs": [],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+      }
+    ],
+    "data": "0x9169350a"
+  },
+  {
+    "id": "decode-function-unknown",
+    "abi": [
+      {
+        "type": "function",
+        "name": "closeCreation",
+        "inputs": [],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+      }
+    ],
+    "data": "0xdeadbeef"
+  },
+  {
+    "id": "decode-function-short",
+    "abi": [
+      {
+        "type": "function",
+        "name": "closeCreation",
+        "inputs": [],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+      }
+    ],
+    "data": "0x01"
+  }
+]

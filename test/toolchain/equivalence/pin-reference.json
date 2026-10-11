@@ -1,0 +1,135 @@
+{
+  "sourceSha256": "ef5ae6cc5cef818a16e2830c9d9f837ee3ccb34c40bd6597ededf9571782dc83",
+  "functionSha256": "20694f08b2a98b13632ab2c85db85cfb08af19dd5b5ec62c9cfe5d6a222146fb",
+  "results": [
+    {
+      "id": "pinned-positive",
+      "outcome": "return",
+      "value": {
+        "header": {
+          "hash": "0xabababababababababababababababababababababababababababababababab",
+          "number": "0x10",
+          "timestamp": "0x20"
+        },
+        "block": "0x10"
+      },
+      "outputBytes": "7b22686561646572223a7b2268617368223a22307861626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162222c226e756d626572223a2230783130222c2274696d657374616d70223a2230783230227d2c22626c6f636b223a2230783130227d",
+      "trace": [
+        {
+          "method": "eth_chainId",
+          "params": []
+        },
+        {
+          "method": "eth_getBlockByNumber",
+          "params": [
+            "0x10",
+            false
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pinned-latest",
+      "outcome": "return",
+      "value": {
+        "header": {
+          "hash": "0xabababababababababababababababababababababababababababababababab",
+          "number": "0x10",
+          "timestamp": "0x20"
+        },
+        "block": "0x10"
+      },
+      "outputBytes": "7b22686561646572223a7b2268617368223a22307861626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162616261626162222c226e756d626572223a2230783130222c2274696d657374616d70223a2230783230227d2c22626c6f636b223a2230783130227d",
+      "trace": [
+        {
+          "method": "eth_chainId",
+          "params": []
+        },
+        {
+          "method": "eth_getBlockByNumber",
+          "params": [
+            "latest",
+            false
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pinned-wrong-chain",
+      "outcome": "throw",
+      "error": {
+        "name": "Error",
+        "message": "RPC_CHAIN"
+      },
+      "trace": [
+        {
+          "method": "eth_chainId",
+          "params": []
+        }
+      ]
+    },
+    {
+      "id": "pinned-wrong-number",
+      "outcome": "throw",
+      "error": {
+        "name": "Error",
+        "message": "BLOCK_NUMBER_MISMATCH"
+      },
+      "trace": [
+        {
+          "method": "eth_chainId",
+          "params": []
+        },
+        {
+          "method": "eth_getBlockByNumber",
+          "params": [
+            "0x10",
+            false
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pinned-missing",
+      "outcome": "throw",
+      "error": {
+        "name": "Error",
+        "message": "BLOCK_MISSING"
+      },
+      "trace": [
+        {
+          "method": "eth_chainId",
+          "params": []
+        },
+        {
+          "method": "eth_getBlockByNumber",
+          "params": [
+            "0x10",
+            false
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pinned-missing-timestamp",
+      "outcome": "throw",
+      "error": {
+        "name": "Error",
+        "message": "BLOCK_MISSING"
+      },
+      "trace": [
+        {
+          "method": "eth_chainId",
+          "params": []
+        },
+        {
+          "method": "eth_getBlockByNumber",
+          "params": [
+            "0x10",
+            false
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "scope": "Additional exact hex-spelling checks; prior verification plan stays unchanged",
+  "testIds": [
+    "test_foundation.FoundationTests.test_complete_extended_hex_gate",
+    "test_foundation.FoundationTests.test_hex_octets_hashes_and_safe_text_domains",
+    "test_foundation.FoundationTests.test_wrong_case_folding_detected"
+  ]
+}

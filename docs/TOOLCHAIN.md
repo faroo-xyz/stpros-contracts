@@ -82,3 +82,92 @@ help/deploy refusal. They never send transactions. For TypeScript diagnosis comp
 like-prepared exports: Hardhat-generated typings and Rocketh artifacts affect the
 result. Record missing-preparation errors and existing diagnostics explicitly;
 never report an overall PASS from zero diagnostic delta.
+
+## Native trust primitives (implementation awaiting independent review)
+
+The additive typed API in `tools/lib/abi.py` provides parameter and function
+encoding/decoding plus strict-mode indexed-event decoding from reviewed JSON ABIs.
+`BigInt` and `UNDEFINED` preserve the reference engine's result-type distinctions.
+The original static B0 API remains available. These APIs do not attest a contract,
+approve an ABI, sign a transaction or replace any registered Task.
+
+The decoder intentionally follows pinned viem admission: for example, it ignores
+some noncanonical padding, accepts unaligned dynamic offsets, and trims leading
+NUL bytes in decoded strings. Solidity's own decoder can reject or retain data
+differently. The local Solidity witnesses distinguish these behaviors explicitly;
+do not use the compatibility decoder as proof of canonical Solidity encoding.
+
+`tools/lib/release_json.py` separates compact release canonical JSON, ordinary
+wire JSON, raw SHA-256 and the historical filter ID. Existing native/snapshot
+pretty JSON is unchanged. Use explicit `BigInt` for integer values that represent
+JS BigInt. Parsed JSON numbers use IEEE-754 Number semantics. The checked reader
+retains the original helper's optional-hash behavior; only `approved_json` requires
+an external raw-file digest. Computing a digest never creates independent approval.
+
+`tools/release/native/rpc.py` is a read-only library and pin primitive. It retains
+the release URL/method, batching, retry, timeout and response-correlation policy,
+including the reference's acceptance of `result` with `error: null`. It has no
+native release CLI, signing provider, deployment executor or unrestricted method
+forwarder. Complete checkpoint/history/Safe/LOSS migrations remain separate work.
+
+Permanent reference cases and exact original Node outputs live in
+`test/toolchain/equivalence/`. The original 192-case corpus is immutable; additive
+width/URL/pin/function/undefined cases have separate pinned manifests. All expected
+results came from the committed Node/viem baseline, never the Python candidate.
+ABI library diagnostic formatting is retained in reference evidence and compared by
+its precise failure category; release-owned failure messages and successful bytes
+are compared exactly. Required cases cannot be silently skipped or refreshed.
+
+From an approved export with installed dependencies:
+
+```sh
+tools/verify/run.sh "$dest" python3 -m unittest discover -s test/toolchain -p 'test_*.py' -v
+tools/verify/run.sh "$dest" FOUNDRY_PROFILE=final forge test --match-path test/toolchain/FoundationWitness.t.sol -vv
+tools/verify/run.sh "$dest" python3 test/toolchain/equivalence/run.py compare --out /absolute/safe/new-result.json
+```
+
+`verify-reference` uses an export of the original source commit and refuses source
+or frozen-output drift. Copy only the explicitly listed harness files into that
+reference export; do not copy candidate `tools/` files. The input fixture directory
+`/private/tmp/faroo-foundation-inputs` is reserved for sequential test runs using
+synthetic data; reference and candidate run sequentially and have separate outputs.
+Research records exact capture/reproduction commands and dependency identities.
+No command above runs a full release, accesses a public RPC or renews approval.
+
+The new typed Python encoder admits only `0x` followed by whole hexadecimal
+bytes. The independently requested admission amendment explicitly excludes odd
+nibbles and nonhex encoder inputs. `admission-policy.json` binds only the two
+frozen cases to their exact inputs, original outcomes and required native refusal.
+The original 358 cases now account for 356 exact outcomes and two admission
+deviations. Malformed hex decoding reports `BaseError`; null remains `TypeError`.
+No existing Release or governance implementation uses these candidate primitives.
+
+The typed encoder now retains original letter casing in admitted dynamic `bytes`
+and fixed `bytesN` values, including nested arrays, tuples and function calldata.
+Internal encoding fragments are even-length hex text without a prefix; lengths
+and head/tail offsets remain measured in bytes. Only byte-value spelling is
+preserved. Generated uint/bool/address/string words and selectors keep their
+previous representation; Keccak continues to hash decoded octets.
+
+Both original spelling counterexamples now match exactly. All 360 pre-existing
+cases account for 358 exact outcomes and the same two admission deviations.
+A separately frozen 102-case viem supplement covers every fixed-byte width,
+dynamic-byte boundaries, nested arrays/tuples, functions, Timelock single/batch
+payloads, independent decoding and Safe JSON/text hash domains. The complete
+462-case result is 460 exact outcomes, two approved admission deviations and
+zero unexplained mismatches. These totals are derived from executed cases.
+
+`compare` validates every original and supplemental lock and compares successful
+outputs case-sensitively. It never folds case to obtain equivalence. Full discovery
+also requires all methods from the original and additive verification plans and
+rejects missing tests, skips and expected failures:
+
+```sh
+tools/verify/run.sh "$dest" python3 test/toolchain/equivalence/run.py test --out /absolute/safe/new-discovery.json
+```
+
+Implementation status: **READY FOR INDEPENDENT IMPLEMENTATION REVIEW**. This is
+not independent approval or permission to replace operational Release consumers.
+Research retains all preceding blockers and failed logs with exact identities;
+its current handoff records the tested files, independent witnesses, negative
+controls and unchanged historical limitations. No downstream migration is started.

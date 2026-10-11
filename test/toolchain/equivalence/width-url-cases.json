@@ -1,0 +1,1738 @@
+[
+  {
+    "id": "width-8-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint8"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "255"
+      }
+    ]
+  },
+  {
+    "id": "width-8-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint8"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "256"
+      }
+    ]
+  },
+  {
+    "id": "width-8-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint8"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-8-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint8"
+      }
+    ],
+    "data": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+  },
+  {
+    "id": "width-16-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint16"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "65535"
+      }
+    ]
+  },
+  {
+    "id": "width-16-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint16"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "65536"
+      }
+    ]
+  },
+  {
+    "id": "width-16-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint16"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-16-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint16"
+      }
+    ],
+    "data": "0x000000000000000000000000000000000000000000000000000000000000ffff"
+  },
+  {
+    "id": "width-24-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint24"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "16777215"
+      }
+    ]
+  },
+  {
+    "id": "width-24-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint24"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "16777216"
+      }
+    ]
+  },
+  {
+    "id": "width-24-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint24"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-24-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint24"
+      }
+    ],
+    "data": "0x0000000000000000000000000000000000000000000000000000000000ffffff"
+  },
+  {
+    "id": "width-32-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint32"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "4294967295"
+      }
+    ]
+  },
+  {
+    "id": "width-32-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint32"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "4294967296"
+      }
+    ]
+  },
+  {
+    "id": "width-32-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint32"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-32-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint32"
+      }
+    ],
+    "data": "0x00000000000000000000000000000000000000000000000000000000ffffffff"
+  },
+  {
+    "id": "width-40-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint40"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "1099511627775"
+      }
+    ]
+  },
+  {
+    "id": "width-40-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint40"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "1099511627776"
+      }
+    ]
+  },
+  {
+    "id": "width-40-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint40"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-40-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint40"
+      }
+    ],
+    "data": "0x000000000000000000000000000000000000000000000000000000ffffffffff"
+  },
+  {
+    "id": "width-48-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint48"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "281474976710655"
+      }
+    ]
+  },
+  {
+    "id": "width-48-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint48"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "281474976710656"
+      }
+    ]
+  },
+  {
+    "id": "width-48-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint48"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-48-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint48"
+      }
+    ],
+    "data": "0x0000000000000000000000000000000000000000000000000000ffffffffffff"
+  },
+  {
+    "id": "width-56-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint56"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "72057594037927935"
+      }
+    ]
+  },
+  {
+    "id": "width-56-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint56"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "72057594037927936"
+      }
+    ]
+  },
+  {
+    "id": "width-56-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint56"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-56-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint56"
+      }
+    ],
+    "data": "0x00000000000000000000000000000000000000000000000000ffffffffffffff"
+  },
+  {
+    "id": "width-64-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint64"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "18446744073709551615"
+      }
+    ]
+  },
+  {
+    "id": "width-64-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint64"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "18446744073709551616"
+      }
+    ]
+  },
+  {
+    "id": "width-64-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint64"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-64-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint64"
+      }
+    ],
+    "data": "0x000000000000000000000000000000000000000000000000ffffffffffffffff"
+  },
+  {
+    "id": "width-72-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint72"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "4722366482869645213695"
+      }
+    ]
+  },
+  {
+    "id": "width-72-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint72"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "4722366482869645213696"
+      }
+    ]
+  },
+  {
+    "id": "width-72-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint72"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-72-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint72"
+      }
+    ],
+    "data": "0x0000000000000000000000000000000000000000000000ffffffffffffffffff"
+  },
+  {
+    "id": "width-80-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint80"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "1208925819614629174706175"
+      }
+    ]
+  },
+  {
+    "id": "width-80-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint80"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "1208925819614629174706176"
+      }
+    ]
+  },
+  {
+    "id": "width-80-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint80"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-80-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint80"
+      }
+    ],
+    "data": "0x00000000000000000000000000000000000000000000ffffffffffffffffffff"
+  },
+  {
+    "id": "width-88-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint88"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "309485009821345068724781055"
+      }
+    ]
+  },
+  {
+    "id": "width-88-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint88"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "309485009821345068724781056"
+      }
+    ]
+  },
+  {
+    "id": "width-88-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint88"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-88-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint88"
+      }
+    ],
+    "data": "0x000000000000000000000000000000000000000000ffffffffffffffffffffff"
+  },
+  {
+    "id": "width-96-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint96"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "79228162514264337593543950335"
+      }
+    ]
+  },
+  {
+    "id": "width-96-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint96"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "79228162514264337593543950336"
+      }
+    ]
+  },
+  {
+    "id": "width-96-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint96"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-96-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint96"
+      }
+    ],
+    "data": "0x0000000000000000000000000000000000000000ffffffffffffffffffffffff"
+  },
+  {
+    "id": "width-104-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint104"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "20282409603651670423947251286015"
+      }
+    ]
+  },
+  {
+    "id": "width-104-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint104"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "20282409603651670423947251286016"
+      }
+    ]
+  },
+  {
+    "id": "width-104-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint104"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-104-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint104"
+      }
+    ],
+    "data": "0x00000000000000000000000000000000000000ffffffffffffffffffffffffff"
+  },
+  {
+    "id": "width-112-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint112"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "5192296858534827628530496329220095"
+      }
+    ]
+  },
+  {
+    "id": "width-112-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint112"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "5192296858534827628530496329220096"
+      }
+    ]
+  },
+  {
+    "id": "width-112-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint112"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-112-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint112"
+      }
+    ],
+    "data": "0x000000000000000000000000000000000000ffffffffffffffffffffffffffff"
+  },
+  {
+    "id": "width-120-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint120"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "1329227995784915872903807060280344575"
+      }
+    ]
+  },
+  {
+    "id": "width-120-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint120"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "1329227995784915872903807060280344576"
+      }
+    ]
+  },
+  {
+    "id": "width-120-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint120"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-120-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint120"
+      }
+    ],
+    "data": "0x0000000000000000000000000000000000ffffffffffffffffffffffffffffff"
+  },
+  {
+    "id": "width-128-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint128"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "340282366920938463463374607431768211455"
+      }
+    ]
+  },
+  {
+    "id": "width-128-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint128"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "340282366920938463463374607431768211456"
+      }
+    ]
+  },
+  {
+    "id": "width-128-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint128"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-128-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint128"
+      }
+    ],
+    "data": "0x00000000000000000000000000000000ffffffffffffffffffffffffffffffff"
+  },
+  {
+    "id": "width-136-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint136"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "87112285931760246646623899502532662132735"
+      }
+    ]
+  },
+  {
+    "id": "width-136-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint136"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "87112285931760246646623899502532662132736"
+      }
+    ]
+  },
+  {
+    "id": "width-136-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint136"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-136-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint136"
+      }
+    ],
+    "data": "0x000000000000000000000000000000ffffffffffffffffffffffffffffffffff"
+  },
+  {
+    "id": "width-144-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint144"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "22300745198530623141535718272648361505980415"
+      }
+    ]
+  },
+  {
+    "id": "width-144-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint144"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "22300745198530623141535718272648361505980416"
+      }
+    ]
+  },
+  {
+    "id": "width-144-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint144"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-144-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint144"
+      }
+    ],
+    "data": "0x0000000000000000000000000000ffffffffffffffffffffffffffffffffffff"
+  },
+  {
+    "id": "width-152-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint152"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "5708990770823839524233143877797980545530986495"
+      }
+    ]
+  },
+  {
+    "id": "width-152-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint152"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "5708990770823839524233143877797980545530986496"
+      }
+    ]
+  },
+  {
+    "id": "width-152-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint152"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-152-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint152"
+      }
+    ],
+    "data": "0x00000000000000000000000000ffffffffffffffffffffffffffffffffffffff"
+  },
+  {
+    "id": "width-160-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint160"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "1461501637330902918203684832716283019655932542975"
+      }
+    ]
+  },
+  {
+    "id": "width-160-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint160"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "1461501637330902918203684832716283019655932542976"
+      }
+    ]
+  },
+  {
+    "id": "width-160-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint160"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-160-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint160"
+      }
+    ],
+    "data": "0x000000000000000000000000ffffffffffffffffffffffffffffffffffffffff"
+  },
+  {
+    "id": "width-168-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint168"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "374144419156711147060143317175368453031918731001855"
+      }
+    ]
+  },
+  {
+    "id": "width-168-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint168"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "374144419156711147060143317175368453031918731001856"
+      }
+    ]
+  },
+  {
+    "id": "width-168-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint168"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-168-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint168"
+      }
+    ],
+    "data": "0x0000000000000000000000ffffffffffffffffffffffffffffffffffffffffff"
+  },
+  {
+    "id": "width-176-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint176"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "95780971304118053647396689196894323976171195136475135"
+      }
+    ]
+  },
+  {
+    "id": "width-176-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint176"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "95780971304118053647396689196894323976171195136475136"
+      }
+    ]
+  },
+  {
+    "id": "width-176-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint176"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-176-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint176"
+      }
+    ],
+    "data": "0x00000000000000000000ffffffffffffffffffffffffffffffffffffffffffff"
+  },
+  {
+    "id": "width-184-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint184"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "24519928653854221733733552434404946937899825954937634815"
+      }
+    ]
+  },
+  {
+    "id": "width-184-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint184"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "24519928653854221733733552434404946937899825954937634816"
+      }
+    ]
+  },
+  {
+    "id": "width-184-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint184"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-184-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint184"
+      }
+    ],
+    "data": "0x000000000000000000ffffffffffffffffffffffffffffffffffffffffffffff"
+  },
+  {
+    "id": "width-192-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint192"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "6277101735386680763835789423207666416102355444464034512895"
+      }
+    ]
+  },
+  {
+    "id": "width-192-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint192"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "6277101735386680763835789423207666416102355444464034512896"
+      }
+    ]
+  },
+  {
+    "id": "width-192-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint192"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-192-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint192"
+      }
+    ],
+    "data": "0x0000000000000000ffffffffffffffffffffffffffffffffffffffffffffffff"
+  },
+  {
+    "id": "width-200-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint200"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "1606938044258990275541962092341162602522202993782792835301375"
+      }
+    ]
+  },
+  {
+    "id": "width-200-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint200"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "1606938044258990275541962092341162602522202993782792835301376"
+      }
+    ]
+  },
+  {
+    "id": "width-200-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint200"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-200-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint200"
+      }
+    ],
+    "data": "0x00000000000000ffffffffffffffffffffffffffffffffffffffffffffffffff"
+  },
+  {
+    "id": "width-208-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint208"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "411376139330301510538742295639337626245683966408394965837152255"
+      }
+    ]
+  },
+  {
+    "id": "width-208-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint208"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "411376139330301510538742295639337626245683966408394965837152256"
+      }
+    ]
+  },
+  {
+    "id": "width-208-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint208"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-208-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint208"
+      }
+    ],
+    "data": "0x000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  },
+  {
+    "id": "width-216-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint216"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "105312291668557186697918027683670432318895095400549111254310977535"
+      }
+    ]
+  },
+  {
+    "id": "width-216-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint216"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "105312291668557186697918027683670432318895095400549111254310977536"
+      }
+    ]
+  },
+  {
+    "id": "width-216-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint216"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-216-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint216"
+      }
+    ],
+    "data": "0x0000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  },
+  {
+    "id": "width-224-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint224"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "26959946667150639794667015087019630673637144422540572481103610249215"
+      }
+    ]
+  },
+  {
+    "id": "width-224-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint224"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "26959946667150639794667015087019630673637144422540572481103610249216"
+      }
+    ]
+  },
+  {
+    "id": "width-224-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint224"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-224-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint224"
+      }
+    ],
+    "data": "0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  },
+  {
+    "id": "width-232-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint232"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "6901746346790563787434755862277025452451108972170386555162524223799295"
+      }
+    ]
+  },
+  {
+    "id": "width-232-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint232"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "6901746346790563787434755862277025452451108972170386555162524223799296"
+      }
+    ]
+  },
+  {
+    "id": "width-232-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint232"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-232-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint232"
+      }
+    ],
+    "data": "0x000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  },
+  {
+    "id": "width-240-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint240"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "1766847064778384329583297500742918515827483896875618958121606201292619775"
+      }
+    ]
+  },
+  {
+    "id": "width-240-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint240"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "1766847064778384329583297500742918515827483896875618958121606201292619776"
+      }
+    ]
+  },
+  {
+    "id": "width-240-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint240"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-240-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint240"
+      }
+    ],
+    "data": "0x0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  },
+  {
+    "id": "width-248-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint248"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "452312848583266388373324160190187140051835877600158453279131187530910662655"
+      }
+    ]
+  },
+  {
+    "id": "width-248-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint248"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "452312848583266388373324160190187140051835877600158453279131187530910662656"
+      }
+    ]
+  },
+  {
+    "id": "width-248-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint248"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-248-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint248"
+      }
+    ],
+    "data": "0x00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  },
+  {
+    "id": "width-256-max",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint256"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+      }
+    ]
+  },
+  {
+    "id": "width-256-overflow",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint256"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "115792089237316195423570985008687907853269984665640564039457584007913129639936"
+      }
+    ]
+  },
+  {
+    "id": "width-256-negative",
+    "op": "encode",
+    "params": [
+      {
+        "type": "uint256"
+      }
+    ],
+    "values": [
+      {
+        "$bigint": "-1"
+      }
+    ]
+  },
+  {
+    "id": "width-256-decode",
+    "op": "decode",
+    "params": [
+      {
+        "type": "uint256"
+      }
+    ],
+    "data": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  },
+  {
+    "id": "url-normalization-0",
+    "op": "rpc",
+    "url": "http://[0:0:0:0:0:0:0:1]:8545",
+    "simulation": true,
+    "calls": [
+      [
+        "eth_chainId",
+        []
+      ]
+    ]
+  },
+  {
+    "id": "url-normalization-1",
+    "op": "rpc",
+    "url": "\fhttps://rpc.pharos.xyz\u000b",
+    "simulation": true,
+    "calls": [
+      [
+        "eth_chainId",
+        []
+      ]
+    ]
+  },
+  {
+    "id": "url-normalization-2",
+    "op": "rpc",
+    "url": "http://+127.0.0.1:8545",
+    "simulation": true,
+    "calls": [
+      [
+        "eth_chainId",
+        []
+      ]
+    ]
+  },
+  {
+    "id": "url-normalization-3",
+    "op": "rpc",
+    "url": "https://rpc.pharos.xyz:0443",
+    "simulation": true,
+    "calls": [
+      [
+        "eth_chainId",
+        []
+      ]
+    ]
+  },
+  {
+    "id": "url-normalization-4",
+    "op": "rpc",
+    "url": "http://127.0.0.01:8545",
+    "simulation": true,
+    "calls": [
+      [
+        "eth_chainId",
+        []
+      ]
+    ]
+  },
+  {
+    "id": "url-normalization-5",
+    "op": "rpc",
+    "url": "https://%72pc.pharos.xyz/",
+    "simulation": true,
+    "calls": [
+      [
+        "eth_chainId",
+        []
+      ]
+    ]
+  }
+]

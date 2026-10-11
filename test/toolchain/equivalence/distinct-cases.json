@@ -1,0 +1,423 @@
+[
+  {
+    "id": "assertion-distinct",
+    "op": "function",
+    "abi": {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "timelock",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "timelockHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "minDelay",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "gov",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "can",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "guardian",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "ops",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "deployer",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "proxyAdmin",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "proxyAdminHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "inventoryHash",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "role",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "account",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "expected",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct ReleaseAssertions.RoleCheck[]",
+              "name": "roles",
+              "type": "tuple[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "proxy",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "owner",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "implementation",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "implementationHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "guarded",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "paused",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct ReleaseAssertions.ProxyCheck[]",
+              "name": "proxies",
+              "type": "tuple[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "factory",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "beacon",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "implementation",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "implementationHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "hardened",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "creationClosed",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct ReleaseAssertions.BeaconCheck[]",
+              "name": "beacons",
+              "type": "tuple[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "vault",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "factory",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "round",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "termsHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "phase",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "hardened",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "retired",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "governed",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "residualRecovery",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct ReleaseAssertions.VaultCheck[]",
+              "name": "vaults",
+              "type": "tuple[]"
+            }
+          ],
+          "internalType": "struct ReleaseAssertions.Common",
+          "name": "e",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "oracle",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "stpros",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "bridge",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "distributor",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "reporter",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "treasury",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "keeper",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "commissionPpm",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "aprPpm",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "maxUpdateAmount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "interval",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "unbondingPeriod",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "maxWithdrawCount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "mainnetV1",
+              "type": "bool"
+            },
+            {
+              "internalType": "address[]",
+              "name": "destinations",
+              "type": "address[]"
+            }
+          ],
+          "internalType": "struct ReleaseAssertions.Core",
+          "name": "c",
+          "type": "tuple"
+        }
+      ],
+      "name": "assertR4",
+      "outputs": [],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    "values": [
+      {
+        "chainId": {
+          "$bigint": "1672"
+        },
+        "timelock": "0x0000000000000000000000000000000000000001",
+        "timelockHash": "0x0000000000000000000000000000000000000000000000000000000000000001",
+        "minDelay": {
+          "$bigint": "172800"
+        },
+        "gov": "0x0000000000000000000000000000000000000002",
+        "can": "0x0000000000000000000000000000000000000003",
+        "guardian": "0x0000000000000000000000000000000000000004",
+        "ops": "0x0000000000000000000000000000000000000005",
+        "deployer": "0x0000000000000000000000000000000000000006",
+        "proxyAdmin": "0x0000000000000000000000000000000000000007",
+        "proxyAdminHash": "0x0000000000000000000000000000000000000000000000000000000000000002",
+        "inventoryHash": "0x0000000000000000000000000000000000000000000000000000000000000003",
+        "roles": [
+          {
+            "target": "0x0000000000000000000000000000000000000010",
+            "role": "0x0000000000000000000000000000000000000000000000000000000000000004",
+            "account": "0x0000000000000000000000000000000000000011",
+            "expected": true
+          },
+          {
+            "target": "0x0000000000000000000000000000000000000012",
+            "role": "0x0000000000000000000000000000000000000000000000000000000000000005",
+            "account": "0x0000000000000000000000000000000000000013",
+            "expected": false
+          }
+        ],
+        "proxies": [
+          {
+            "proxy": "0x0000000000000000000000000000000000000020",
+            "owner": "0x0000000000000000000000000000000000000021",
+            "implementation": "0x0000000000000000000000000000000000000022",
+            "implementationHash": "0x0000000000000000000000000000000000000000000000000000000000000006",
+            "guarded": true,
+            "paused": false
+          }
+        ],
+        "beacons": [
+          {
+            "factory": "0x0000000000000000000000000000000000000030",
+            "beacon": "0x0000000000000000000000000000000000000031",
+            "implementation": "0x0000000000000000000000000000000000000032",
+            "implementationHash": "0x0000000000000000000000000000000000000000000000000000000000000007",
+            "hardened": false,
+            "creationClosed": true
+          }
+        ],
+        "vaults": [
+          {
+            "vault": "0x0000000000000000000000000000000000000040",
+            "factory": "0x0000000000000000000000000000000000000041",
+            "round": {
+              "$bigint": "99"
+            },
+            "termsHash": "0x0000000000000000000000000000000000000000000000000000000000000008",
+            "phase": 3,
+            "hardened": true,
+            "retired": false,
+            "governed": true,
+            "residualRecovery": false
+          }
+        ]
+      },
+      {
+        "oracle": "0x0000000000000000000000000000000000000050",
+        "stpros": "0x0000000000000000000000000000000000000051",
+        "bridge": "0x0000000000000000000000000000000000000052",
+        "distributor": "0x0000000000000000000000000000000000000053",
+        "asset": "0x0000000000000000000000000000000000000054",
+        "reporter": "0x0000000000000000000000000000000000000055",
+        "treasury": "0x0000000000000000000000000000000000000056",
+        "keeper": "0x0000000000000000000000000000000000000057",
+        "commissionPpm": {
+          "$bigint": "100000"
+        },
+        "aprPpm": {
+          "$bigint": "200000"
+        },
+        "maxUpdateAmount": {
+          "$bigint": "123456789"
+        },
+        "interval": {
+          "$bigint": "3600"
+        },
+        "unbondingPeriod": {
+          "$bigint": "604800"
+        },
+        "maxWithdrawCount": {
+          "$bigint": "16"
+        },
+        "mainnetV1": true,
+        "destinations": [
+          "0x0000000000000000000000000000000000000060",
+          "0x0000000000000000000000000000000000000061"
+        ]
+      }
+    ]
+  }
+]

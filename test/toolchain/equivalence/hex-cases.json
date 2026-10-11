@@ -1,0 +1,1617 @@
+[
+  {
+    "id": "hex-fixed-1-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes1"
+      }
+    ],
+    "values": [
+      "0xAB"
+    ]
+  },
+  {
+    "id": "hex-fixed-1-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes1"
+      }
+    ],
+    "values": [
+      "0xaB"
+    ]
+  },
+  {
+    "id": "hex-fixed-2-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes2"
+      }
+    ],
+    "values": [
+      "0xABCD"
+    ]
+  },
+  {
+    "id": "hex-fixed-2-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes2"
+      }
+    ],
+    "values": [
+      "0xaBcD"
+    ]
+  },
+  {
+    "id": "hex-fixed-3-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes3"
+      }
+    ],
+    "values": [
+      "0xABCDEF"
+    ]
+  },
+  {
+    "id": "hex-fixed-3-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes3"
+      }
+    ],
+    "values": [
+      "0xaBcDeF"
+    ]
+  },
+  {
+    "id": "hex-fixed-4-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes4"
+      }
+    ],
+    "values": [
+      "0xABCDEF01"
+    ]
+  },
+  {
+    "id": "hex-fixed-4-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes4"
+      }
+    ],
+    "values": [
+      "0xaBcDeF01"
+    ]
+  },
+  {
+    "id": "hex-fixed-5-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes5"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100"
+    ]
+  },
+  {
+    "id": "hex-fixed-5-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes5"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100"
+    ]
+  },
+  {
+    "id": "hex-fixed-6-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes6"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100AB"
+    ]
+  },
+  {
+    "id": "hex-fixed-6-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes6"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aB"
+    ]
+  },
+  {
+    "id": "hex-fixed-7-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes7"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCD"
+    ]
+  },
+  {
+    "id": "hex-fixed-7-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes7"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcD"
+    ]
+  },
+  {
+    "id": "hex-fixed-8-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes8"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF"
+    ]
+  },
+  {
+    "id": "hex-fixed-8-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes8"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF"
+    ]
+  },
+  {
+    "id": "hex-fixed-9-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes9"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF01"
+    ]
+  },
+  {
+    "id": "hex-fixed-9-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes9"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF01"
+    ]
+  },
+  {
+    "id": "hex-fixed-10-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes10"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100"
+    ]
+  },
+  {
+    "id": "hex-fixed-10-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes10"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100"
+    ]
+  },
+  {
+    "id": "hex-fixed-11-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes11"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100AB"
+    ]
+  },
+  {
+    "id": "hex-fixed-11-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes11"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aB"
+    ]
+  },
+  {
+    "id": "hex-fixed-12-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes12"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCD"
+    ]
+  },
+  {
+    "id": "hex-fixed-12-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes12"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcD"
+    ]
+  },
+  {
+    "id": "hex-fixed-13-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes13"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF"
+    ]
+  },
+  {
+    "id": "hex-fixed-13-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes13"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF"
+    ]
+  },
+  {
+    "id": "hex-fixed-14-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes14"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF01"
+    ]
+  },
+  {
+    "id": "hex-fixed-14-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes14"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF01"
+    ]
+  },
+  {
+    "id": "hex-fixed-15-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes15"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100"
+    ]
+  },
+  {
+    "id": "hex-fixed-15-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes15"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100"
+    ]
+  },
+  {
+    "id": "hex-fixed-16-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes16"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100AB"
+    ]
+  },
+  {
+    "id": "hex-fixed-16-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes16"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aB"
+    ]
+  },
+  {
+    "id": "hex-fixed-17-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes17"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100ABCD"
+    ]
+  },
+  {
+    "id": "hex-fixed-17-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes17"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aBcD"
+    ]
+  },
+  {
+    "id": "hex-fixed-18-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes18"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100ABCDEF"
+    ]
+  },
+  {
+    "id": "hex-fixed-18-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes18"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aBcDeF"
+    ]
+  },
+  {
+    "id": "hex-fixed-19-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes19"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100ABCDEF01"
+    ]
+  },
+  {
+    "id": "hex-fixed-19-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes19"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aBcDeF01"
+    ]
+  },
+  {
+    "id": "hex-fixed-20-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes20"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100"
+    ]
+  },
+  {
+    "id": "hex-fixed-20-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes20"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100"
+    ]
+  },
+  {
+    "id": "hex-fixed-21-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes21"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100AB"
+    ]
+  },
+  {
+    "id": "hex-fixed-21-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes21"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aB"
+    ]
+  },
+  {
+    "id": "hex-fixed-22-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes22"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCD"
+    ]
+  },
+  {
+    "id": "hex-fixed-22-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes22"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcD"
+    ]
+  },
+  {
+    "id": "hex-fixed-23-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes23"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF"
+    ]
+  },
+  {
+    "id": "hex-fixed-23-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes23"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF"
+    ]
+  },
+  {
+    "id": "hex-fixed-24-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes24"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF01"
+    ]
+  },
+  {
+    "id": "hex-fixed-24-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes24"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF01"
+    ]
+  },
+  {
+    "id": "hex-fixed-25-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes25"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100"
+    ]
+  },
+  {
+    "id": "hex-fixed-25-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes25"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100"
+    ]
+  },
+  {
+    "id": "hex-fixed-26-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes26"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100AB"
+    ]
+  },
+  {
+    "id": "hex-fixed-26-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes26"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aB"
+    ]
+  },
+  {
+    "id": "hex-fixed-27-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes27"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCD"
+    ]
+  },
+  {
+    "id": "hex-fixed-27-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes27"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcD"
+    ]
+  },
+  {
+    "id": "hex-fixed-28-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes28"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF"
+    ]
+  },
+  {
+    "id": "hex-fixed-28-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes28"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF"
+    ]
+  },
+  {
+    "id": "hex-fixed-29-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes29"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF01"
+    ]
+  },
+  {
+    "id": "hex-fixed-29-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes29"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF01"
+    ]
+  },
+  {
+    "id": "hex-fixed-30-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes30"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100"
+    ]
+  },
+  {
+    "id": "hex-fixed-30-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes30"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100"
+    ]
+  },
+  {
+    "id": "hex-fixed-31-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes31"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100AB"
+    ]
+  },
+  {
+    "id": "hex-fixed-31-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes31"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aB"
+    ]
+  },
+  {
+    "id": "hex-fixed-32-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes32"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCD"
+    ]
+  },
+  {
+    "id": "hex-fixed-32-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes32"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcD"
+    ]
+  },
+  {
+    "id": "hex-dynamic-0-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes"
+      }
+    ],
+    "values": [
+      "0x"
+    ]
+  },
+  {
+    "id": "hex-dynamic-0-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes"
+      }
+    ],
+    "values": [
+      "0x"
+    ]
+  },
+  {
+    "id": "hex-dynamic-1-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes"
+      }
+    ],
+    "values": [
+      "0xAB"
+    ]
+  },
+  {
+    "id": "hex-dynamic-1-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes"
+      }
+    ],
+    "values": [
+      "0xaB"
+    ]
+  },
+  {
+    "id": "hex-dynamic-2-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes"
+      }
+    ],
+    "values": [
+      "0xABCD"
+    ]
+  },
+  {
+    "id": "hex-dynamic-2-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes"
+      }
+    ],
+    "values": [
+      "0xaBcD"
+    ]
+  },
+  {
+    "id": "hex-dynamic-31-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100AB"
+    ]
+  },
+  {
+    "id": "hex-dynamic-31-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aB"
+    ]
+  },
+  {
+    "id": "hex-dynamic-32-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCD"
+    ]
+  },
+  {
+    "id": "hex-dynamic-32-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcD"
+    ]
+  },
+  {
+    "id": "hex-dynamic-33-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF"
+    ]
+  },
+  {
+    "id": "hex-dynamic-33-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF"
+    ]
+  },
+  {
+    "id": "hex-dynamic-63-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF"
+    ]
+  },
+  {
+    "id": "hex-dynamic-63-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF"
+    ]
+  },
+  {
+    "id": "hex-dynamic-64-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF01"
+    ]
+  },
+  {
+    "id": "hex-dynamic-64-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF01"
+    ]
+  },
+  {
+    "id": "hex-dynamic-65-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100"
+    ]
+  },
+  {
+    "id": "hex-dynamic-65-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100"
+    ]
+  },
+  {
+    "id": "hex-dynamic-136-upper",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes"
+      }
+    ],
+    "values": [
+      "0xABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100ABCDEF0100AB"
+    ]
+  },
+  {
+    "id": "hex-dynamic-136-mixed",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes"
+      }
+    ],
+    "values": [
+      "0xaBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aBcDeF0100aB"
+    ]
+  },
+  {
+    "id": "hex-array-bytes[]",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes[]"
+      }
+    ],
+    "values": [
+      [
+        "0xAB",
+        "0xaB",
+        "0x"
+      ]
+    ]
+  },
+  {
+    "id": "hex-array-bytes[2]",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes[2]"
+      }
+    ],
+    "values": [
+      [
+        "0xAB",
+        "0xaB"
+      ]
+    ]
+  },
+  {
+    "id": "hex-array-bytes[][]",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes[][]"
+      }
+    ],
+    "values": [
+      [
+        [
+          "0xAB",
+          "0xaB"
+        ],
+        [],
+        [
+          "0x",
+          "0xaBcD"
+        ]
+      ]
+    ]
+  },
+  {
+    "id": "hex-array-bytes[][2]",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes[][2]"
+      }
+    ],
+    "values": [
+      [
+        [
+          "0xAB"
+        ],
+        [
+          "0xaB",
+          "0x"
+        ]
+      ]
+    ]
+  },
+  {
+    "id": "hex-array-bytes[2][]",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes[2][]"
+      }
+    ],
+    "values": [
+      [
+        [
+          "0xAB",
+          "0xaB"
+        ],
+        [
+          "0x",
+          "0xaBcD"
+        ]
+      ]
+    ]
+  },
+  {
+    "id": "hex-array-bytes2[2][2]",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes2[2][2]"
+      }
+    ],
+    "values": [
+      [
+        [
+          "0xABaB",
+          "0xaBcD"
+        ],
+        [
+          "0xFf00",
+          "0x0011"
+        ]
+      ]
+    ]
+  },
+  {
+    "id": "hex-nested-tuple",
+    "op": "encode",
+    "params": [
+      {
+        "type": "bytes",
+        "name": "dynamic"
+      },
+      {
+        "type": "bytes4",
+        "name": "fixed"
+      },
+      {
+        "type": "bytes[]",
+        "name": "list"
+      },
+      {
+        "type": "bytes2[2]",
+        "name": "fixedList"
+      },
+      {
+        "type": "tuple",
+        "name": "nested",
+        "components": [
+          {
+            "type": "bytes3",
+            "name": "tag"
+          },
+          {
+            "type": "bytes[][]",
+            "name": "payloads"
+          },
+          {
+            "type": "uint256",
+            "name": "amount"
+          },
+          {
+            "type": "address",
+            "name": "target"
+          },
+          {
+            "type": "string",
+            "name": "memo"
+          }
+        ]
+      }
+    ],
+    "values": [
+      "0xaBcD00Ff",
+      "0xABabCdEf",
+      [
+        "0xAB",
+        "0xaB",
+        "0x"
+      ],
+      [
+        "0xABaB",
+        "0xaBaB"
+      ],
+      {
+        "tag": "0xABaBfF",
+        "payloads": [
+          [
+            "0xAB",
+            "0xaB"
+          ],
+          [],
+          [
+            "0x",
+            "0xaBcD"
+          ]
+        ],
+        "amount": 43981,
+        "target": "0xabababababababababababababababababababab",
+        "memo": "ABab \u6c49\u5b57"
+      }
+    ]
+  },
+  {
+    "id": "hex-tuple-array",
+    "op": "encode",
+    "params": [
+      {
+        "type": "tuple[]",
+        "components": [
+          {
+            "type": "bytes2",
+            "name": "tag"
+          },
+          {
+            "type": "bytes",
+            "name": "payload"
+          }
+        ]
+      }
+    ],
+    "values": [
+      [
+        {
+          "tag": "0xABaB",
+          "payload": "0xaBcD"
+        },
+        {
+          "tag": "0xaBaB",
+          "payload": "0xABCD"
+        }
+      ]
+    ]
+  },
+  {
+    "id": "hex-representation-separation",
+    "op": "encode",
+    "params": [
+      {
+        "type": "address"
+      },
+      {
+        "type": "uint256"
+      },
+      {
+        "type": "string"
+      },
+      {
+        "type": "bytes2"
+      }
+    ],
+    "values": [
+      "0xabababababababababababababababababababab",
+      43981,
+      "ABab",
+      "0xABab"
+    ]
+  },
+  {
+    "id": "hex-function-caseEnvelope",
+    "op": "function",
+    "abi": {
+      "type": "function",
+      "name": "caseEnvelope",
+      "inputs": [
+        {
+          "type": "bytes",
+          "name": "dynamic"
+        },
+        {
+          "type": "bytes4",
+          "name": "fixed"
+        },
+        {
+          "type": "bytes[]",
+          "name": "list"
+        },
+        {
+          "type": "bytes2[2]",
+          "name": "fixedList"
+        },
+        {
+          "type": "tuple",
+          "name": "nested",
+          "components": [
+            {
+              "type": "bytes3",
+              "name": "tag"
+            },
+            {
+              "type": "bytes[][]",
+              "name": "payloads"
+            },
+            {
+              "type": "uint256",
+              "name": "amount"
+            },
+            {
+              "type": "address",
+              "name": "target"
+            },
+            {
+              "type": "string",
+              "name": "memo"
+            }
+          ]
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    "values": [
+      "0xaBcD00Ff",
+      "0xABabCdEf",
+      [
+        "0xAB",
+        "0xaB",
+        "0x"
+      ],
+      [
+        "0xABaB",
+        "0xaBaB"
+      ],
+      {
+        "tag": "0xABaBfF",
+        "payloads": [
+          [
+            "0xAB",
+            "0xaB"
+          ],
+          [],
+          [
+            "0x",
+            "0xaBcD"
+          ]
+        ],
+        "amount": 43981,
+        "target": "0xabababababababababababababababababababab",
+        "memo": "ABab \u6c49\u5b57"
+      }
+    ]
+  },
+  {
+    "id": "hex-timelock-single",
+    "op": "encode",
+    "params": [
+      {
+        "type": "address"
+      },
+      {
+        "type": "uint256"
+      },
+      {
+        "type": "bytes"
+      },
+      {
+        "type": "bytes32"
+      },
+      {
+        "type": "bytes32"
+      }
+    ],
+    "values": [
+      "0xabababababababababababababababababababab",
+      17,
+      "0xABaB00Ff",
+      "0xaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaB",
+      "0xCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCd"
+    ]
+  },
+  {
+    "id": "hex-timelock-batch",
+    "op": "encode",
+    "params": [
+      {
+        "type": "address[]"
+      },
+      {
+        "type": "uint256[]"
+      },
+      {
+        "type": "bytes[]"
+      },
+      {
+        "type": "bytes32"
+      },
+      {
+        "type": "bytes32"
+      }
+    ],
+    "values": [
+      [
+        "0xabababababababababababababababababababab",
+        "0x1212121212121212121212121212121212121212"
+      ],
+      [
+        17,
+        18
+      ],
+      [
+        "0xABaB00Ff",
+        "0xaBaB00fF"
+      ],
+      "0xaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaB",
+      "0xCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCd"
+    ]
+  },
+  {
+    "id": "hex-function-schedule",
+    "op": "function",
+    "abi": {
+      "type": "function",
+      "name": "schedule",
+      "inputs": [
+        {
+          "type": "address"
+        },
+        {
+          "type": "uint256"
+        },
+        {
+          "type": "bytes"
+        },
+        {
+          "type": "bytes32"
+        },
+        {
+          "type": "bytes32"
+        },
+        {
+          "type": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    "values": [
+      "0xabababababababababababababababababababab",
+      17,
+      "0xABaB00Ff",
+      "0xaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaB",
+      "0xCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCd",
+      300
+    ]
+  },
+  {
+    "id": "hex-function-execute",
+    "op": "function",
+    "abi": {
+      "type": "function",
+      "name": "execute",
+      "inputs": [
+        {
+          "type": "address"
+        },
+        {
+          "type": "uint256"
+        },
+        {
+          "type": "bytes"
+        },
+        {
+          "type": "bytes32"
+        },
+        {
+          "type": "bytes32"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    "values": [
+      "0xabababababababababababababababababababab",
+      17,
+      "0xABaB00Ff",
+      "0xaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaB",
+      "0xCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCd"
+    ]
+  },
+  {
+    "id": "hex-function-scheduleBatch",
+    "op": "function",
+    "abi": {
+      "type": "function",
+      "name": "scheduleBatch",
+      "inputs": [
+        {
+          "type": "address[]"
+        },
+        {
+          "type": "uint256[]"
+        },
+        {
+          "type": "bytes[]"
+        },
+        {
+          "type": "bytes32"
+        },
+        {
+          "type": "bytes32"
+        },
+        {
+          "type": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    "values": [
+      [
+        "0xabababababababababababababababababababab",
+        "0x1212121212121212121212121212121212121212"
+      ],
+      [
+        17,
+        18
+      ],
+      [
+        "0xABaB00Ff",
+        "0xaBaB00fF"
+      ],
+      "0xaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaB",
+      "0xCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCd",
+      300
+    ]
+  },
+  {
+    "id": "hex-function-executeBatch",
+    "op": "function",
+    "abi": {
+      "type": "function",
+      "name": "executeBatch",
+      "inputs": [
+        {
+          "type": "address[]"
+        },
+        {
+          "type": "uint256[]"
+        },
+        {
+          "type": "bytes[]"
+        },
+        {
+          "type": "bytes32"
+        },
+        {
+          "type": "bytes32"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    "values": [
+      [
+        "0xabababababababababababababababababababab",
+        "0x1212121212121212121212121212121212121212"
+      ],
+      [
+        17,
+        18
+      ],
+      [
+        "0xABaB00Ff",
+        "0xaBaB00fF"
+      ],
+      "0xaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaB",
+      "0xCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCdCd"
+    ]
+  },
+  {
+    "id": "hex-function-upgradeAndCall",
+    "op": "function",
+    "abi": {
+      "type": "function",
+      "name": "upgradeAndCall",
+      "inputs": [
+        {
+          "type": "address"
+        },
+        {
+          "type": "address"
+        },
+        {
+          "type": "bytes"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    "values": [
+      "0xabababababababababababababababababababab",
+      "0x1212121212121212121212121212121212121212",
+      "0xABcd1234"
+    ]
+  },
+  {
+    "id": "hex-function-grantRole",
+    "op": "function",
+    "abi": {
+      "type": "function",
+      "name": "grantRole",
+      "inputs": [
+        {
+          "type": "bytes32"
+        },
+        {
+          "type": "address"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    "values": [
+      "0xaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaBaB",
+      "0xabababababababababababababababababababab"
+    ]
+  }
+]

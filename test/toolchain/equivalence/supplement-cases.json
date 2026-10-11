@@ -1,0 +1,81 @@
+[
+  {
+    "id": "rpc-url-credentials",
+    "op": "rpc",
+    "url": "https://synthetic@rpc.pharos.xyz",
+    "calls": []
+  },
+  {
+    "id": "rpc-url-local-query",
+    "op": "rpc",
+    "url": "http://localhost:8545/?x=1",
+    "simulation": true,
+    "calls": []
+  },
+  {
+    "id": "rpc-url-local-path",
+    "op": "rpc",
+    "url": "http://localhost:8545/path",
+    "simulation": true,
+    "calls": []
+  },
+  {
+    "id": "rpc-timeout",
+    "op": "rpc",
+    "url": "http://127.0.0.1:8545",
+    "simulation": true,
+    "calls": [
+      [
+        "eth_chainId",
+        []
+      ]
+    ],
+    "responses": [
+      {
+        "kind": "throw",
+        "name": "TimeoutError",
+        "message": "The operation was aborted due to timeout"
+      }
+    ]
+  },
+  {
+    "id": "rpc-redirect-refusal",
+    "op": "rpc",
+    "url": "http://127.0.0.1:8545",
+    "simulation": true,
+    "calls": [
+      [
+        "eth_chainId",
+        []
+      ]
+    ],
+    "responses": [
+      {
+        "kind": "throw",
+        "name": "TypeError",
+        "message": "fetch failed"
+      }
+    ]
+  },
+  {
+    "id": "rpc-whole-batch-retry",
+    "op": "rpc",
+    "url": "http://127.0.0.1:8545",
+    "simulation": true,
+    "calls": [
+      [
+        "eth_chainId",
+        []
+      ]
+    ],
+    "responses": [
+      {
+        "kind": "error",
+        "code": -32603
+      },
+      {
+        "kind": "reverse"
+      }
+    ]
+  }
+]

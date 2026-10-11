@@ -1,0 +1,12 @@
+{
+  "sourceCommit": "e4015a8ceccb5b3fb9e1b4f66bd0396cd3e622b7",
+  "referenceVersion": "viem 2.51.0",
+  "caseCount": 102,
+  "files": {
+    "hex-cases.json": "faed92d3d2617f267af77ee3d70582532ebbd9449b1066858d633fad1705774d",
+    "hex-reference.json": "e96da948d30dec384e9d8b1934900caddb12ebd791c73f208e75c08cda7870f1",
+    "hex-witness-reference.mjs": "814b1010f24ce1b9ec03854a59cab7689a408c4cb7f87099d5aa78ca2527ed62",
+    "hex-witness-reference.json": "3b0e70e48da6c4fbf6cfba1aaf1bcb7f6b0a589657a41a87f4de32a6f546218b",
+    "../../fixtures/native-foundation/hex-spelling.json": "b00a876706f625d2ea30e59a668478ffa27d61926f758266be82fc73eee6eae0"
+  }
+}

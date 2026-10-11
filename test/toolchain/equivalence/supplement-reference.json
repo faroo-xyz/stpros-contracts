@@ -1,0 +1,138 @@
+{
+  "origin": "SYNTHETIC TEST ONLY",
+  "node": "v22.20.0",
+  "viem": "2.51.0",
+  "results": [
+    {
+      "id": "rpc-url-credentials",
+      "outcome": "throw",
+      "error": {
+        "name": "Error",
+        "message": "RPC_CREDENTIALS_FORBIDDEN",
+        "shortMessage": null
+      },
+      "errorBytes": "5250435f43524544454e5449414c535f464f5242494444454e",
+      "trace": []
+    },
+    {
+      "id": "rpc-url-local-query",
+      "outcome": "throw",
+      "error": {
+        "name": "Error",
+        "message": "RPC_NOT_ALLOWLISTED",
+        "shortMessage": null
+      },
+      "errorBytes": "5250435f4e4f545f414c4c4f574c4953544544",
+      "trace": []
+    },
+    {
+      "id": "rpc-url-local-path",
+      "outcome": "throw",
+      "error": {
+        "name": "Error",
+        "message": "RPC_NOT_ALLOWLISTED",
+        "shortMessage": null
+      },
+      "errorBytes": "5250435f4e4f545f414c4c4f574c4953544544",
+      "trace": []
+    },
+    {
+      "id": "rpc-timeout",
+      "outcome": "return",
+      "value": [
+        {
+          "status": "rejected",
+          "error": {
+            "name": "TimeoutError",
+            "message": "The operation was aborted due to timeout",
+            "shortMessage": null
+          }
+        }
+      ],
+      "outputBytes": "5b7b22737461747573223a2272656a6563746564222c226572726f72223a7b226e616d65223a2254696d656f75744572726f72222c226d657373616765223a22546865206f7065726174696f6e207761732061626f727465642064756520746f2074696d656f7574222c2273686f72744d657373616765223a6e756c6c7d7d5d",
+      "trace": [
+        {
+          "url": "http://127.0.0.1:8545",
+          "method": "POST",
+          "body": {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "eth_chainId",
+            "params": []
+          },
+          "timeout": 30000,
+          "redirect": "error"
+        }
+      ]
+    },
+    {
+      "id": "rpc-redirect-refusal",
+      "outcome": "return",
+      "value": [
+        {
+          "status": "rejected",
+          "error": {
+            "name": "TypeError",
+            "message": "fetch failed",
+            "shortMessage": null
+          }
+        }
+      ],
+      "outputBytes": "5b7b22737461747573223a2272656a6563746564222c226572726f72223a7b226e616d65223a22547970654572726f72222c226d657373616765223a226665746368206661696c6564222c2273686f72744d657373616765223a6e756c6c7d7d5d",
+      "trace": [
+        {
+          "url": "http://127.0.0.1:8545",
+          "method": "POST",
+          "body": {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "eth_chainId",
+            "params": []
+          },
+          "timeout": 30000,
+          "redirect": "error"
+        }
+      ]
+    },
+    {
+      "id": "rpc-whole-batch-retry",
+      "outcome": "return",
+      "value": [
+        {
+          "status": "fulfilled",
+          "value": []
+        }
+      ],
+      "outputBytes": "5b7b22737461747573223a2266756c66696c6c6564222c2276616c7565223a5b5d7d5d",
+      "trace": [
+        {
+          "url": "http://127.0.0.1:8545",
+          "method": "POST",
+          "body": {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "eth_chainId",
+            "params": []
+          },
+          "timeout": 30000,
+          "redirect": "error"
+        },
+        {
+          "sleep": 1000
+        },
+        {
+          "url": "http://127.0.0.1:8545",
+          "method": "POST",
+          "body": {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "eth_chainId",
+            "params": []
+          },
+          "timeout": 30000,
+          "redirect": "error"
+        }
+      ]
+    }
+  ]
+}

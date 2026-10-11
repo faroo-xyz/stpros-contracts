@@ -1,0 +1,28 @@
+{
+  "caseCount": 192,
+  "designCommit": "37d330cdec11a2763038a1ada6173f90f05749f5",
+  "files": {
+    "cases.json": "1bc50800a3b90b82ce08550925ff3f968c0b6ca2ef04b94a3d8e032c5ba3a8bb",
+    "reference.json": "9b902b6c43ca538215a0cafa00c5aca1d5d098b582ff2563c2eaabc717e8837a",
+    "reference.mjs": "1d52c3bec2ddd25148935015418403033e33d4cd21dff24f1c63935faa157ad0"
+  },
+  "origin": "SYNTHETIC TEST ONLY; reference captured before Python candidate implementation",
+  "sourceCommit": "e4015a8ceccb5b3fb9e1b4f66bd0396cd3e622b7",
+  "sourceSha256": {
+    "package.json": "f656bbe2a2282425ef684fde924053d6a558eae0f6549db8776ffd63e751d351",
+    "pnpm-lock.yaml": "5b5ba09fdf1b387fb3087d3f0bc53b166e84e6ab9395c2ef5cc09627eb3880b5",
+    "tasks/release/core.mjs": "50f302943bc5cdb61c91034c6b9fa338a4e1e389b1e430a7038335901778e3aa",
+    "tasks/release/history.mjs": "4214d1820d9da6726419c28cc634680218bb58b269760bb2f9973031b3fd64d6",
+    "tasks/release/pool-replay.mjs": "92b1860d37d9801eafa62a0fc204099659d5e436e801e50129f2f26ef9bb809a",
+    "tasks/release/read-only.mjs": "ef5ae6cc5cef818a16e2830c9d9f837ee3ccb34c40bd6597ededf9571782dc83",
+    "tasks/release/residual-replay.mjs": "8629b1c11359a5fceac7e354a6404ca980187da4dd7c93baa537dbfda7594a4c",
+    "tasks/release/timelock-history.mjs": "3ecfab39d9cef9eed14567c8cd83a3b4909d95f24ccbe566ef6df07a5fcab157",
+    "tools/ci/canonical.py": "8deba456084746d115f309e429ca2a324b933a76b5e6a2e19b9b91fba81f59fb",
+    "tools/ci/r4-reference.json": "3a885dc98ce450afd108f5e00600f4af96e6b0a8190f45be434d99a3aae44cb3",
+    "tools/lib/abi.py": "69274dbc5da38481c7cd874d2868df0aef55e00e168ce3e409dc54f79321fda9",
+    "tools/lib/common.py": "d44a6cf3cf0df7d3302302b99f8e21df49f114d8eb9587d9afd756bbaab9a30e",
+    "tools/lib/keccak.py": "26942f7fb013aba5c99a1e5f3c91896c321f29b55ad0dd40f4ca5873202ca8cb",
+    "tools/lib/rpc.py": "b50f6e3b136e84ee3b1e2c3e59e2c64ce4571ca0d5393358a4a4c7128d481bed"
+  },
+  "sourceTree": "d4fc6af8b96e0f0fc86628e3bc04810ab0070cdf"
+}

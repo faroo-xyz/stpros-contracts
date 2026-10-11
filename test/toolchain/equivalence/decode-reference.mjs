@@ -1,0 +1,3 @@
+import fs from'node:fs';import{createRequire}from'node:module';const require=createRequire(process.cwd()+'/package.json'),v=require('viem');
+const pack=x=>x===undefined?{$undefined:true}:typeof x==='bigint'?{$bigint:String(x)}:Array.isArray(x)?x.map(pack):x&&typeof x==='object'?Object.fromEntries(Object.entries(x).map(([k,w])=>[k,pack(w)])):x;
+const results=[];for(const c of JSON.parse(fs.readFileSync(process.argv[2]))){try{const value=pack(v.decodeFunctionData({abi:c.abi,data:c.data}));results.push({id:c.id,outcome:'return',value,outputBytes:Buffer.from(JSON.stringify(value)).toString('hex')});}catch(e){results.push({id:c.id,outcome:'throw',error:{name:e.name,message:e.message,shortMessage:e.shortMessage??null}});}}console.log(JSON.stringify({results},null,2));
