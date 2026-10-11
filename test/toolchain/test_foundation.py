@@ -335,7 +335,14 @@ class FoundationTests(unittest.TestCase):
         with patch.object(Path,'read_bytes',corrupt),self.assertRaisesRegex(ValueError,'frozen reference changed'):harness.verify()
 
     def test_scope_has_no_native_cli_or_signing_dependency(self):
-        self.assertFalse((ROOT/'tools/release/native/__main__.py').exists())
+        # Keep the locked Foundation test identity while enforcing the newly
+        # authorized additive CLI surface. No primitive corpus or policy changes.
+        from tools.release.native import __main__ as native_cli
+        self.assertEqual(native_cli.RELEASE_ACTIONS, ('preflight', 'authority', 'p1-runbook',
+                         'build-handoff', 'build-u', 'estimate-gas', 'testnet-handoff', 'postcheck'))
+        groups=native_cli.parser()._subparsers._group_actions[0].choices
+        self.assertEqual(set(groups), {'release', 'artifact'})
+        self.assertEqual(set(groups['artifact']._subparsers._group_actions[0].choices), {'normalize'})
         self.assertEqual(rpc.METHODS,{'eth_chainId','eth_getBlockByNumber','eth_getCode','eth_getStorageAt','eth_call','eth_getLogs','eth_estimateGas','eth_getTransactionByHash'})
 
 

@@ -14,8 +14,9 @@ and permanent tests.
 | Access and migration | `contracts/access/`, `contracts/upgrade/` | Guardian pause, Timelock ownership, version/admin migration guards; INV-C and recorded-bytecode release tests |
 | Atomic handoff | `contracts/release/ReleaseAssertions.sol` | H/U assertions, GC-01/02 and rollback; `test/release/` |
 | Reviewed planning | `tasks/release/` | Unsigned builders, action-bearing Timelock history/dependencies, authenticated replay and Safe configuration checks |
+| Native release candidate | `tools/release/native/` | Additive Python unsigned builders and complete read-only checkpoints; frozen original-engine replay and local Solidity witnesses in `test/release/native/` |
 | Legacy CLI | `tasks/*.ts`, `deploy/*.ts` | Supported views/user operations and the refusing deploy override; `test/tasks/` |
-| Historical provenance | `tools/release/`, `tools/lib/` | Python archive/fixture/RPC verification, separate from JS release-time replay |
+| Historical provenance | `tools/release/`, `tools/lib/` | Python archive/fixture/RPC verification and shared ABI/JSON primitives; original JS replay remains available |
 | Build identity | `tools/ci/`, `tools/snapshot/`, `tools/verify/` | Pinned production compilation, immutable B0 comparison, secret-free export/runner |
 | Current models | `test/invariant/` | Bounded stateful A/B/C handlers, independent ghosts, counters and wrong-rule controls |
 | Historical witnesses | `test/helpers/LegacyTopology.sol`, `test/fixtures/legacy/`, `deployments/` | Actual recorded implementations; never replace with current source for historical claims |

@@ -83,7 +83,7 @@ like-prepared exports: Hardhat-generated typings and Rocketh artifacts affect th
 result. Record missing-preparation errors and existing diagnostics explicitly;
 never report an overall PASS from zero diagnostic delta.
 
-## Native trust primitives (implementation awaiting independent review)
+## Native trust primitives
 
 The additive typed API in `tools/lib/abi.py` provides parameter and function
 encoding/decoding plus strict-mode indexed-event decoding from reviewed JSON ABIs.
@@ -106,9 +106,9 @@ an external raw-file digest. Computing a digest never creates independent approv
 
 `tools/release/native/rpc.py` is a read-only library and pin primitive. It retains
 the release URL/method, batching, retry, timeout and response-correlation policy,
-including the reference's acceptance of `result` with `error: null`. It has no
-native release CLI, signing provider, deployment executor or unrestricted method
-forwarder. Complete checkpoint/history/Safe/LOSS migrations remain separate work.
+including the reference's acceptance of `result` with `error: null`. The additive
+release CLI below uses this adapter. It has no signing provider, deployment
+executor or unrestricted method forwarder. LOSS remains a separate migration.
 
 Permanent reference cases and exact original Node outputs live in
 `test/toolchain/equivalence/`. The original 192-case corpus is immutable; additive
@@ -140,7 +140,7 @@ nibbles and nonhex encoder inputs. `admission-policy.json` binds only the two
 frozen cases to their exact inputs, original outcomes and required native refusal.
 The original 358 cases now account for 356 exact outcomes and two admission
 deviations. Malformed hex decoding reports `BaseError`; null remains `TypeError`.
-No existing Release or governance implementation uses these candidate primitives.
+The original Node Release implementation retains its own frozen primitives.
 
 The typed encoder now retains original letter casing in admitted dynamic `bytes`
 and fixed `bytesN` values, including nested arrays, tuples and function calldata.
@@ -166,8 +166,66 @@ rejects missing tests, skips and expected failures:
 tools/verify/run.sh "$dest" python3 test/toolchain/equivalence/run.py test --out /absolute/safe/new-discovery.json
 ```
 
-Implementation status: **READY FOR INDEPENDENT IMPLEMENTATION REVIEW**. This is
-not independent approval or permission to replace operational Release consumers.
-Research retains all preceding blockers and failed logs with exact identities;
-its current handoff records the tested files, independent witnesses, negative
-controls and unchanged historical limitations. No downstream migration is started.
+The Foundation implementation received independent review before the additive
+release work below. Its frozen evidence and two admission exceptions are unchanged.
+
+## Additive native Release CLI (awaiting independent review)
+
+Run `python3 -m tools.release.native release <action>` inside an approved export.
+The eight actions are `preflight`, `authority`, `p1-runbook`, `build-handoff`,
+`build-u`, `estimate-gas`, `testnet-handoff` and `postcheck`. Every action accepts
+`--release-config`, `--review-hash`, `--rpc`, `--checkpoint pre|execution`,
+`--checkpoint-review` and `--checkpoint-review-hash`, with the original Release
+meaning and admission order. Release mode requires a fresh explicit read-only RPC
+recheck before emitting a plan. Simulation mode retains its simulation labels.
+
+For the execution checkpoint, reuse the frozen pre-H bundle and its original
+review hash; provide separately reviewed fresh execution evidence. Do not rebuild
+U across the mandatory delay. Postcheck accepts consumed signing nonces while
+still checking authority, code, authenticated history and current economics.
+
+`artifact normalize --build-info PATH --compiler-output PATH --source NAME
+--contract NAME` is a separate preparation action under the same module. It emits
+the existing normalized artifact schema to stdout. Preparation never establishes
+independent approval. Failed validation emits no success JSON. Hashing runtime
+bytecode preserves the original viem byte-hash domain; this does not widen the
+Foundation typed ABI encoder's two approved admission exclusions.
+
+`inputs.py` owns bundle admission and the shared context. `plans.py` constructs
+unsigned Safe and Timelock artifacts. `history.py`, `timelock.py`, `economics.py`
+and `residual.py` authenticate history and reconcile state; `checkpoint.py` uses
+the same expectations for pinned and fresh observations. There is no fallback to
+Node on a failed native check. All existing operational Tasks remain available.
+
+The frozen Release corpus contains 509 original Node/viem cases. The gate checks
+exact successful outputs, owned refusal messages, input access, request coverage,
+pins, causal read epochs and clock boundaries. Independent reads within the same
+immutable block epoch may start in another order; they cannot cross a phase or
+clock barrier. ENOENT OS diagnostic wording and known export prefixes in file-I/O
+traces are the only normalization; successful output strings are never normalized.
+Foundation RPC tests separately cover retries, batching and response correlation.
+
+After a `--with-hardhat` export, use fresh output paths and run sequentially
+(the fixed, marker-owned synthetic input directory is shared):
+
+```sh
+tools/verify/run.sh "$dest" node test/release/native/reference/replay.mjs /absolute/safe/original.json
+tools/verify/run.sh "$dest" python3 test/release/native/gate.py test --reference-proof /absolute/safe/original.json --out /absolute/safe/candidate.json.gz
+tools/verify/run.sh "$dest" FOUNDRY_PROFILE=final forge test --match-path test/release/native/NativeReleaseWitness.t.sol -vv
+```
+
+Reference replay verifies every original source and frozen corpus hash. It runs
+the unchanged Node modules and original Task callbacks with recorded input/RPC
+transcripts. It refuses a changed original source. The Python gate requires all
+509 cases, focused unit tests and 19 deliberate wrong-rule controls; it rejects
+skips, missing controls or a mismatched reference replay identity. Solidity/OZ
+witness inputs are extracted only from frozen original outputs and checked again
+by the Python tests; no candidate-generated expected values are used.
+
+Safe-forwarded historical residual recovery without real authorization evidence
+remains `INCOMPLETE_SAFE_RECOVERY_EVIDENCE`. Timelock action coverage is not proof
+of all silent empty operations. Per-call local gas estimates remain preliminary
+and do not prove atomic H/U gas or FS-6. Full real-state forks, live Safe control,
+deployment, signing, LOSS/Operations/Explorer migration and dependency retirement
+are outside this package. Research preserves historical INCOMPLETE, FAIL-existing
+and NOT RUN results; local equivalence does not establish release approval.

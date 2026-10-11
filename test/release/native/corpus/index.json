@@ -1,0 +1,4074 @@
+[
+  {
+    "id": "governance-closure.test.mjs:0001",
+    "test": "GC01 input and fresh observation reject mainnet phase 0",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "8771f6895db6fdf8468defa1fc9e6b424cc9f6cc44e75233c50d08e4f0342039"
+  },
+  {
+    "id": "governance-closure.test.mjs:0002",
+    "test": "GC01 input and fresh observation reject mainnet phase 0",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "f71e68a72737ac6a26a4dbaf06757ab716b783bd67422015f9420512f9291fac"
+  },
+  {
+    "id": "governance-closure.test.mjs:0003",
+    "test": "GC01 input and fresh observation reject mainnet phase 1",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "0963176cade679ac46fb29372217d02e3436bd0fe1f32ff37c651201c3a4e437"
+  },
+  {
+    "id": "governance-closure.test.mjs:0004",
+    "test": "GC01 input and fresh observation reject mainnet phase 1",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "0b7a603e174212f0879e84fc5cd04ad1417f328b369a03b7ad228d062b382350"
+  },
+  {
+    "id": "governance-closure.test.mjs:0005",
+    "test": "GC01 input and fresh observation reject mainnet phase 2",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "6013762b0739ad0675e6dfda809e3f25ce621160f8a48b7b3e2f44f1102307f5"
+  },
+  {
+    "id": "governance-closure.test.mjs:0006",
+    "test": "GC01 input and fresh observation reject mainnet phase 2",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "0ff8ba48d1f3f09c346a7f8fa4f3dc7d03e5bc83f42b057a7a3b7bb73a9869b9"
+  },
+  {
+    "id": "governance-closure.test.mjs:0007",
+    "test": "GC01 SETTLED accepted and frozen U unchanged by checking",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "18da75d622ac90eeaa4bcef04cbb333fca1cbb12d11d20ed3a409850474c243e"
+  },
+  {
+    "id": "governance-closure.test.mjs:0008",
+    "test": "GC01 SETTLED accepted and frozen U unchanged by checking",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "c65203644607e644ae33e7d76ebfb8829b20e34fc48041a05a8b79320a1b4e7a"
+  },
+  {
+    "id": "governance-closure.test.mjs:0009",
+    "test": "GC01 SETTLED accepted and frozen U unchanged by checking",
+    "function": "timelock-history.mjs.requireActionBearingCoverage",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "5f2331b3ff43c83c3c3091f69419109d06f28389b8ba4c54a6ab9f2adc17c649"
+  },
+  {
+    "id": "governance-closure.test.mjs:0010",
+    "test": "GC01 SETTLED accepted and frozen U unchanged by checking",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "3ddfaa4b931276386ab232f90ad002d90c74c4d0d2540578de502c0ef9b9ecf9"
+  },
+  {
+    "id": "governance-closure.test.mjs:0011",
+    "test": "GC01 testnet governed phase 0 remains supported",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "60885fc93c2b6cddcb79f942dcd82ee2ebfe211925c084c08f432adeb00e8b8d"
+  },
+  {
+    "id": "governance-closure.test.mjs:0012",
+    "test": "GC01 testnet governed phase 1 remains supported",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "1fc267cef83e0452fb8309711330396d59e71cab833d986910ab7e426b86d5e1"
+  },
+  {
+    "id": "governance-closure.test.mjs:0013",
+    "test": "GC01 testnet governed phase 2 remains supported",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "0c4b8707eb67612e01731ed1c860f62a99b4cc8747e5b1ce64ce3ff9634ee09e"
+  },
+  {
+    "id": "governance-closure.test.mjs:0014",
+    "test": "GC02 OPS equals gov rejects",
+    "function": "core.mjs.validateConfig",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "8310affdc0176ba873a31d42c5cd83db0c0525e32ab1f52bf83654d847223a28"
+  },
+  {
+    "id": "governance-closure.test.mjs:0015",
+    "test": "GC02 OPS equals can rejects",
+    "function": "core.mjs.validateConfig",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "818bed26e6266aa5ce05f5f30d623da3032e49bdc5e84419bb6c658523d7d917"
+  },
+  {
+    "id": "governance-closure.test.mjs:0016",
+    "test": "GC02 OPS equals timelock rejects",
+    "function": "core.mjs.validateConfig",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "1527a53fafc2a58285d4a7a67e1cde7d191c13f2d6b061aea6c62a4fca798b5f"
+  },
+  {
+    "id": "governance-closure.test.mjs:0017",
+    "test": "GC02 independent Safe addresses with gov/OPS owner overlap reject",
+    "function": "core.mjs.validateConfig",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "daabf708f00dc0d6b7df77db433447f487cd1ae712427f29683785b391a597fe"
+  },
+  {
+    "id": "governance-closure.test.mjs:0018",
+    "test": "GC02 independent Safe addresses with can/OPS owner overlap reject",
+    "function": "core.mjs.validateConfig",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "8f6eb739db614e2f98df27402d8bf41ef42edaa58ff6b033215b481356790fdd"
+  },
+  {
+    "id": "governance-closure.test.mjs:0019",
+    "test": "GC02 OPS equals reviewed GRD uses same identity and passes historical/current checks",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "eec20db1e311a97a54fbc425cdfcafe061b14f5bdef0e4608f2d08bf132281c9"
+  },
+  {
+    "id": "governance-closure.test.mjs:0020",
+    "test": "GC02 conflicting alias configurations are rejected before deduplicating views",
+    "function": "core.mjs.validateConfig",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "7eb6eb46cb434359bb4be70596f6820d69994649d9f0ada997203b86eb1e06f8"
+  },
+  {
+    "id": "governance-closure.test.mjs:0021",
+    "test": "GC02 actual current OPS signer rotation is detected",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "33f1283f914ce20c2694540f3725abee152fb5d96b9d4136c2f6c1610d3fbb90"
+  },
+  {
+    "id": "governance-closure.test.mjs:0022",
+    "test": "GC02 historical contract/delegated signer without control proof is INCOMPLETE",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "157196ab982d23a90c4eb78ea2403fb5cc7b190eed2a02778d2ea171fbbd2053"
+  },
+  {
+    "id": "governance-closure.test.mjs:0023",
+    "test": "GC02 current contract/delegated signer without control proof is INCOMPLETE",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "663fa45c923025042e31586093e0cb2c6476a9873eb81e268f1e085c7d860a39"
+  },
+  {
+    "id": "governance-closure.test.mjs:0024",
+    "test": "GC02 actual OPS singleton mismatch rejects",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "e66930f95eb710be9fa773ebdbcf0ed46eb4648c34bbefc04da02ea3e09fe380"
+  },
+  {
+    "id": "governance-closure.test.mjs:0025",
+    "test": "GC02 actual OPS threshold mismatch rejects",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "b627cab290f5093902a9dc0e1f26716b89025558108971367155d49a1ac719bc"
+  },
+  {
+    "id": "governance-closure.test.mjs:0026",
+    "test": "GC02 actual OPS module mismatch rejects",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "7c6b77288e4d4e7092de5ef48ccf33a1c589abb39963ebbbcc5c02a7d4168a60"
+  },
+  {
+    "id": "governance-closure.test.mjs:0027",
+    "test": "GC02 actual OPS guard mismatch rejects",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "1ca74b0dd45f773a48593c4a1d01a1acf9716822cd4f663f22c5f5cfc710847a"
+  },
+  {
+    "id": "governance-closure.test.mjs:0028",
+    "test": "GC03 canonical runtime identity cannot be replaced by reviewed synthetic code",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "dfbdbb63afae1502b5822dd633dd4ec44ebf5d38b45d31cdca83e06629f07e79"
+  },
+  {
+    "id": "governance-closure.test.mjs:0029",
+    "test": "GC03 single zero reconstructs identity and lifecycle",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "0cd12ae3962c9ea03892ae2645b05f98e48c5149bb96005e2c633f325bc91c6b"
+  },
+  {
+    "id": "governance-closure.test.mjs:0030",
+    "test": "GC03 single zero reconstructs identity and lifecycle",
+    "function": "timelock-history.mjs.checkOperationPlan",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "35a95ce8fe227c1b06bb01252832cdb015597270f3089337448bcb9446eb9a2b"
+  },
+  {
+    "id": "governance-closure.test.mjs:0031",
+    "test": "GC03 single salt reconstructs identity and lifecycle",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "750a9f995a29f862b6a720092b8a36ad2d5a7135dde138e86ef2f2da0c8fbaf3"
+  },
+  {
+    "id": "governance-closure.test.mjs:0032",
+    "test": "GC03 single salt reconstructs identity and lifecycle",
+    "function": "timelock-history.mjs.checkOperationPlan",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "2df46acfa9756b386925f21325e0b9875ab74406c7666aa11218d2f06d38ee86"
+  },
+  {
+    "id": "governance-closure.test.mjs:0033",
+    "test": "GC03 batch one reconstructs identity and lifecycle",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "fbf60a4486b03b55573aee8643e2cd2e662ea3e14bf306878bfc0d0c6cce62f1"
+  },
+  {
+    "id": "governance-closure.test.mjs:0034",
+    "test": "GC03 batch one reconstructs identity and lifecycle",
+    "function": "timelock-history.mjs.checkOperationPlan",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "cc57747b1e8227da1bfd01acd6e09876c80a149a5af17a20abe73d3c25e54103"
+  },
+  {
+    "id": "governance-closure.test.mjs:0035",
+    "test": "GC03 batch many salt reconstructs identity and lifecycle",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "f170165f8d072fbbe951a66038400cfb20d2bd46f9db5dea90235e5fe0a3039f"
+  },
+  {
+    "id": "governance-closure.test.mjs:0036",
+    "test": "GC03 batch many salt reconstructs identity and lifecycle",
+    "function": "timelock-history.mjs.checkOperationPlan",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "99f5c49f64d4c9d1efa5535a934c4a47f5c62724a85c778b438e70c0e1856fe0"
+  },
+  {
+    "id": "governance-closure.test.mjs:0037",
+    "test": "GC03 valid nested execution interleaves without losing outer indices",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "468aab1e0a0c179ef3783a75e169bed5af31035b0bd82315f5778b6bc08782ec"
+  },
+  {
+    "id": "governance-closure.test.mjs:0038",
+    "test": "GC03 empty metadata is observed without claiming silent transitions",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "b59a1516501326fd6ab632e21bbd453f6f9ac91f3502503d6b3b9ffe8f4bcd1d"
+  },
+  {
+    "id": "governance-closure.test.mjs:0039",
+    "test": "GC03 pending action with predecessor timestamp 0 remains outstanding",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "720185054acabc0fec3bfd091a194e93af844a7c50db53e02159c3bf792b8356"
+  },
+  {
+    "id": "governance-closure.test.mjs:0040",
+    "test": "GC03 pending action with predecessor timestamp 0 remains outstanding",
+    "function": "timelock-history.mjs.checkOperationPlan",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "1219611e90c19c2e35a377cb0cbc9a3aa70a7de637d05c279897179c625c93e4"
+  },
+  {
+    "id": "governance-closure.test.mjs:0041",
+    "test": "GC03 pending action with predecessor timestamp 1 remains outstanding",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "b1d67a98a4aa4ef1fa20510372f99f37ce8e1b87c9454a35a531ac4877989260"
+  },
+  {
+    "id": "governance-closure.test.mjs:0042",
+    "test": "GC03 pending action with predecessor timestamp 1 remains outstanding",
+    "function": "timelock-history.mjs.checkOperationPlan",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "562d45d756e6a320e2767f8b86fbae169a3bdbfdda7f2ca7efc8ea3ce2e9dfb0"
+  },
+  {
+    "id": "governance-closure.test.mjs:0043",
+    "test": "GC03 pending action with predecessor timestamp 2000 remains outstanding",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "67e66a73309ab9ab2bc5943875c44c62a4d7005b7a76fa1c3a9b188d4708b00c"
+  },
+  {
+    "id": "governance-closure.test.mjs:0044",
+    "test": "GC03 pending action with predecessor timestamp 2000 remains outstanding",
+    "function": "timelock-history.mjs.checkOperationPlan",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "7d2db300604a3e246d15fff3286b31d4fd008280c5fcfe3fab156e10dba5ceac"
+  },
+  {
+    "id": "governance-closure.test.mjs:0045",
+    "test": "GC03 missing predecessor response cannot be inferred Done",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "f376b216a616a5b24013a6e4fb6a4b62c883ece708f37562cf15edd7fb6cbb51"
+  },
+  {
+    "id": "governance-closure.test.mjs:0046",
+    "test": "GC03 executed action requires referenced predecessor Done",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "e7f1a6dd25e252202e9b46f34f8560c93a049726d521849f98a7030adb5d88a9"
+  },
+  {
+    "id": "governance-closure.test.mjs:0047",
+    "test": "GC03 executed action requires referenced predecessor Done",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "e70697dd8cf8acca5918adbbc3aff34553628e98b2d1468b6868383d9400dae5"
+  },
+  {
+    "id": "governance-closure.test.mjs:0048",
+    "test": "GC03 rejects missing tail",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "370ebc5ac6c142e078b8467be5b8dc60834494088dc24ec4c73a1151230fd953"
+  },
+  {
+    "id": "governance-closure.test.mjs:0049",
+    "test": "GC03 rejects missing index",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "048e6c84566d16040eb70b89649e1cb23f0115f0911155ed6c6c2cc246adf461"
+  },
+  {
+    "id": "governance-closure.test.mjs:0050",
+    "test": "GC03 rejects duplicate event",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "0d6f536beb33af248b74a63a81a1df837ab6cb934b4286c0dceb9c1cd4f24902"
+  },
+  {
+    "id": "governance-closure.test.mjs:0051",
+    "test": "GC03 rejects incorrect calldata",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "5ed0434a181b80ffb2fb9a0661e9d7c97c61d7c8c2ef558ed8b32509862c5ec1"
+  },
+  {
+    "id": "governance-closure.test.mjs:0052",
+    "test": "GC03 rejects incorrect salt",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "6c8fafd492b7311544e914962e92139f79f25fe593798b6adf253d54c39a53bd"
+  },
+  {
+    "id": "governance-closure.test.mjs:0053",
+    "test": "GC03 rejects incorrect predecessor",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "9c9d2b4f7df60f17068edda3dff8bc3d6b3306339accc192a68931b724d524ef"
+  },
+  {
+    "id": "governance-closure.test.mjs:0054",
+    "test": "GC03 rejects incorrect timestamp",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "0fe0f084ac6d40d4102e594e0f6f3486c75c58b93c9deb6d8a49664c62157915"
+  },
+  {
+    "id": "governance-closure.test.mjs:0055",
+    "test": "GC03 rejects missing salt",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "79293f6ded2b3a3eee5f34aaac7fac8cd5dcfba7b920c1af664c6be548c2db44"
+  },
+  {
+    "id": "governance-closure.test.mjs:0056",
+    "test": "GC03 unknown execution and incomplete batch execution reject",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "2111a634a888e4eef7ac797f4d2d033b7612e7665dafdc96ee895e1d016b6c6e"
+  },
+  {
+    "id": "governance-closure.test.mjs:0057",
+    "test": "GC03 unknown execution and incomplete batch execution reject",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "eb76aa24bffbe057c0ff8d0d955f99e88fa6c5fec9e54b73f558bdaf4cd72544"
+  },
+  {
+    "id": "governance-closure.test.mjs:0058",
+    "test": "GC03 one-call zero-address no-value empty-data call still counts as action",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "0443c026ae645bf65ae5b155063d8e20550924738625b1192c72926462ac14c5"
+  },
+  {
+    "id": "governance-closure.test.mjs:0059",
+    "test": "GC03 gate requires archive and runtime attestations, not merely parsed rows",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "5e526b5596a9c75bc650f68e79ba7c50b6abcac6b0467c0017f3d7a2bc609aa9"
+  },
+  {
+    "id": "governance-closure.test.mjs:0060",
+    "test": "GC03 gate requires archive and runtime attestations, not merely parsed rows",
+    "function": "timelock-history.mjs.requireActionBearingCoverage",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "60c1c7797c06c285bcbe08bb17c21a8c9cb7696d90a1b095d33e9ce6c8394e48"
+  },
+  {
+    "id": "governance-closure.test.mjs:0061",
+    "test": "GC03 gate requires archive and runtime attestations, not merely parsed rows",
+    "function": "timelock-history.mjs.requireActionBearingCoverage",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "b20ae3e28f067bf2ce667d36bd4aebb7a478ee3044a514e0bb392bf4176b10ee"
+  },
+  {
+    "id": "governance-closure.test.mjs:0062",
+    "test": "GC03 missing whole operation is an evidence limitation, not parser-certified completeness",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "2f40d8b8e27f9980a06cfad77921acc0184561897c72b968e195b6e09bb552ef"
+  },
+  {
+    "id": "governance-closure.test.mjs:0063",
+    "test": "GC03 missing whole operation is an evidence limitation, not parser-certified completeness",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "30e5d021244b85429b9395a8553961e4b5a6ef6f617510bedd6beafd40b50508"
+  },
+  {
+    "id": "governance-closure.test.mjs:0064",
+    "test": "GC03 missing whole operation is an evidence limitation, not parser-certified completeness",
+    "function": "timelock-history.mjs.requireActionBearingCoverage",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "83dbbba2ae5162eda2594c9003d4d046882e25025d2e7f4b466aac2cd629be67"
+  },
+  {
+    "id": "governance-closure.test.mjs:0065",
+    "test": "GC03 canceled timestamp cannot conceal a rescheduled outstanding operation",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "4d365610abad0beff1085f32f79a52e5ff9fdd34f2ea0e6526e1a85a8dcd942c"
+  },
+  {
+    "id": "governance-closure.test.mjs:0066",
+    "test": "GC03 current Done cannot replace missing execution history",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "36727271e63a1f0efc4035cbe3a460588c3b2c50fcff8d458db4e2224a98c8ed"
+  },
+  {
+    "id": "governance-closure.test.mjs:0067",
+    "test": "GC03 known predecessor must already be executed in replay",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "5af3cfabd404524439a58df045577f68db13ca3c5492610f42551ab320e26edd"
+  },
+  {
+    "id": "governance-closure.test.mjs:0068",
+    "test": "GC03 empty cancellation metadata still requires canonical timestamp evidence",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "5b3a80c8b73401264c410d2d7f37b258454947d367fbf943b1494a2c23a38463"
+  },
+  {
+    "id": "governance-closure.test.mjs:0069",
+    "test": "GC03 historical zero-delay cancel/reschedule can continue the same executing batch",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "return",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "84c17fe8ec6cb4812d3287326006f16db7978c54997a390bb5893ab3bdc6408f"
+  },
+  {
+    "id": "governance-closure.test.mjs:0070",
+    "test": "GC03 historical zero-delay cancel/reschedule can continue the same executing batch",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "governance-closure.test.mjs.json.gz",
+    "sha256": "e334ff66b17010522bd9ad2d05359e288237338d926d7ed9ec0e81fb5d3003d1"
+  },
+  {
+    "id": "history.test.mjs:0001",
+    "test": "B0-scale 1672: authenticated historical windows, only three incremental log requests",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "history.test.mjs.json.gz",
+    "sha256": "49fdd7b51d54b018868850e3de874242db1e2d3a71ce764dd8ce12b206dc20c5"
+  },
+  {
+    "id": "history.test.mjs:0002",
+    "test": "B0-scale 688689: authenticated historical windows, only three incremental log requests",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "history.test.mjs.json.gz",
+    "sha256": "48b52ecb49a20e661c9e395eea3274691a83c1d44acb29f694747ca0ce73a0a1"
+  },
+  {
+    "id": "history.test.mjs:0003",
+    "test": "authenticated baseline rejects missing approval",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "history.test.mjs.json.gz",
+    "sha256": "dd351a5b78946f991d55cf43d54b6451bd7be753df07cecbb5bba0d3a668bd57"
+  },
+  {
+    "id": "history.test.mjs:0004",
+    "test": "authenticated baseline rejects changed chunk",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "history.test.mjs.json.gz",
+    "sha256": "6314eb4269f33170d4880c4aa3cf3696d168a9d9a29cc61cfaaaaf569e91d037"
+  },
+  {
+    "id": "history.test.mjs:0005",
+    "test": "authenticated baseline rejects missing archive",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "history.test.mjs.json.gz",
+    "sha256": "752bc50f07b2e25afc3a02385427bc79a270fb4e976d36d9d66dd0ef8ac1f72a"
+  },
+  {
+    "id": "history.test.mjs:0006",
+    "test": "authenticated baseline rejects wrong chain",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "history.test.mjs.json.gz",
+    "sha256": "aeaee6f0cc74d07b1e1dec1137209bf048b4aa80363fb0b10b03a9d7a81e827b"
+  },
+  {
+    "id": "history.test.mjs:0007",
+    "test": "authenticated baseline rejects missing target",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "history.test.mjs.json.gz",
+    "sha256": "f4332f9a0448fa985b1f1ea49a765c958289baa4d2c90158933b5743ba5d35aa"
+  },
+  {
+    "id": "history.test.mjs:0008",
+    "test": "authenticated baseline rejects missing chunk",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "history.test.mjs.json.gz",
+    "sha256": "897e64888c5139a521f02072a76ba8cb12c085e557c4a7ff35b9af66e5973499"
+  },
+  {
+    "id": "history.test.mjs:0009",
+    "test": "authenticated baseline rejects missing historical window",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "history.test.mjs.json.gz",
+    "sha256": "86026864bd07dd6e5cf8f2cda68898a9850a769237cfe84444988a105c10ecf7"
+  },
+  {
+    "id": "history.test.mjs:0010",
+    "test": "authenticated baseline rejects wrong inventory binding",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "history.test.mjs.json.gz",
+    "sha256": "7268b9d966de6d8f0a168bee50f5ce3437d7b1ef10dc4d36a2f02b1299f8fdf9"
+  },
+  {
+    "id": "history.test.mjs:0011",
+    "test": "missing incremental window response is never treated as an empty window",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "history.test.mjs.json.gz",
+    "sha256": "514be2358d230965615fc73f101000f80214daaa71010a76c7a6ade4d1f7f8e2"
+  },
+  {
+    "id": "history.test.mjs:0012",
+    "test": "omitted economic log is caught by authoritative current balance",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "history.test.mjs.json.gz",
+    "sha256": "1928f4b26e01f0aec056f66ff78297bfc2cfe6c497d92a60380cd9c92daf63f5"
+  },
+  {
+    "id": "history.test.mjs:0013",
+    "test": "new holder is discovered through Transfer without a new deposit",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "history.test.mjs.json.gz",
+    "sha256": "87a6e8aad92e5ccd9adffc38766eba4ad76ad68dbf1047cbadf507eec4b8bfeb"
+  },
+  {
+    "id": "history.test.mjs:0014",
+    "test": "new withdrawal owner, partial then full claims and FIFO records reconcile",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "history.test.mjs.json.gz",
+    "sha256": "8a5b03c09b68c946cfca32cd769f0c2cbbcfe37624802ebdecf77b643e48fd0f"
+  },
+  {
+    "id": "history.test.mjs:0015",
+    "test": "new withdrawal owner, partial then full claims and FIFO records reconcile",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "history.test.mjs.json.gz",
+    "sha256": "156d6d59c42dd71f913165793a8ada2c82b25cb531c497263a96c505e0fa85ba"
+  },
+  {
+    "id": "history.test.mjs:0016",
+    "test": "recorded V1 unbound claim-time receiver and full reserve payout",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "history.test.mjs.json.gz",
+    "sha256": "da8fbab84ee145be4ac6aba3c03ab61d6e91adc76de0d2efc6113e74a559219b"
+  },
+  {
+    "id": "history.test.mjs:0017",
+    "test": "transient RoleGranted(bytes32,address,address) cannot hide behind restored state",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "history.test.mjs.json.gz",
+    "sha256": "b8b1bb259957a80bccea347fa6b6023702d6066f22a8fe2f5947971eef9a2133"
+  },
+  {
+    "id": "history.test.mjs:0018",
+    "test": "transient OwnershipTransferred(address,address) cannot hide behind restored state",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "history.test.mjs.json.gz",
+    "sha256": "6125be56e324cd171fa9262913fd2f4429d1126e4a53d95f46198783e427544c"
+  },
+  {
+    "id": "history.test.mjs:0019",
+    "test": "transient UpdateLimitsChanged(uint256,uint256) cannot hide behind restored state",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "history.test.mjs.json.gz",
+    "sha256": "cc84896f99665c889796b19eb806c9c0c65bbea202700fd0e367af62689d6354"
+  },
+  {
+    "id": "history.test.mjs:0020",
+    "test": "transient Upgraded(address) cannot hide behind restored state",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "history.test.mjs.json.gz",
+    "sha256": "21706a40db49fc6c5e649cf5c5f9068e8a1ead1554b833cd979e889e89ee073d"
+  },
+  {
+    "id": "history.test.mjs:0021",
+    "test": "recent event hash reorganization rejected",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "history.test.mjs.json.gz",
+    "sha256": "764d98a633ff9015ec33a8a96a4cf43c25840e0ed5fe8947a980c74a189ce543"
+  },
+  {
+    "id": "history.test.mjs:0022",
+    "test": "slow pass catches up once, retains original bundle inputs and scans each delta only once",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "history.test.mjs.json.gz",
+    "sha256": "492de9253c32d3ebb3a7bf95ce9d85cec598e3889584d059191e3988fdb03909"
+  },
+  {
+    "id": "history.test.mjs:0023",
+    "test": "persistent stale checkpoints remain fail-closed after bounded catch-up",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "history.test.mjs.json.gz",
+    "sha256": "eefdc339dda204b0cb02b54ccb94de7da9382cbc9cb58486520e9441c6c3388f"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0001",
+    "test": "complete release preflight 1672, newer head=false, reaches every Safe",
+    "function": "core.mjs.preflight",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "148aef93fc9523c0bed61a836903198f97d953522cf9fb7954abf459f56e092e"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0002",
+    "test": "complete release preflight 1672, newer head=false, reaches every Safe",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "1f9261e31e2c6ce3e3545e2fdb0f40a49077f3ad515af4664739507fe8459e16"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0003",
+    "test": "complete release preflight 1672, newer head=true, reaches every Safe",
+    "function": "core.mjs.preflight",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "05e46e1418b81ba8305ac4c232ac78ed7b33cd0bf712ef5dfb4a010d5dd00374"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0004",
+    "test": "complete release preflight 1672, newer head=true, reaches every Safe",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "c9de26bcab8701c37f22f05aad18a2fcc3895105aab0311b345f89ff2780c5a9"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0005",
+    "test": "complete release preflight 688689, newer head=false, reaches every Safe",
+    "function": "core.mjs.preflight",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "64ecf22880e495b7bd254bd201cb998ae105f96ecf8e41e071aea793f90935f1"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0006",
+    "test": "complete release preflight 688689, newer head=false, reaches every Safe",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "27c9095244f93065fb98345df358160446ff7f37be594677dd671ae4c37eb7db"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0007",
+    "test": "complete release preflight 688689, newer head=true, reaches every Safe",
+    "function": "core.mjs.preflight",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "d9d870ca6a04b40fd79af8ec54a00e5439a0fe36848a47c2f330d01d9bcad751"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0008",
+    "test": "complete release preflight 688689, newer head=true, reaches every Safe",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "4e032910b3aa9d17c72ab86b0ac72a2e3c838290358c30c1e7bde834ecbbdd9d"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0009",
+    "test": "full RPC preflight rejects owners",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "fda4082bbd9db9a7ac2070f68f89ff4f867418131c94959ef5f309688b0a6f96"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0010",
+    "test": "full RPC preflight rejects threshold",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "99901dd914a7fdbca548b0c932b7124ba917a6b75dc4e756df5f47233a4f57ce"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0011",
+    "test": "full RPC preflight rejects nonce",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "24dca05dbecce36a03ac21f22b114cae72ca0f8dc3faf6fcf34fc94fb6dfef0f"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0012",
+    "test": "full RPC preflight rejects module",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "695958f99768f29f33c6d90e1e07615547a80681b6904d677b50dc37cb4a344f"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0013",
+    "test": "full RPC preflight rejects guard",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "9d25517218343d8ce8e7054692f7082a8582eeb6c8a242e97e99fb1e5bda36a5"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0014",
+    "test": "full RPC preflight rejects singleton",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "7cd2ac7af55a832769f9e0461efc3524a304d71e952f420e146be0cbbe765b92"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0015",
+    "test": "full RPC preflight rejects review hash",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "75f383b4191bac69b50fe534eba2f62a02387bfdd13a9ddfa4e470684d82d103"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0016",
+    "test": "full RPC preflight rejects expired review",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "8ead0d1864c52e8f2906fec0f5a4c34cf5556035f1a2792a070689a04058c1a4"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0017",
+    "test": "full RPC preflight rejects stale provider",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "50aefef206059efb09357ce1fbf5568ac95ad28327ef56dfb2aa3cc28567e0f7"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0018",
+    "test": "full RPC preflight rejects owner",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "04a7351c2939b1acb2e3d952e7735bdf99ba6b7f8144addfcd329c9e46f807d9"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0019",
+    "test": "full RPC preflight rejects implementation",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "7e48a24598122b57f51ab82e3cd421c2987acf87864aecfac135df7a374f6ea8"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0020",
+    "test": "full RPC preflight rejects beacon",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "2b80560c34798b29e24f1b691521a98496f67156f3c133ad5eab40d0bcd437ef"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0021",
+    "test": "full RPC preflight rejects factory registry",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "99891f36b06d8380f19f82804ba990accaa4656ed552c61e4248afe1a04c27f4"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0022",
+    "test": "full RPC preflight rejects missing historical data",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "15ebc5e9517d86307928235218c5ee0c8d5054c8c8f2695ef6e6424f9bed53ab"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0023",
+    "test": "full RPC preflight rejects RPC error",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "8558b524a4d6b649beedc611a4a82bfad1ccf7422d65fa2cad558b5e32e82d0d"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0024",
+    "test": "canonical pin is checked again after all RPC reads",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "a56e5a783d07e0f4322c783f5a990fbb8575e32d7519255daadf731ffcbf80c2"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0025",
+    "test": "new privileged holder after review cannot hide behind the old inventory",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "6e0e6dcfb8892258915db3ff3575dc9d7b78a6d61d91357142412f978789c5cf"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0026",
+    "test": "testnet critical Oracle reporter drift rejected",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "277c3c3286f38d448ffced74b50d844090406f290540dfd4f09466e020c5f415"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0027",
+    "test": "testnet critical Oracle treasury drift rejected",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "1abd7f46d5595fce39b1e28d9b0a12c9b35962eb5806ef5387775669f975f8b3"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0028",
+    "test": "testnet critical Oracle commissionPpm drift rejected",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "f4c3f302796d1a1187257af6e1f140c405e3308e1711e46faf4651aa3ce4d676"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0029",
+    "test": "testnet critical Oracle maxUpdateAmount drift rejected",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "343d2ce3a0df6ee254c1d96af97289ad24e09308f4f0321554e66349a1ea7aa1"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0030",
+    "test": "testnet critical Oracle interval drift rejected",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "479e948f71e3e2d662d2955daff523150df2cb92ae8a3b484baa30a5ceba556e"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0031",
+    "test": "legacy oracle wiring cannot be substituted",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "5dc8d47c1062a3773cb620e11aadc9a55fe1bbf825cc6e5d53c3cce187b2e937"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0032",
+    "test": "legacy bridge wiring cannot be substituted",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "9ae1f9096f9c09ce490ce4b736cb99dae14ce32e86486f5be5ed38a230305323"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0033",
+    "test": "legacy distributor wiring cannot be substituted",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "77b049af0cc585fb73683c615f841ce644eab3e06463e9951e27c09909cc488c"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0034",
+    "test": "legacy canonical wiring cannot be substituted",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "301f0ab1f0ece958e4d50bef4cad91ffe527d01d654123d7642b46abfed454ba"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0035",
+    "test": "permitted 1672 deposit is reconciled without regenerating approved calldata",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "f3c008de7c3967fd039a4f71aadc35e0c6651bd0d46a8312537b9e9be6b1abc5"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0036",
+    "test": "permitted 1672 deposit is reconciled without regenerating approved calldata",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "485b5110f8f7ac161c67fa233ec1b5b767592894a782cc4a8616a14c8199b81a"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0037",
+    "test": "permitted 1672 deposit is reconciled without regenerating approved calldata",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "0f9c4f76ca56f26f557ff010d2421506daeae4e09cf3f49e3b44b0813dc713f7"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0038",
+    "test": "permitted 688689 deposit is reconciled without regenerating approved calldata",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "9fcb54aeaf041da880c2003344914a394f95d4511b342f795a982dea012e943e"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0039",
+    "test": "permitted 688689 deposit is reconciled without regenerating approved calldata",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "36d646e40764b0c980b30abe9ac0451e071fbe742dff849e882c3e5c10bf02c1"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0040",
+    "test": "permitted 688689 deposit is reconciled without regenerating approved calldata",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "d794b66a82b0e219f07a832a5baed760859505a5f969115c6ae7c6dd5f38e8c9"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0041",
+    "test": "unreconciled pool change rejected despite coherent share balances",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "ddb9fd7cb1466a6dc2b0b896127050c39cfebb5150e24ebc228fd4f75053e92a"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0042",
+    "test": "unreconciled queue counters rejected even if Q-C and empty record sum still match",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "dce7c14733e63852aa00e209c748a17dcfaff77a32400bc67b063d8187b63040"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0043",
+    "test": "recorded V3 equivalent partial claim advances per-record queued but preserves global queued",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "646da296f7e85109dd6600dddea3a7659b782040f885fea72c568b4a8ec592d4"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0044",
+    "test": "recorded V3 equivalent partial claim advances per-record queued but preserves global queued",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "73cf4765375d078df39f2f7231536a025e43de34a90d02bf0ff532f73b0c8f86"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0045",
+    "test": "partial claim rejects incorrect queued",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "89845ad3ab20e2dfa606a2dd1fdbc718bd4d1ed38016b1ac0e87de13f01ce4e0"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0046",
+    "test": "partial claim rejects incorrect pending",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "ec0b514ba84ffa0e856ad42e73e4db79986a26630e60e0748e3a0be5c3d32ba7"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0047",
+    "test": "partial claim rejects incorrect unbondingPeriod",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "2bd3fe6d436dc4f6d0bf45cdeaa52bbb5b0eaad778525fb436a5a7c6cd892508"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0048",
+    "test": "partial claim rejects incorrect receiver",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "6a126e9876e17438e4a9b1df88f93b24afded59f024897beaafff39ce948d201"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0049",
+    "test": "claim replay rejects bound receiver",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "121175532e023414205a316c2980250540eda3f6e4f06b484b2932b64fd48a24"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0050",
+    "test": "claim replay rejects oversized payout",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "7c09a5020cde52e158d6d751dc4e10faef2e591f8b745915accc4f4a6398a9a1"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0051",
+    "test": "claim replay rejects zero payout",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "7f4bdbf6fa2398f3bee63d7a0b15768e84f4e27d2ef8bc4e28a50a56305640c7"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0052",
+    "test": "claim replay rejects unmatured snapshot",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "a13dcf77a188456e0dc42b57aedf452d579fa9e274b74f5b7097976d2bedf37f"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0053",
+    "test": "complete recorded target binding 1672",
+    "function": "core.mjs.validateRecordedTopology",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "4c7863239f0661b13fdf7d41586cc885dbfb8baa8f1ded4fd783869dabe33729"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0054",
+    "test": "complete recorded target binding 688689",
+    "function": "core.mjs.validateRecordedTopology",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "43c2f243a7b9ce4b58ed51b305e1e1bba1ef42b6a70b65413343e3880cce2105"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0055",
+    "test": "coherent 1672 oracle substitution rejected",
+    "function": "core.mjs.validateRecordedTopology",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "0427066d2bf69318be2457c4cfb9fd1ea3c6cb377e1208058a4f3cdacb7f45e5"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0056",
+    "test": "coherent 1672 stpros substitution rejected",
+    "function": "core.mjs.validateRecordedTopology",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "8d55c4dac4e84ec12cf6d863b6d202ce1e512cb4d89db198ea962252e7a4f89f"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0057",
+    "test": "coherent 1672 proxyAdmin substitution rejected",
+    "function": "core.mjs.validateRecordedTopology",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "0d6d20b5d977343d216e45943311312e6dbcb2c52a3689642d4d0269ee6a5f60"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0058",
+    "test": "coherent 1672 bridge substitution rejected",
+    "function": "core.mjs.validateRecordedTopology",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "b0e1c467862f1924c5f8bd3a3f5cddef7357b178c621518dc6310bfeaf1e2bb9"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0059",
+    "test": "coherent 1672 distributor substitution rejected",
+    "function": "core.mjs.validateRecordedTopology",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "2a10be55fa82f6097b21bcfd5361645d7f7ae19c3476ac43a364e784d17d7fe1"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0060",
+    "test": "coherent 688689 oracle substitution rejected",
+    "function": "core.mjs.validateRecordedTopology",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "ecac910e575e8bfd5685c12926effad0234348956cc6c1c2d32f86aedae98c5b"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0061",
+    "test": "coherent 688689 stpros substitution rejected",
+    "function": "core.mjs.validateRecordedTopology",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "bff3919a222e3f3d3d27a76ae52f97d5334d27d4bc717f4ef5d9e4c6a9189f11"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0062",
+    "test": "coherent 688689 proxyAdmin substitution rejected",
+    "function": "core.mjs.validateRecordedTopology",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "3a6102df13763f429f67564fe0e82a303bed73cd75744eeaf8a89b48583d3514"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0063",
+    "test": "coherent 688689 bridge substitution rejected",
+    "function": "core.mjs.validateRecordedTopology",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "92e8d37023545d3403c03cea7cbbfef15612b4f026c0366ad3221f77f430d833"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0064",
+    "test": "coherent 688689 distributor substitution rejected",
+    "function": "core.mjs.validateRecordedTopology",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "75d17a6c7d118d992a57c7f889a27ca73e49f50dcfd92b4f1fcf17b55eb8dc1e"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0065",
+    "test": "1672 factory binding cannot drift",
+    "function": "core.mjs.validateRecordedTopology",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "dafc1c38ecee37e2e8766f43d670498c32d600c6d394216cec9809f3ff1e02e2"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0066",
+    "test": "1672 beacon binding cannot drift",
+    "function": "core.mjs.validateRecordedTopology",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "e7a47dd2af313836e2704d8da9254b17eac7aad67b586e12aaf2d5dbc0d1ef80"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0067",
+    "test": "1672 vaults binding cannot drift",
+    "function": "core.mjs.validateRecordedTopology",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "b0e6c69f1632c4a99572eb1cc313df625fef9d694e45269523429de3008ee054"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0068",
+    "test": "688689 factory binding cannot drift",
+    "function": "core.mjs.validateRecordedTopology",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "4701648e561e5b48d87277d20b43691a82e09d812f1d6d727eb5fc05c38a11e1"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0069",
+    "test": "688689 beacon binding cannot drift",
+    "function": "core.mjs.validateRecordedTopology",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "3de406e348e3f86dbf419ad0ce96f39e24f8501fddb950c36d6b39f0a34aacff"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0070",
+    "test": "688689 vaults binding cannot drift",
+    "function": "core.mjs.validateRecordedTopology",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "3fefc6849dc0e0e2e4d61879a599813e6e84529f0e3f3ddc3a03b09ee44ae7fd"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0071",
+    "test": "execution checkpoint retains old canonical bundle across 48h and validates fresh signing nonce",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "48bec90aa35b6e56721b7d7faadebb9f3f50ecd563fcc6f73a1db0797b344b7b"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0072",
+    "test": "execution checkpoint retains old canonical bundle across 48h and validates fresh signing nonce",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "4d0e7a43480b28e1d4386e51f8b31099bcf8e66c6ea22f4da8cd0ddee080b8f6"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0073",
+    "test": "execution checkpoint retains old canonical bundle across 48h and validates fresh signing nonce",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "bc4d3bbf30cda64032f85f15640f1945147f585e653f7863a3140618b843ba47"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0074",
+    "test": "execution checkpoint retains old canonical bundle across 48h and validates fresh signing nonce",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "7654429f40c733004fae3146761e79622899dc8745cd3eea432c7033373db2c4"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0075",
+    "test": "execution checkpoint retains old canonical bundle across 48h and validates fresh signing nonce",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "02c3c34c42b5af830ddfae61dc259ce945f6c2e5317f4d39a0ef6f6e866e959b"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0076",
+    "test": "execution checkpoint retains old canonical bundle across 48h and validates fresh signing nonce",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "9292bf0892806fac6a8292182935096001ca48a11e2ab5c866ca70afbef576f5"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0077",
+    "test": "execution checkpoint requires fresh independently reviewed fork evidence",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "0ec0efd468936e80f17661de88cf0b5e8c00e5315125c9e222b8b8e04e8db2f5"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0078",
+    "test": "execution checkpoint requires fresh independently reviewed fork evidence",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "c2472abb3a19f3f843788c524a93adf5de641fc9302a067484e5ec8a26e1b81b"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0079",
+    "test": "execution checkpoint requires fresh independently reviewed fork evidence",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "58295a7070d1bd0ea345252ab431c2c7d0631a69ba13fb0b632aec9c083a4909"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0080",
+    "test": "execution checkpoint requires fresh independently reviewed fork evidence",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "55770c18be7a8f3ad361dbea549993b9d2dc1561c3061ce5b6cb5fc758352fe6"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0081",
+    "test": "testnet execution rechecks Oracle configuration rather than relying only on assertHandoff",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "06bae51a0533dbb19456da1a743ac995e33e10781922600feeb90209e146b918"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0082",
+    "test": "testnet execution rechecks Oracle configuration rather than relying only on assertHandoff",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "81e6107985ebe852cc5b0a08f37a449146d2e7293793e877b62ca6ddefcea2c1"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0083",
+    "test": "testnet execution rechecks Oracle configuration rather than relying only on assertHandoff",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "ba28841732a2f87335aa09383ee5d0787f4b39b8428cff39e86de1ee2233b546"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0084",
+    "test": "transient upgrade cannot hide behind restored current slot",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "62b9c35959d2384c3583b0dfd49c89d4ef8992ce0a47cfde20cbe180e9807297"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0085",
+    "test": "Beacon code drift rejected even when getter responses remain plausible",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "2233db49565554adaeb09301fd718731698a9aa8dc81cf356419da1e4089bc30"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0086",
+    "test": "execution allows reconciled deposits during mandatory delay with original operation ID",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "9032986ac9e4a563e581d58505b79befa49308f54b9217952e2aab756807bd11"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0087",
+    "test": "execution allows reconciled deposits during mandatory delay with original operation ID",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "3a8c77527124b91edc9e12c86fce1651baccc80e4262c4d28b04ae9326169d2e"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0088",
+    "test": "execution allows reconciled deposits during mandatory delay with original operation ID",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "b01ad6937fd14e1a7084345fe6d13311b40848b981f197e57c0ce3dbaf8da7c6"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0089",
+    "test": "postcheck verifies current version/history and accepts already consumed governance nonce",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "54088334b3ee79d3ae1db1e52facf6fa9b6ffe35f29ed1a29b8efe0d58b0ce1a"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0090",
+    "test": "postcheck verifies current version/history and accepts already consumed governance nonce",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "584d44b4caa63cd01d1989838aea3dc1e7826fdfa45d2b23d44bcf7ea1b6daa7"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0091",
+    "test": "postcheck verifies current version/history and accepts already consumed governance nonce",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "6cab34ab5e2e8306798cc14095bfb16e16f4c62975db682957b5c13ced25e4df"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0092",
+    "test": "postcheck verifies current version/history and accepts already consumed governance nonce",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "547b7e6312a533a286161f4ea58018f601013c72d29af5e3a6e149e7568478a0"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0093",
+    "test": "postcheck verifies current version/history and accepts already consumed governance nonce",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "92697fda5e5dae30f53fb415c8f608a1c88a6f04dc9324169bfd1ed6cf32c345"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0094",
+    "test": "approved testnet T-3 incomplete recovery verifies actual old owners and retains atomic U",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "968d44b7a676771aa464bed4d525a729d6ee395672b10c2a3b1c8c7ad28f1e31"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0095",
+    "test": "approved testnet T-3 incomplete recovery verifies actual old owners and retains atomic U",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "51c19d8a3a136390af15621496d5dc9fb64d9429cd273e0f3912c099b9e057f0"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0096",
+    "test": "approved testnet T-3 incomplete recovery verifies actual old owners and retains atomic U",
+    "function": "core.mjs.testnetHandoff",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "690c6e2e131be4b64826f402e408744dcedaba61855b455f3a8486036bfe4e5e"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0097",
+    "test": "approved testnet T-3 incomplete recovery verifies actual old owners and retains atomic U",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "99dfd2cd51ec57b07796d0dd6ae1a398d509d6a91df69710813d0b3fb2ab38ca"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0098",
+    "test": "approved testnet T-3 incomplete recovery verifies actual old owners and retains atomic U",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "8fc284135abf3e9ce90e0c563bb62197e6fd38274fad961a63281b16840a6a13"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0099",
+    "test": "all other preflight checks pass for coherent 1672 oracle substitution, registry still rejects",
+    "function": "core.mjs.preflight",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "cf2072c90a81514e01734d67cae83108ff25b1716e3bab4bfd47d8d26532fd81"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0100",
+    "test": "all other preflight checks pass for coherent 1672 oracle substitution, registry still rejects",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "26a8216dd245603f4611da254e34342f3df92d918b9a0b469b274e936f7eecdc"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0101",
+    "test": "all other preflight checks pass for coherent 688689 oracle substitution, registry still rejects",
+    "function": "core.mjs.preflight",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "7e17e7ea3c546c0d8b1cbed0956878bba96882d167236d7962ad625ac61ef7cb"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0102",
+    "test": "all other preflight checks pass for coherent 688689 oracle substitution, registry still rejects",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "ea62e22c5bd1200468ca94015110c65ea0e3c109e9336e8baf2f488e6b741a95"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0103",
+    "test": "all other preflight checks pass for coherent 688689 bridge substitution, registry still rejects",
+    "function": "core.mjs.preflight",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "5aa8b9ea6484e767e0670bf0a3e69106eb201aa338b1d83d89bbbaa1fbdb05d1"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0104",
+    "test": "all other preflight checks pass for coherent 688689 bridge substitution, registry still rejects",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "1f532669d66e702449712b8d42f781818acb86f5618864e55f2a12f928e9436b"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0105",
+    "test": "all other preflight checks pass for coherent 688689 distributor substitution, registry still rejects",
+    "function": "core.mjs.preflight",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "cc5e82d20fd70577549a3c1f489f37f3b49a30076bc368b3df34aba09c4e5ad5"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0106",
+    "test": "all other preflight checks pass for coherent 688689 distributor substitution, registry still rejects",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "b73a1ee3819706552551c592a4d07897579348a9493795a6ad187a39dc925885"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0107",
+    "test": "missing view-assertion response is not a successful checkpoint",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "c0317a5f4ca125b55702287e068c62c3eef911a9b45ab3b1168b02dd11a3734e"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0108",
+    "test": "missing view-assertion response is not a successful checkpoint",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "abe6c9aa500264b4ecda9f00307d73a5f4cbfd62a00ee711b2777be2df836f63"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0109",
+    "test": "missing view-assertion response is not a successful checkpoint",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "bf50cbf3e9a1ddacdc94fd772f70c88a7e6bdb3c03193b219ffc7580161d9895"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0110",
+    "test": "post-R4 same-owner request is unbound, partial payout to another receiver reconciles",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "e092b7c6663cb25886e8e8cc856c7f5a2129f170703b8e6937886117816f11af"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0111",
+    "test": "post-R4 same-owner request is unbound, partial payout to another receiver reconciles",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "825adb9d76028330350ca1c9740f10710d0899c53ba3a81569b2d5f82473d558"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0112",
+    "test": "post-R4 same-owner request is unbound, partial payout to another receiver reconciles",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "d2b6dda6f9b1ac819de9611515fb02c3c2c52f6b84d363790ffff1dba49f62ae"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0113",
+    "test": "post-R4 same-owner request is unbound, partial payout to another receiver reconciles",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "6ad5714843427fb0447b8789c4bfdfca84ec11c1f23461eac390b195a054e5ef"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0114",
+    "test": "post-R4 same-owner request is unbound, partial payout to another receiver reconciles",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "b747c5a5ee6a84070823f617968f1c6caebc85b37ff47e5dc801a73082c5e981"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0115",
+    "test": "legitimate reporter pool increase remains reconciled",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "4e9d01117d70a3a4db64f50ded0eaa8585f7db58eb42998e24f8ecf96e9f2a40"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0116",
+    "test": "execution rejects a former reviewed admin regrant followed by revoke",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "6c6f754125d8cb3ec2c2f8d3ca50c3bfd72021f6bd1455c5d308b56a37dd0bca"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0117",
+    "test": "execution rejects a former reviewed admin regrant followed by revoke",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "eb8f6a9f345600dfbaa13aaeb43cd72f195337fc217a444f0602811efd742259"
+  },
+  {
+    "id": "read-only.integration.test.mjs:0118",
+    "test": "execution rejects a former reviewed admin regrant followed by revoke",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "throw",
+    "file": "read-only.integration.test.mjs.json.gz",
+    "sha256": "2e01ec50de2d1df073b1faf39dc3c9e05fcb963686edac0ecb061e58d319791a"
+  },
+  {
+    "id": "release-tooling.test.mjs:0001",
+    "test": "mainnet H/U frozen order, full second beacon retirement and Safe format",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "971392355d302664c347badea0ac1b465f2439f075ab78f6098780db0ffbe863"
+  },
+  {
+    "id": "release-tooling.test.mjs:0002",
+    "test": "mainnet H/U frozen order, full second beacon retirement and Safe format",
+    "function": "core.mjs.buildHandoff",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "61793a1e35756511a34641cef9e4f61a6a52ebdef420559c9c2ae03e07b0edbc"
+  },
+  {
+    "id": "release-tooling.test.mjs:0003",
+    "test": "mainnet H/U frozen order, full second beacon retirement and Safe format",
+    "function": "core.mjs.preflight",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "50e512fc12b1cce30513bc1d67604ebd4797d3d235200ac0daba09ed56130eea"
+  },
+  {
+    "id": "release-tooling.test.mjs:0004",
+    "test": "mainnet H/U frozen order, full second beacon retirement and Safe format",
+    "function": "core.mjs.verifyOperation",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "317de59bd00612e1fe1a63fd6ab91c9749e6c740f78d31b3265e6a6ff9d5236a"
+  },
+  {
+    "id": "release-tooling.test.mjs:0005",
+    "test": "reject mutated operation id",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "81084039205bf41cd8cfa1390e2215c80e7aa3a9713a8bcb4d534ac3b6182e90"
+  },
+  {
+    "id": "release-tooling.test.mjs:0006",
+    "test": "reject mutated operation id",
+    "function": "core.mjs.verifyOperation",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "158c2c145413ff4c16fc1e1e506fe2be76933407f391677eff3c141c9ac20815"
+  },
+  {
+    "id": "release-tooling.test.mjs:0007",
+    "test": "reject mutated operation salt",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "a0717cc0fb0489dffe6ddbca0b9b32020cf7bfa311cf0afaa70f8ade6f44c4e0"
+  },
+  {
+    "id": "release-tooling.test.mjs:0008",
+    "test": "reject mutated operation salt",
+    "function": "core.mjs.verifyOperation",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "8598bf42b5ddd067756f06aec177588a763531d13615d8d8890cbd44e5423e06"
+  },
+  {
+    "id": "release-tooling.test.mjs:0009",
+    "test": "reject mutated operation predecessor",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "d953a7557db7f45101468523ed6ef485e952d25924a94f6ec77d9f259ceaaa11"
+  },
+  {
+    "id": "release-tooling.test.mjs:0010",
+    "test": "reject mutated operation predecessor",
+    "function": "core.mjs.verifyOperation",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "0041da40a9ed2c488e4f686394d5d7b9132f80b463f6032df7d7487602383512"
+  },
+  {
+    "id": "release-tooling.test.mjs:0011",
+    "test": "reject mutated operation targets",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "995663f4b554528a8d04db9c459ce699745edcaff5f4576b8bd71a6ab1b7e004"
+  },
+  {
+    "id": "release-tooling.test.mjs:0012",
+    "test": "reject mutated operation targets",
+    "function": "core.mjs.verifyOperation",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "b45d6d2ec049b7cedd7c8e068bc20b96c3575fcab6aa07f70bb45935b0f6b91f"
+  },
+  {
+    "id": "release-tooling.test.mjs:0013",
+    "test": "reject mutated operation values",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "e5e7ed917cdab43e9594a5128db84f904df46fae7df37cd492f201d3c9200ae1"
+  },
+  {
+    "id": "release-tooling.test.mjs:0014",
+    "test": "reject mutated operation values",
+    "function": "core.mjs.verifyOperation",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "bc9dfdbf776d80dc11399452f734a4101ce9f735dcf8970552af6c2a3a56af8e"
+  },
+  {
+    "id": "release-tooling.test.mjs:0015",
+    "test": "reject mutated operation payloads",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "0eb6d1ad3b458f9dd64e4a425729333f70bf4e2850ab9ea999f0435175c3458a"
+  },
+  {
+    "id": "release-tooling.test.mjs:0016",
+    "test": "reject mutated operation payloads",
+    "function": "core.mjs.verifyOperation",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "b786a160fde4fb061fc041e5fd5ce8fdd67db59f43b01b7a299582266dc65bd3"
+  },
+  {
+    "id": "release-tooling.test.mjs:0017",
+    "test": "owner-approved fallback B, no duplicate Factory migration",
+    "function": "core.mjs.buildU",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "b7ad34e2d5bcd25ea6c33f5c98faedad082a37e08be2d4f0a6ea75fa0958ddcf"
+  },
+  {
+    "id": "release-tooling.test.mjs:0018",
+    "test": "owner-approved fallback B, no duplicate Factory migration",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "7970da43064659fe8088376cea2f55113eaef9a608617ec6c31c0cd4b6448eb2"
+  },
+  {
+    "id": "release-tooling.test.mjs:0019",
+    "test": "owner-approved fallback B, no duplicate Factory migration",
+    "function": "core.mjs.buildHandoff",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "f629b752cad0d6c12ce11a8e78e2a47910fb28ab99d4dbf9c2e93c1964910ac6"
+  },
+  {
+    "id": "release-tooling.test.mjs:0020",
+    "test": "owner-approved fallback B, no duplicate Factory migration",
+    "function": "core.mjs.p1Runbook",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "49b47dea77f2c99907e4f9f89a10ba934bb1576474f3a9c453b089a2abc4c214"
+  },
+  {
+    "id": "release-tooling.test.mjs:0021",
+    "test": "owner-approved fallback B, no duplicate Factory migration",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "14d758a542508f135ddceda7c4a350e40f96f406ab2ed666457a94512ffa18d3"
+  },
+  {
+    "id": "release-tooling.test.mjs:0022",
+    "test": "owner-approved fallback C, no duplicate Factory migration",
+    "function": "core.mjs.buildU",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "fc67b376ff4d73ca61aa2c9125bd3e775182983c9e1a3e0827afd54b58842b78"
+  },
+  {
+    "id": "release-tooling.test.mjs:0023",
+    "test": "owner-approved fallback C, no duplicate Factory migration",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "4cff7f4eef84b692ecd2d92bf9ac38f1e34d9110c04ca1c2edc6f749678d96c2"
+  },
+  {
+    "id": "release-tooling.test.mjs:0024",
+    "test": "owner-approved fallback C, no duplicate Factory migration",
+    "function": "core.mjs.buildHandoff",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "9d987e0713677a2d5dd037f08c4d30d51904e8cbfaacc82a2a4503ecc06f25c8"
+  },
+  {
+    "id": "release-tooling.test.mjs:0025",
+    "test": "owner-approved fallback C, no duplicate Factory migration",
+    "function": "core.mjs.p1Runbook",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "31b83d6ba8b96632954d70a00213837955b9605857b05c0930e9ddee5ecc7ca3"
+  },
+  {
+    "id": "release-tooling.test.mjs:0026",
+    "test": "owner-approved fallback C, no duplicate Factory migration",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "391eaed1f7419fb4dd366e4e6c0fc69c06a84941319b01b582030fd1c3c16ed9"
+  },
+  {
+    "id": "release-tooling.test.mjs:0027",
+    "test": "owner-approved fallback D, no duplicate Factory migration",
+    "function": "core.mjs.buildU",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "0ea807d9504398ec6da612472c9489f47c826ed37a08446e498684988a508e14"
+  },
+  {
+    "id": "release-tooling.test.mjs:0028",
+    "test": "owner-approved fallback D, no duplicate Factory migration",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "9a84f1540b3cbbfb64d198c6763ad8d900f940f173308705118a71d7fd595cfe"
+  },
+  {
+    "id": "release-tooling.test.mjs:0029",
+    "test": "owner-approved fallback D, no duplicate Factory migration",
+    "function": "core.mjs.buildHandoff",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "19c03388e19e2daef9055699f43646de4c43ec2c966c3c3a202dd7ca3515b0be"
+  },
+  {
+    "id": "release-tooling.test.mjs:0030",
+    "test": "owner-approved fallback D, no duplicate Factory migration",
+    "function": "core.mjs.p1Runbook",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "621efac6be6e27e8597fa52c8556c418aac318883596831649b6a83ecf7939d9"
+  },
+  {
+    "id": "release-tooling.test.mjs:0031",
+    "test": "owner-approved fallback D, no duplicate Factory migration",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "e6886df65bfbe8b2f8c434cc9bd537d1bd49edff98e020f4df5ce6e07d0d31ed"
+  },
+  {
+    "id": "release-tooling.test.mjs:0032",
+    "test": "testnet T0 through T5, canonical V3 token, 15-vault reconciliation",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "1e53bc8fe90d215ed418f7d947205bb186789ed8af6214530ffbec6e6e3f600f"
+  },
+  {
+    "id": "release-tooling.test.mjs:0033",
+    "test": "testnet T0 through T5, canonical V3 token, 15-vault reconciliation",
+    "function": "core.mjs.testnetHandoff",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "c0a8e8459401f933ce9367f3396d89b1ce4ee992d1c0aa4cb8a842ed4f79d8c6"
+  },
+  {
+    "id": "release-tooling.test.mjs:0034",
+    "test": "testnet T0 through T5, canonical V3 token, 15-vault reconciliation",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "9b7f1b2659b26c1c806cd81189fba558312ccd9752c78853bdafb2097732d7aa"
+  },
+  {
+    "id": "release-tooling.test.mjs:0035",
+    "test": "testnet E2-unavailable approved recovery retires all, retains inert inventoried roles",
+    "function": "core.mjs.testnetHandoff",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "63b46dd28fa43ac3d72dffbc0d85f217bdd7ccb80b03a9bb5818c078a161ae13"
+  },
+  {
+    "id": "release-tooling.test.mjs:0036",
+    "test": "testnet E2-unavailable approved recovery retires all, retains inert inventoried roles",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "315f58306c9b12ef789376df21cdc183c57aa19b2cf1c91ab38ce886b416153e"
+  },
+  {
+    "id": "release-tooling.test.mjs:0037",
+    "test": "preflight refuses missing release gates",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "3cc1ad32d25041384bd53dc6cc962d9eb11010ca6899bda92675b3b482d5ff05"
+  },
+  {
+    "id": "release-tooling.test.mjs:0038",
+    "test": "preflight refuses wrong delay",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "bc6b82d01cc36c0b05e2a67d2302bf8f69fb1a4f4ea72a8298eca5552f5fa1c2"
+  },
+  {
+    "id": "release-tooling.test.mjs:0039",
+    "test": "preflight refuses wrong APR",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "c1b20abd5cbedb222ab971104255a29e6b7e49701f18105d70f30760f843ff6c"
+  },
+  {
+    "id": "release-tooling.test.mjs:0040",
+    "test": "preflight refuses missing inventory",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "ccaef99a2a88710b496e1f194390c69dd93ddfe22b3f6fc1b698714b1fb69f49"
+  },
+  {
+    "id": "release-tooling.test.mjs:0041",
+    "test": "preflight refuses truncated role list",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "46666b4109f74b100b8c0332502e2b36ff0dd0d672ade9f8da4b94198396932d"
+  },
+  {
+    "id": "release-tooling.test.mjs:0042",
+    "test": "preflight refuses stale TL privilege",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "2f8ca7dc43eb1b3994f1f9b1b4f0a5e0d5addf68803b823cc188bcdcbb3f31ba"
+  },
+  {
+    "id": "release-tooling.test.mjs:0043",
+    "test": "preflight refuses wrong PA",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "2569cb2d5b1f089e990a90be47fcf5b498c2431497d755ac8a1540bd474430c4"
+  },
+  {
+    "id": "release-tooling.test.mjs:0044",
+    "test": "preflight refuses wrong version",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "5b4d3ec2b5189d7ae2bad779aab44f60a1a9da2048db3bdefbfa7896e60b818f"
+  },
+  {
+    "id": "release-tooling.test.mjs:0045",
+    "test": "preflight refuses wrong beacon owner",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "d51991b3dff4209b62367236f9c680af8f53aef5206944f9dd9cf24171505b58"
+  },
+  {
+    "id": "release-tooling.test.mjs:0046",
+    "test": "preflight refuses wrong immutable",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "47ba179f99fd72df0b0cf22ed27ebe5716d476dfd396aea003b153f6214bacd9"
+  },
+  {
+    "id": "release-tooling.test.mjs:0047",
+    "test": "preflight refuses implementation proxy substitution",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "d47677f5cae0ca583c9d97b36f8961a0fc50214f27f9250e68799016d142c519"
+  },
+  {
+    "id": "release-tooling.test.mjs:0048",
+    "test": "preflight refuses no code",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "3002354e65396c8615325130a50b899579e48a760ed2cd0f0dded13b8a27036f"
+  },
+  {
+    "id": "release-tooling.test.mjs:0049",
+    "test": "preflight refuses unapproved artifact",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "45394573eae87b2904f2e55abf7ec68b1bd23ca61c67e13cc50ca8705f77b24b"
+  },
+  {
+    "id": "release-tooling.test.mjs:0050",
+    "test": "preflight refuses inventory gap",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "9fa1f9921424fa4bdc4e88c4046ea29913d71b97a3a38c9f0f2c75f72fab85da"
+  },
+  {
+    "id": "release-tooling.test.mjs:0051",
+    "test": "preflight refuses unexpected owner",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "2a7908e0f5d26974cd76bf2deaa3ae9f38bb65c08b2dd48dff90dc0f3d632296"
+  },
+  {
+    "id": "release-tooling.test.mjs:0052",
+    "test": "preflight refuses paused",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "1841e13e51056c92198565f50fe5e191a997f6d04512aa5bf04daab765872b0e"
+  },
+  {
+    "id": "release-tooling.test.mjs:0053",
+    "test": "preflight refuses split request",
+    "function": "core.mjs.preflight",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "923a471041275e18d4f85042f1f8142cd47a90e5b3c162905d4a6f7b972daf57"
+  },
+  {
+    "id": "release-tooling.test.mjs:0054",
+    "test": "immutable width and missing binding fail closed",
+    "function": "core.mjs.verifyRuntime",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "62857c63a4b5bb011ee4bd28554677fdd46f4045e845c4e3fca3efe9199b85be"
+  },
+  {
+    "id": "release-tooling.test.mjs:0055",
+    "test": "immutable width and missing binding fail closed",
+    "function": "core.mjs.verifyRuntime",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "25864ecc2e7d73b44c32f3a3e9519620946c17818f25cdb93362b3e8c82d93e0"
+  },
+  {
+    "id": "release-tooling.test.mjs:0056",
+    "test": "full role scan detects omitted privileged holder independently of supplied list",
+    "function": "read-only.mjs.scanRoles",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "9f106d9f132be4b09a47b1bd384df31f7eccd729eb0620106d36d82899d62916"
+  },
+  {
+    "id": "release-tooling.test.mjs:0057",
+    "test": "holder scan rejects an omitted zero-balance historical holder",
+    "function": "read-only.mjs.scanEconomics",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "aa2c50779a6abfa8043cfbf52440c94ab822380140a61bdffdbea0fac8f8e59f"
+  },
+  {
+    "id": "release-tooling.test.mjs:0058",
+    "test": "fresh and malformed reviewed artifact production settings",
+    "function": "artifacts.mjs.freezeArtifact",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "3779d760f55ae8496334d27803ce8d3bfe9467f83ff335362656856eac7fe570"
+  },
+  {
+    "id": "release-tooling.test.mjs:0059",
+    "test": "fresh and malformed reviewed artifact production settings",
+    "function": "artifacts.mjs.freezeArtifact",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "a6d4bb8235f4288ca8f198c23c17f18f568aa86cef74bdffa093fdf264bdcac4"
+  },
+  {
+    "id": "release-tooling.test.mjs:0060",
+    "test": "recorded target binding refuses an arbitrary canonical target even with coherent config",
+    "function": "core.mjs.validateRecordedTopology",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "0da6291c146122e5d733c47e094d00de995e0aeaad96d985a75fb56b9579a95a"
+  },
+  {
+    "id": "release-tooling.test.mjs:0061",
+    "test": "recorded target binding refuses an arbitrary canonical target even with coherent config",
+    "function": "core.mjs.validateRecordedTopology",
+    "outcome": "throw",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "2439b39bef438c1795a555a8b9e05107b9ff4c244dc8184bd4c43e4a5d07d59d"
+  },
+  {
+    "id": "release-tooling.test.mjs:0062",
+    "test": "approved C residual role churn cannot veto terminal retirement calldata",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "942b2a33d3c51c12fb23faf6c43167fb7450123b445b84516b167e407a344824"
+  },
+  {
+    "id": "release-tooling.test.mjs:0063",
+    "test": "approved C residual role churn cannot veto terminal retirement calldata",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "release-tooling.test.mjs.json.gz",
+    "sha256": "0ac81e4393f024e2b545113438e6c434758678e4b26323665f9afad2df9af187"
+  },
+  {
+    "id": "remediation.test.mjs:0001",
+    "test": "supplement",
+    "function": "core.mjs.operation",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "b333da8b12f44bfd565cd1bed435d118ff9ca15085dc748d8ce8d1db03d863bb"
+  },
+  {
+    "id": "remediation.test.mjs:0002",
+    "test": "supplement",
+    "function": "core.mjs.operation",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "18fa5e09a6ef2083506286627f53a05298a3e3e8efcf2a11314dfcd2b6734e89"
+  },
+  {
+    "id": "remediation.test.mjs:0003",
+    "test": "effective 1672 reporter cannot equal gov",
+    "function": "core.mjs.validateConfig",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "5c930ca4323541532599ce1ec0a0a17da65584323b6970729863d4f3d5d4c7f5"
+  },
+  {
+    "id": "remediation.test.mjs:0004",
+    "test": "effective 1672 reporter cannot equal can",
+    "function": "core.mjs.validateConfig",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "d7b607865c6c0e799f2cccb2654557c364243ed78f5ad46e3778ab45e7eafe7f"
+  },
+  {
+    "id": "remediation.test.mjs:0005",
+    "test": "effective 1672 reporter cannot equal timelock",
+    "function": "core.mjs.validateConfig",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "6b49368b323bf542a259144e682f8423a55c914da164e5926801629891b5d059"
+  },
+  {
+    "id": "remediation.test.mjs:0006",
+    "test": "effective 1672 keeper cannot equal gov",
+    "function": "core.mjs.validateConfig",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "19f4b94f444183545651fd74fd843fe7bea4ab56f86827c9c64f37c5d77ed8b7"
+  },
+  {
+    "id": "remediation.test.mjs:0007",
+    "test": "effective 1672 keeper cannot equal can",
+    "function": "core.mjs.validateConfig",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "44e3430cf4d15a1e672ca335b6ff938455e197d65141718e11e3adcd7847bd96"
+  },
+  {
+    "id": "remediation.test.mjs:0008",
+    "test": "effective 1672 keeper cannot equal timelock",
+    "function": "core.mjs.validateConfig",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "e455ba13dac286d64534ce77d45574b4ad5c3d8d7de07e8b5a1c2b58af63cbc0"
+  },
+  {
+    "id": "remediation.test.mjs:0009",
+    "test": "effective 688689 reporter cannot equal gov",
+    "function": "core.mjs.validateConfig",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "d4cf84e377320c1193a3152e6ba9a5050bd53e5ffc8005b780b19a7a9990bffc"
+  },
+  {
+    "id": "remediation.test.mjs:0010",
+    "test": "effective 688689 reporter cannot equal can",
+    "function": "core.mjs.validateConfig",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "edf4b76375f863e3a11b8d852d5cbc399f877822c4774229b036724ee24c8811"
+  },
+  {
+    "id": "remediation.test.mjs:0011",
+    "test": "effective 688689 reporter cannot equal timelock",
+    "function": "core.mjs.validateConfig",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "682c9654dbb3072ef99d6c68e9ed6820a6734b00d237db7a54ea8fa05e0cc9f2"
+  },
+  {
+    "id": "remediation.test.mjs:0012",
+    "test": "effective 688689 keeper cannot equal gov",
+    "function": "core.mjs.validateConfig",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "bb7263e4f52ff2afa33e523ddf97a50a7ad8c374abdfe782a759faadd0a96d48"
+  },
+  {
+    "id": "remediation.test.mjs:0013",
+    "test": "effective 688689 keeper cannot equal can",
+    "function": "core.mjs.validateConfig",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "0467baa92fa11195d86ece00550811228c8dbd661c061281efe2a85cd031dc34"
+  },
+  {
+    "id": "remediation.test.mjs:0014",
+    "test": "effective 688689 keeper cannot equal timelock",
+    "function": "core.mjs.validateConfig",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "e8e3b399b4b438f0be195e6760e375a883a2041f0329954e6f09f7537c532e67"
+  },
+  {
+    "id": "remediation.test.mjs:0015",
+    "test": "testnet uses preserved reporter; OPS/GRD alias remains supported",
+    "function": "core.mjs.validateConfig",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "470e81cb84465cec40d5a1cb58e76ffee84a0e09b5476171fce964816b64c6fe"
+  },
+  {
+    "id": "remediation.test.mjs:0016",
+    "test": "Timelock multi-call IDs, cancellation, reschedule, execution, plan",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "4029c019aefb6e34c9a42ea804d45ccd9d8c005aa8d015d23a0c6e62d46ccb9f"
+  },
+  {
+    "id": "remediation.test.mjs:0017",
+    "test": "Timelock multi-call IDs, cancellation, reschedule, execution, plan",
+    "function": "timelock-history.mjs.checkOperationPlan",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "29100872665512a59c6d1daf570ca76b51e0b38a9cde7b2f65ddc9c9182e4e47"
+  },
+  {
+    "id": "remediation.test.mjs:0018",
+    "test": "Timelock multi-call IDs, cancellation, reschedule, execution, plan",
+    "function": "timelock-history.mjs.checkOperationPlan",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "8e6a3449e0a5467e8d64e6b93abe76bdfdd1183f23d1b4c215f999cb906a3b5a"
+  },
+  {
+    "id": "remediation.test.mjs:0019",
+    "test": "Timelock multi-call IDs, cancellation, reschedule, execution, plan",
+    "function": "timelock-history.mjs.checkOperationPlan",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "1eab6a9d345e51b04f83ac6e6a38a4636ec7abe7a5b00519cef1d5cd8ee1facd"
+  },
+  {
+    "id": "remediation.test.mjs:0020",
+    "test": "Timelock rejects duplicate log",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "812d6add91aefdc6c28b91798303b7da0095b4217e5160740ff7f452ffe45491"
+  },
+  {
+    "id": "remediation.test.mjs:0021",
+    "test": "Timelock rejects duplicate index",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "cee84be95bc330bf6d7878d101324d0770201827a73fca09b807077804422a89"
+  },
+  {
+    "id": "remediation.test.mjs:0022",
+    "test": "Timelock rejects missing index",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "365468765071c4aa7c2fec2ee01670da1eca2d57ad72bade79633c6e001a215a"
+  },
+  {
+    "id": "remediation.test.mjs:0023",
+    "test": "Timelock rejects state mismatch",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "b707f0f14873a198cf2e8b6f762bb4764a183841c57fd2c0314b6cc73b5009c1"
+  },
+  {
+    "id": "remediation.test.mjs:0024",
+    "test": "Timelock rejects reschedule pending",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "ce18429d0631e1eae6eb189bb6104b3dcb74ac2638eea812e391f18dd14cd940"
+  },
+  {
+    "id": "remediation.test.mjs:0025",
+    "test": "Timelock rejects execution wrong payload",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "d7f2ee3964867aee5eeb71b375039864bc2f616589465c6a4d01f2f8318006f5"
+  },
+  {
+    "id": "remediation.test.mjs:0026",
+    "test": "Timelock accepts empty cancellation metadata but rejects unknown execution and early execution",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "ac31c0c588d8f82aeae10ba70ba06b8745b5c1db901f29f07e8a8bc04e735e8a"
+  },
+  {
+    "id": "remediation.test.mjs:0027",
+    "test": "Timelock accepts empty cancellation metadata but rejects unknown execution and early execution",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "fcbf7b5dd26cf4ffaed439ed32eb6b5e82a21a27736f47c914e4e4af43da0e1d"
+  },
+  {
+    "id": "remediation.test.mjs:0028",
+    "test": "Timelock accepts empty cancellation metadata but rejects unknown execution and early execution",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "3d2e0bc8ee97b831f9ae7e721be44d684e072833522e953f78f60dfda9baa619"
+  },
+  {
+    "id": "remediation.test.mjs:0029",
+    "test": "pool replay ordinary",
+    "function": "pool-replay.mjs.replayPool",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "e6a094be7eb0ad8203579dd83e8df42bcffd31a9fa1a48485feec7bf64bb1444"
+  },
+  {
+    "id": "remediation.test.mjs:0030",
+    "test": "pool replay last share",
+    "function": "pool-replay.mjs.replayPool",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "e10ca064b3da69fa456d06571d8944f6a264c95e00644d89785ecc293b1bc4a5"
+  },
+  {
+    "id": "remediation.test.mjs:0031",
+    "test": "pool replay positive dust",
+    "function": "pool-replay.mjs.replayPool",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "99fa9478298d04811dfe308c8e1332ca9f604f452a8819f9342f206e0b57d012"
+  },
+  {
+    "id": "remediation.test.mjs:0032",
+    "test": "pool replay nonzero remaining supply",
+    "function": "pool-replay.mjs.replayPool",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "53fb1c74ffebc09a075ee1f44e1010336e4b1c6e59b8bd3a12b810a93cb8826e"
+  },
+  {
+    "id": "remediation.test.mjs:0033",
+    "test": "pool rejects unexplained NAV",
+    "function": "pool-replay.mjs.replayPool",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "899870d6aaffc527f125e156b0f5393d69a2f13a19d1a7788d698420a162e4b5"
+  },
+  {
+    "id": "remediation.test.mjs:0034",
+    "test": "pool rejects unexplained shares",
+    "function": "pool-replay.mjs.replayPool",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "1999e265cb6e3cd6ae141703dd3fee3c3bb672a97e593af0b06cc43fe8db7c7c"
+  },
+  {
+    "id": "remediation.test.mjs:0035",
+    "test": "pool rejects wrong pool event",
+    "function": "pool-replay.mjs.replayPool",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "da59ee17915b67d26bdcf6accc245c84cc23ed48a16f7eb17e5a2ce2792a1cb1"
+  },
+  {
+    "id": "remediation.test.mjs:0036",
+    "test": "pool rejects missing burn",
+    "function": "pool-replay.mjs.replayPool",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "cc3dd8a96199e8d5ed64317e27b8ed6eae5a2fae68592deec8e2c74f2991e3f4"
+  },
+  {
+    "id": "remediation.test.mjs:0037",
+    "test": "pool rejects wrong burn amount",
+    "function": "pool-replay.mjs.replayPool",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "6e9401e95c7bfa01ce78d0294758c7ea88b97bff2e89a96ea7901493e6cbe942"
+  },
+  {
+    "id": "remediation.test.mjs:0038",
+    "test": "pool rejects wrong burn owner",
+    "function": "pool-replay.mjs.replayPool",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "8fa97f882b653385f879b943b38bf1120e2d485becfa7d3f2551838f24a0d8eb"
+  },
+  {
+    "id": "remediation.test.mjs:0039",
+    "test": "pool rejects wrong transaction",
+    "function": "pool-replay.mjs.replayPool",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "f69f16d4e8c043819486abe98a6d388c0a8b4bc4e9ddf03a932109e8b320f941"
+  },
+  {
+    "id": "remediation.test.mjs:0040",
+    "test": "pool rejects event after withdrawal",
+    "function": "pool-replay.mjs.replayPool",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "9227d5a6c13d8bfb5d4143ffe69ccf35fc21f82c3fd2cfd4a997bc4d939a1334"
+  },
+  {
+    "id": "remediation.test.mjs:0041",
+    "test": "pool rejects unmatched event",
+    "function": "pool-replay.mjs.replayPool",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "7c267a5c3c228cd831442d4804ee91f065a017c99e7b59f32226eba980512199"
+  },
+  {
+    "id": "remediation.test.mjs:0042",
+    "test": "approved residual 1672/C reconciles real round transition; unexplained terms rejected",
+    "function": "residual-replay.mjs.termsHash",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "948797f8d1b662cfaca4d1cd81c1dedaf9af59a250cc4b14c54fb887b5548c1a"
+  },
+  {
+    "id": "remediation.test.mjs:0043",
+    "test": "approved residual 1672/C reconciles real round transition; unexplained terms rejected",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "7b7b7baffdd59616c2517a497516dcb1f116abcc64584b2a4e3f70e4606bd0c3"
+  },
+  {
+    "id": "remediation.test.mjs:0044",
+    "test": "approved residual 1672/C reconciles real round transition; unexplained terms rejected",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "e557ef76abc68dbdad486bf913bf894db6ead8fdec8c939147777c8757848591"
+  },
+  {
+    "id": "remediation.test.mjs:0045",
+    "test": "approved residual 1672/C reconciles real round transition; unexplained terms rejected",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "24f26ea3aecec14ed175b1401daebaf8d55d8379d617aa9a925d368d37d78f9c"
+  },
+  {
+    "id": "remediation.test.mjs:0046",
+    "test": "approved residual 1672/C reconciles real round transition; unexplained terms rejected",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "45b683d92a6cd663fd54d483cee02e8a25dd8bd4277bcdb4f2b2ead6ef94703b"
+  },
+  {
+    "id": "remediation.test.mjs:0047",
+    "test": "approved residual 1672/D reconciles real round transition; unexplained terms rejected",
+    "function": "residual-replay.mjs.termsHash",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "7b96fbdeaded0ca536c8a1a6db123b86c7df5b08ff6d1f87e2015e8e90e28f0b"
+  },
+  {
+    "id": "remediation.test.mjs:0048",
+    "test": "approved residual 1672/D reconciles real round transition; unexplained terms rejected",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "ebb3d3d7496d3197449947224fe6242dcbd281c4b0565a8c96318ba0d0b82a68"
+  },
+  {
+    "id": "remediation.test.mjs:0049",
+    "test": "approved residual 1672/D reconciles real round transition; unexplained terms rejected",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "f8d2ade7afc707c33b30cb52c61616f5756e83880373319d5b131adac4b91157"
+  },
+  {
+    "id": "remediation.test.mjs:0050",
+    "test": "approved residual 1672/D reconciles real round transition; unexplained terms rejected",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "8f239a650e322d73a466510559a3e06fcc359f8b4a99bb167e637b7910f6a6ff"
+  },
+  {
+    "id": "remediation.test.mjs:0051",
+    "test": "approved residual 1672/D reconciles real round transition; unexplained terms rejected",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "ba0f3a884c4a9fb307c416d37021b836ae1cdb02e6999e50b475728073e25707"
+  },
+  {
+    "id": "remediation.test.mjs:0052",
+    "test": "approved residual 688689/A reconciles real round transition; unexplained terms rejected",
+    "function": "residual-replay.mjs.termsHash",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "d60383a5975a2726038ce9369801d176043801ad82e328bc60c1983d683b9db8"
+  },
+  {
+    "id": "remediation.test.mjs:0053",
+    "test": "approved residual 688689/A reconciles real round transition; unexplained terms rejected",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "335934c8c46ea0bf061679ba098dafe040d70a181ef4493fab87faaa95b10863"
+  },
+  {
+    "id": "remediation.test.mjs:0054",
+    "test": "approved residual 688689/A reconciles real round transition; unexplained terms rejected",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "a2372addebb7313c4c97e58bfcf611b086b09d3db5b6ac9c3037ccaa803d2408"
+  },
+  {
+    "id": "remediation.test.mjs:0055",
+    "test": "approved residual 688689/A reconciles real round transition; unexplained terms rejected",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "7a123ba523e0399bac3953a964e827c97eaf6e31dcae00580019a1eab0de25ff"
+  },
+  {
+    "id": "remediation.test.mjs:0056",
+    "test": "approved residual 688689/A reconciles real round transition; unexplained terms rejected",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "63f342f3cdbba36a5e0cb0570d65bfcc488991ef8013be29ffcf15a288fd6afd"
+  },
+  {
+    "id": "remediation.test.mjs:0057",
+    "test": "unexplained residual terms without events fail; governed never takes exception",
+    "function": "residual-replay.mjs.termsHash",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "3d0a0f345a75bd4ca379940d0e39834e257ca3242331d57939358b4724ab21a9"
+  },
+  {
+    "id": "remediation.test.mjs:0058",
+    "test": "unexplained residual terms without events fail; governed never takes exception",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "45b5e03b77288208269a303aebdb958a1b54e23533d14ae25ec389460ea0489f"
+  },
+  {
+    "id": "remediation.test.mjs:0059",
+    "test": "unexplained residual terms without events fail; governed never takes exception",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "ec3f460f58a9cff77fba71e89572c94e89b17480a939a3318fd4fab1e748902d"
+  },
+  {
+    "id": "remediation.test.mjs:0060",
+    "test": "complete preflight refuses unrelated pending Timelock operation",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "3ee2fe54591cf23dc1e1637cc3088f5739ec1d464878269efbe48952cbe7914e"
+  },
+  {
+    "id": "remediation.test.mjs:0061",
+    "test": "residual 1672/C H checkpoint accepts reconstructed changed terms and keeps U fixed",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "6214d06e3316ef7d6e1ae5784c973576160257fb336127286927ebbab06f3603"
+  },
+  {
+    "id": "remediation.test.mjs:0062",
+    "test": "residual 1672/C H checkpoint accepts reconstructed changed terms and keeps U fixed",
+    "function": "residual-replay.mjs.termsHash",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "23057f73828bb1fd68a72e2d69feda0627ca9a29174ffa0c2616d27cf0ca8e9c"
+  },
+  {
+    "id": "remediation.test.mjs:0063",
+    "test": "residual 1672/C H checkpoint accepts reconstructed changed terms and keeps U fixed",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "7c20fd3d37ac81dd0fb592a03a70c255d8cd01848bd9001baaf937e76e7cb793"
+  },
+  {
+    "id": "remediation.test.mjs:0064",
+    "test": "residual 1672/C H checkpoint accepts reconstructed changed terms and keeps U fixed",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "592225f408fce841ed199e4d94b5b96a357aa458bfc050d7fac5c15ab26e2da5"
+  },
+  {
+    "id": "remediation.test.mjs:0065",
+    "test": "residual 1672/C H checkpoint accepts reconstructed changed terms and keeps U fixed",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "15a615a99d21504f56d2eb3d751d98912034b27b2c891463937a90edbbb11923"
+  },
+  {
+    "id": "remediation.test.mjs:0066",
+    "test": "residual 1672/C H checkpoint accepts reconstructed changed terms and keeps U fixed",
+    "function": "residual-replay.mjs.termsHash",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "f9b6c4670c8790837ae321506e3fe7ae78b864e29db8daf17fbc937e587678bd"
+  },
+  {
+    "id": "remediation.test.mjs:0067",
+    "test": "residual 1672/C H checkpoint accepts reconstructed changed terms and keeps U fixed",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "fc6d7893eb45559a7111212722f2967215e04ee3a96b92baea7efcd9cb191dc7"
+  },
+  {
+    "id": "remediation.test.mjs:0068",
+    "test": "residual 1672/D H checkpoint accepts reconstructed changed terms and keeps U fixed",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "eb1811baa2d769eb9ac7cd2c16342bbc516610cabfe261a7464469f0d5f7ef74"
+  },
+  {
+    "id": "remediation.test.mjs:0069",
+    "test": "residual 1672/D H checkpoint accepts reconstructed changed terms and keeps U fixed",
+    "function": "residual-replay.mjs.termsHash",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "ca72e8311467a12b8515c2817c89b38752bdecb2a2fe34b9d854f16cd08008bc"
+  },
+  {
+    "id": "remediation.test.mjs:0070",
+    "test": "residual 1672/D H checkpoint accepts reconstructed changed terms and keeps U fixed",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "67bab6619872e8c94e8aba63d630bfbfc068a8e9fb31dc6824f7d6e06f3b0005"
+  },
+  {
+    "id": "remediation.test.mjs:0071",
+    "test": "residual 1672/D H checkpoint accepts reconstructed changed terms and keeps U fixed",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "4c16ff81f4be58f3b19a046d2a5486c4eccf5a98cf205a8f3b2f1ae4fdee470a"
+  },
+  {
+    "id": "remediation.test.mjs:0072",
+    "test": "residual 1672/D H checkpoint accepts reconstructed changed terms and keeps U fixed",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "bb7bfde56bf48f4dbb8e247b15e53dc13fb39805114e9035455bed5c1cce1af0"
+  },
+  {
+    "id": "remediation.test.mjs:0073",
+    "test": "residual 1672/D H checkpoint accepts reconstructed changed terms and keeps U fixed",
+    "function": "residual-replay.mjs.termsHash",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "405197f9958de175560a79ac93da3d2cb7df8e0d6a0e2299605f43c269c7ba76"
+  },
+  {
+    "id": "remediation.test.mjs:0074",
+    "test": "residual 1672/D H checkpoint accepts reconstructed changed terms and keeps U fixed",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "bdc80a0cad007a7b76f3e9d956e8def18b7ca3260355e778291431514d088101"
+  },
+  {
+    "id": "remediation.test.mjs:0075",
+    "test": "residual 688689/A H checkpoint accepts reconstructed changed terms and keeps U fixed",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "b2fee5cf19f7a08bda57d20698ad0e64d96be27ee90562bfa52f284dc0ba3851"
+  },
+  {
+    "id": "remediation.test.mjs:0076",
+    "test": "residual 688689/A H checkpoint accepts reconstructed changed terms and keeps U fixed",
+    "function": "residual-replay.mjs.termsHash",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "e9b68ca69c4c3fd2db30b77c0bc0ed5c43fe96348678c4ac90978181809501ca"
+  },
+  {
+    "id": "remediation.test.mjs:0077",
+    "test": "residual 688689/A H checkpoint accepts reconstructed changed terms and keeps U fixed",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "4fb7935904845ee24ae31de2642de8ed02f3e792d95e18fc90e38e89ac600dca"
+  },
+  {
+    "id": "remediation.test.mjs:0078",
+    "test": "residual 688689/A H checkpoint accepts reconstructed changed terms and keeps U fixed",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "8bbdf91a755e039f3d2723665053a234f57674e20c1db175c69873775a68ba9f"
+  },
+  {
+    "id": "remediation.test.mjs:0079",
+    "test": "residual 688689/A H checkpoint accepts reconstructed changed terms and keeps U fixed",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "ad9493a6aa55905d16f5b687cb0ef9f777774f1885e364cffec00df4b40c5e1a"
+  },
+  {
+    "id": "remediation.test.mjs:0080",
+    "test": "residual 688689/A H checkpoint accepts reconstructed changed terms and keeps U fixed",
+    "function": "residual-replay.mjs.termsHash",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "375ad2d86c47fc044e747b1ca4d564c058b96627d990b0a69b7a4bef8694a7b8"
+  },
+  {
+    "id": "remediation.test.mjs:0081",
+    "test": "residual 688689/A H checkpoint accepts reconstructed changed terms and keeps U fixed",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "e6ac37883af86f5025259ab43e61ddb884590556ea2662bf1757c5886369e498"
+  },
+  {
+    "id": "remediation.test.mjs:0082",
+    "test": "zero-supply dust normalization passes complete testnet post-U checkpoint; wrong balances fail",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "4e6e429452b6d33913358882164c542a0989475fc04aee09e543c9e12c09bbc8"
+  },
+  {
+    "id": "remediation.test.mjs:0083",
+    "test": "zero-supply dust normalization passes complete testnet post-U checkpoint; wrong balances fail",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "5210362f4b8a60fc45f2a20c495b624dcda52ebe6ab3ba0e4dc68a126f030b09"
+  },
+  {
+    "id": "remediation.test.mjs:0084",
+    "test": "zero-supply dust normalization passes complete testnet post-U checkpoint; wrong balances fail",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "952d565d2bf2a0934c09be307bd0bf5454b183b11e55848ad23438bbcbf921f5"
+  },
+  {
+    "id": "remediation.test.mjs:0085",
+    "test": "zero-supply dust normalization passes complete testnet post-U checkpoint; wrong balances fail",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "f1c32093c92c1fa784890c53204d65f580c2512fe82ce4f901ee7efa408a2577"
+  },
+  {
+    "id": "remediation.test.mjs:0086",
+    "test": "post-U rejects unrelated operation even when expected U is done",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "a6b2cabce2c20c8b5e5bacdc6d28b90bfc6d7039feb2e86c10596bd93da1935d"
+  },
+  {
+    "id": "remediation.test.mjs:0087",
+    "test": "post-U rejects unrelated operation even when expected U is done",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "cb833842fcb528f1fef276d4f362c4a88ef7cc6c64473556a309d3530ccaf3e5"
+  },
+  {
+    "id": "remediation.test.mjs:0088",
+    "test": "post-U rejects unrelated operation even when expected U is done",
+    "function": "core.mjs.buildU",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "6616a157092618f4b0974f08e9a3a3a12ead4b18f320092da0ba7f633fcecb6b"
+  },
+  {
+    "id": "remediation.test.mjs:0089",
+    "test": "post-U rejects unrelated operation even when expected U is done",
+    "function": "core.mjs.operation",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "7ff758b118a58927938300f96246fe8403de3ca12422568f33033de07325b4e3"
+  },
+  {
+    "id": "remediation.test.mjs:0090",
+    "test": "post-U rejects unrelated operation even when expected U is done",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "75300b37c704bd08a84053d71d8f330d6843d4a3aa12cc48e3d6152c82587471"
+  },
+  {
+    "id": "remediation.test.mjs:0091",
+    "test": "parsing alone never authorizes action-bearing release coverage",
+    "function": "timelock-history.mjs.replayOperations",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "e1fd103387abc763c1630e2dfdc46f3471a8d1948787f55226832f1fab925388"
+  },
+  {
+    "id": "remediation.test.mjs:0092",
+    "test": "parsing alone never authorizes action-bearing release coverage",
+    "function": "timelock-history.mjs.requireActionBearingCoverage",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "3be0782a4e93b54cee3146da30838fd9335f45f246a5931df657c317acf16b99"
+  },
+  {
+    "id": "remediation.test.mjs:0093",
+    "test": "parsing alone never authorizes action-bearing release coverage",
+    "function": "timelock-history.mjs.requireActionBearingCoverage",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "24a8ad07212af301d5d37acdcca0ea50c1c21aa8bcdb1d65ef5931754106c35a"
+  },
+  {
+    "id": "remediation.test.mjs:0094",
+    "test": "residual funded profit backing cannot be excluded from the current checkpoint",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "4c44eccaf98830e0de0a261b231951e83ea895edef2882b9a7bb5906e5514252"
+  },
+  {
+    "id": "remediation.test.mjs:0095",
+    "test": "residual zero-profit round can return to SETTLED with new authenticated terms",
+    "function": "residual-replay.mjs.termsHash",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "36f241cf515b19b49ba0164a3671f1cc9e47ffb9696014420ea445ed28998c1d"
+  },
+  {
+    "id": "remediation.test.mjs:0096",
+    "test": "residual zero-profit round can return to SETTLED with new authenticated terms",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "c9358c2e84349bdd431c3c4369be1ab39850d6236708524c66c205cb188f7039"
+  },
+  {
+    "id": "remediation.test.mjs:0097",
+    "test": "residual zero-profit round can return to SETTLED with new authenticated terms",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "87ea632e12290ad2579eec0f81d1218f09d7048fb9b98bb37407ebe563aca87c"
+  },
+  {
+    "id": "remediation.test.mjs:0098",
+    "test": "GC02 signer rotation is detected at H checkpoint",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "d5fdd7fb7841496f7565d15a2e2766aee6bed796d0ca872cd2b1586bd25d1553"
+  },
+  {
+    "id": "remediation.test.mjs:0099",
+    "test": "GC02 signer rotation is detected at H checkpoint",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "a09587338314a8ced71b9e9f6d788aac30bbc1e3e817f0747a9f8ae42cbd3b8a"
+  },
+  {
+    "id": "remediation.test.mjs:0100",
+    "test": "GC02 signer rotation is detected at H checkpoint",
+    "function": "timelock-history.mjs.requireActionBearingCoverage",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "8e19b7d8934f253e2994ee767d02dc697f9be986a1fdf9e040abfe7e07c92ff4"
+  },
+  {
+    "id": "remediation.test.mjs:0101",
+    "test": "GC02 signer rotation is detected at H checkpoint",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "0a545081d88e2b5a16e62dd822ca55411f08b18f297181ecb1b697407af7c25a"
+  },
+  {
+    "id": "remediation.test.mjs:0102",
+    "test": "GC02 signer rotation is detected at R4 checkpoint",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "d59bef6b6503d8df8a18187de4b3a4a2e8e27880e10e5d194bf5dfb7c1ee9038"
+  },
+  {
+    "id": "remediation.test.mjs:0103",
+    "test": "GC02 signer rotation is detected at R4 checkpoint",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "a8828e8cf1ad5317821474f08963f8108b87c4c784f3615790dc64852f17689a"
+  },
+  {
+    "id": "remediation.test.mjs:0104",
+    "test": "GC02 signer rotation is detected at R4 checkpoint",
+    "function": "timelock-history.mjs.requireActionBearingCoverage",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "e8a5406dca59f460e35a484f5abde15f4587401bb4b0e06339d7efa32da8a9eb"
+  },
+  {
+    "id": "remediation.test.mjs:0105",
+    "test": "GC02 signer rotation is detected at R4 checkpoint",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "7c694a79c4deb6631ec843570bc6c81351994a74f23387346359a6be9680c21e"
+  },
+  {
+    "id": "remediation.test.mjs:0106",
+    "test": "GC01 execution checkpoint rejects mainnet governed phase 0",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "926233c023d433641d72bb2a89d62691aa95192dd455b55588ab73e16cf0f005"
+  },
+  {
+    "id": "remediation.test.mjs:0107",
+    "test": "GC01 execution checkpoint rejects mainnet governed phase 0",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "ed488fe045247edeb2f1549bc3ebccc4dc925d05f60c4ca102b2189ff8922144"
+  },
+  {
+    "id": "remediation.test.mjs:0108",
+    "test": "GC01 execution checkpoint rejects mainnet governed phase 1",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "53e739664807d7de401dfae8765160859e16c9c58615ba89ae9b47556bd595ef"
+  },
+  {
+    "id": "remediation.test.mjs:0109",
+    "test": "GC01 execution checkpoint rejects mainnet governed phase 1",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "3634b0ff0936ca7f5a0e9504ebcfb9c2104fab033ac97765785b340aab587e62"
+  },
+  {
+    "id": "remediation.test.mjs:0110",
+    "test": "GC01 execution checkpoint rejects mainnet governed phase 2",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "c85305bb82ddb3722b1605abe5529299c437b73e6b582e4c9fae96ff9a78be05"
+  },
+  {
+    "id": "remediation.test.mjs:0111",
+    "test": "GC01 execution checkpoint rejects mainnet governed phase 2",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "c23c3f59725b3788aa44314467a770046122a7e33f051cf6059df651d4528f38"
+  },
+  {
+    "id": "remediation.test.mjs:0112",
+    "test": "Safe forwarding remains evidence-required for 1672 residual activity",
+    "function": "residual-replay.mjs.termsHash",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "66282148bea95ebb7e4fccb3c2350655bb147c7ccfe726e46c7ddffee01ac4ed"
+  },
+  {
+    "id": "remediation.test.mjs:0113",
+    "test": "Safe forwarding remains evidence-required for 1672 residual activity",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "b03d3ceff5feeaca84d0f7477224007c212e812593628b9d4cbb6f07c1f7c923"
+  },
+  {
+    "id": "remediation.test.mjs:0114",
+    "test": "Safe forwarding remains evidence-required for 688689 residual activity",
+    "function": "residual-replay.mjs.termsHash",
+    "outcome": "return",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "0e07096cc179ac6ff83fcd964b9b14120854dd74f1c55818008f3d9695c7c29b"
+  },
+  {
+    "id": "remediation.test.mjs:0115",
+    "test": "Safe forwarding remains evidence-required for 688689 residual activity",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "remediation.test.mjs.json.gz",
+    "sha256": "4710cc05986954a48159d274e88ea4ffc5aecd9e2655a8e29f983ad1e52d7f60"
+  },
+  {
+    "id": "withdrawal-events.test.mjs:0001",
+    "test": "F09 V1 aggregate completion of two records preserves the remaining snapshot",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "withdrawal-events.test.mjs.json.gz",
+    "sha256": "75ceccaec3c1ba2ec5355dbff67820150d6185539ee7b609c8da5232d845db28"
+  },
+  {
+    "id": "withdrawal-events.test.mjs:0002",
+    "test": "F09 V1 aggregate completion of two records preserves the remaining snapshot",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "withdrawal-events.test.mjs.json.gz",
+    "sha256": "9bee7f5d4319982482357086b334d90a980e49ce9ed122177f69c25a0b0bb4f0"
+  },
+  {
+    "id": "withdrawal-events.test.mjs:0003",
+    "test": "F09 V1 aggregate completion of three records",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "withdrawal-events.test.mjs.json.gz",
+    "sha256": "a186e25f222dc7eeffc506cd86f88a34283688866efaeb09c0a68404062df5f8"
+  },
+  {
+    "id": "withdrawal-events.test.mjs:0004",
+    "test": "F09 V1 later unmatured records remain untouched",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "withdrawal-events.test.mjs.json.gz",
+    "sha256": "6a3ee6cd9398667489413e6f0d0042c97bb2826039439703af7218db45224f08"
+  },
+  {
+    "id": "withdrawal-events.test.mjs:0005",
+    "test": "F09 V1 later unmatured records remain untouched",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "withdrawal-events.test.mjs.json.gz",
+    "sha256": "67d60f50b8c64313dda3f35a9b20abfd31e520e0a903a2ef92c71868023133d8"
+  },
+  {
+    "id": "withdrawal-events.test.mjs:0006",
+    "test": "F09 aggregate rejects zero event payout",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "withdrawal-events.test.mjs.json.gz",
+    "sha256": "03899adfbcb4c8a909a5f2f5f9df01148f625061ffdf5575c59ba6deab785405"
+  },
+  {
+    "id": "withdrawal-events.test.mjs:0007",
+    "test": "F09 aggregate rejects beyond all pending",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "withdrawal-events.test.mjs.json.gz",
+    "sha256": "95a6e25a10f2d144e27628227d4b967ff5dfeef7d009abf3b10301e7cd44be1b"
+  },
+  {
+    "id": "withdrawal-events.test.mjs:0008",
+    "test": "F09 aggregate rejects fraction of fully funded V1 record",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "withdrawal-events.test.mjs.json.gz",
+    "sha256": "87e3114f81345eca054dc13f0cd57dc45b65eb8fc0ba54e2a795b7485a61520a"
+  },
+  {
+    "id": "withdrawal-events.test.mjs:0009",
+    "test": "F09 aggregate rejects wrong owner",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "withdrawal-events.test.mjs.json.gz",
+    "sha256": "7da02562fc96f9d295f3a2c8778f7392b1298dbacf7a02d926fd0d036a52b5ec"
+  },
+  {
+    "id": "withdrawal-events.test.mjs:0010",
+    "test": "F09 aggregate rejects zero receiver",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "withdrawal-events.test.mjs.json.gz",
+    "sha256": "4ab9e92d3f0fff49996265bf5f2362eb7280e8c9aa78ab9822e96d582f984cd7"
+  },
+  {
+    "id": "withdrawal-events.test.mjs:0011",
+    "test": "F09 aggregate rejects skip immature head",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "withdrawal-events.test.mjs.json.gz",
+    "sha256": "6bb940e7a6f0718abb1ee3d7926b93ac12b4d516e54b0342ed25deac30e475a2"
+  },
+  {
+    "id": "withdrawal-events.test.mjs:0012",
+    "test": "F09 V3 remains per record and receiver-bound",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "return",
+    "file": "withdrawal-events.test.mjs.json.gz",
+    "sha256": "84bffaefff1c532dbae9555e6ee7e21fda91659253fb6493f5f2b9f17711b755"
+  },
+  {
+    "id": "withdrawal-events.test.mjs:0013",
+    "test": "F09 V3 remains per record and receiver-bound",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "withdrawal-events.test.mjs.json.gz",
+    "sha256": "033b51e557366e986ed8b6be1285ebb4cd4738e10f48498353f52081bd0ca477"
+  },
+  {
+    "id": "withdrawal-events.test.mjs:0014",
+    "test": "F09 V3 rejects aggregation across records",
+    "function": "read-only.mjs.recheckObserved",
+    "outcome": "throw",
+    "file": "withdrawal-events.test.mjs.json.gz",
+    "sha256": "3ffa810dba58248c90dadc998ec053cd65b8738d085969fdcb5a15055f383327"
+  },
+  {
+    "id": "withdrawal-events.test.mjs:0015",
+    "test": "F09 1672 claims immediately before/after authenticated upgrade use different event models",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "withdrawal-events.test.mjs.json.gz",
+    "sha256": "a8cbd74532113bcecad1b8a5d581ec33dc63a9a0f297e8ad5a51488854007409"
+  },
+  {
+    "id": "withdrawal-events.test.mjs:0016",
+    "test": "F09 1672 claims immediately before/after authenticated upgrade use different event models",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "return",
+    "file": "withdrawal-events.test.mjs.json.gz",
+    "sha256": "25480edc7d071332fd953d73d2e1cd35d2b44b29d54f148b946b2d734dbbc914"
+  },
+  {
+    "id": "withdrawal-events.test.mjs:0017",
+    "test": "F09 1672 claims immediately before/after authenticated upgrade use different event models",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "throw",
+    "file": "withdrawal-events.test.mjs.json.gz",
+    "sha256": "79869c0e4fe3cf412b128d0c403418534ebc0488159038cd46f1d9ca96f0da7e"
+  },
+  {
+    "id": "withdrawal-events.test.mjs:0018",
+    "test": "F09 688689 claims immediately before/after authenticated upgrade use different event models",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "withdrawal-events.test.mjs.json.gz",
+    "sha256": "6ea7f1518196426fd3dac72049f3711fb0df6b35aae086d0ea6475693873c84d"
+  },
+  {
+    "id": "withdrawal-events.test.mjs:0019",
+    "test": "F09 688689 claims immediately before/after authenticated upgrade use different event models",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "return",
+    "file": "withdrawal-events.test.mjs.json.gz",
+    "sha256": "b04f0489bf7308c7089bda93f646b5b4c73aa4ad634000fdc02c85524cee0753"
+  },
+  {
+    "id": "withdrawal-events.test.mjs:0020",
+    "test": "F09 688689 claims immediately before/after authenticated upgrade use different event models",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "throw",
+    "file": "withdrawal-events.test.mjs.json.gz",
+    "sha256": "42aa6413bfe7f6c0414ed7f0707b6c2e827b566da4ebd815b47ce99b6875598b"
+  },
+  {
+    "id": "withdrawal-events.test.mjs:0021",
+    "test": "F09 an unreviewed implementation cannot switch the event model",
+    "function": "core.mjs.expectations",
+    "outcome": "return",
+    "file": "withdrawal-events.test.mjs.json.gz",
+    "sha256": "543fd86fafa4e7d17a7e9833541391d1ca1a6da16ebf9f8d007da388d52af799"
+  },
+  {
+    "id": "withdrawal-events.test.mjs:0022",
+    "test": "F09 an unreviewed implementation cannot switch the event model",
+    "function": "read-only.mjs.verifyCheckpoint",
+    "outcome": "throw",
+    "file": "withdrawal-events.test.mjs.json.gz",
+    "sha256": "501564ab094e1c782bb0861d6c9557073a7f5a8802e091f0fe35572d12ab93a5"
+  },
+  {
+    "id": "reference-cli.mjs:0001",
+    "test": "CLI simulation 1672 preflight",
+    "function": "index.ts.release:preflight",
+    "outcome": "return",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "1cad0a776a5c2bfaeab77a44ab339c94781abde4761afe4d40c0712a12ef6c93"
+  },
+  {
+    "id": "reference-cli.mjs:0002",
+    "test": "CLI simulation 1672 authority",
+    "function": "index.ts.release:authority",
+    "outcome": "return",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "e3651710b9035b798b1efb9273bde698174be932dfa6db85903c072f15a0697a"
+  },
+  {
+    "id": "reference-cli.mjs:0003",
+    "test": "CLI simulation 1672 build-u",
+    "function": "index.ts.release:build-u",
+    "outcome": "return",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "bb091f7a8d16f0ac8a9f0fbb18b2eec251d34d5b0ec029dc35109156bf645892"
+  },
+  {
+    "id": "reference-cli.mjs:0004",
+    "test": "CLI simulation 1672 p1-runbook",
+    "function": "index.ts.release:p1-runbook",
+    "outcome": "return",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "42c988a2a0a7c70e6390798e76276eef7440321a6241535a8c812f7475c87be7"
+  },
+  {
+    "id": "reference-cli.mjs:0005",
+    "test": "CLI simulation 1672 build-handoff",
+    "function": "index.ts.release:build-handoff",
+    "outcome": "return",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "6e7b985328d90240b3ce9bae87c0b40104dc16ab0ef0d01592b02b4a845615fb"
+  },
+  {
+    "id": "reference-cli.mjs:0006",
+    "test": "CLI simulation 1672 estimate-gas",
+    "function": "index.ts.release:estimate-gas",
+    "outcome": "return",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "1e513baccd6a870e607113d63909884c0b66a4613659d7064c8c95a76ca1fdda"
+  },
+  {
+    "id": "reference-cli.mjs:0007",
+    "test": "CLI simulation 688689 preflight",
+    "function": "index.ts.release:preflight",
+    "outcome": "return",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "a643d560885d6a024566d4dad60d51ef12d202fd355c1c948d4524815bc9e7bd"
+  },
+  {
+    "id": "reference-cli.mjs:0008",
+    "test": "CLI simulation 688689 authority",
+    "function": "index.ts.release:authority",
+    "outcome": "return",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "29822b5f35491b99a4179e135984fedab8246944145a488e7caaad13fb58eedd"
+  },
+  {
+    "id": "reference-cli.mjs:0009",
+    "test": "CLI simulation 688689 build-u",
+    "function": "index.ts.release:build-u",
+    "outcome": "return",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "f3f5addfb5170b53f3a1b00b867393f7502c45e683396eba58e93b4a70da2cb6"
+  },
+  {
+    "id": "reference-cli.mjs:0010",
+    "test": "CLI simulation 688689 testnet-handoff",
+    "function": "index.ts.release:testnet-handoff",
+    "outcome": "return",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "48cea6cd2ce487a33f97a14f8b3402f40c92409a7ba0db91ac58d7d3e850b186"
+  },
+  {
+    "id": "reference-cli.mjs:0011",
+    "test": "CLI simulation 688689 estimate-gas",
+    "function": "index.ts.release:estimate-gas",
+    "outcome": "return",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "3babf9f21580ec53628f125402ec8d482fd197b47244dd0dc95bf2eae74bc3d6"
+  },
+  {
+    "id": "reference-cli.mjs:0012",
+    "test": "CLI live synthetic 1672 preflight",
+    "function": "index.ts.release:preflight",
+    "outcome": "return",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "426ce4a1463d58899cb20a3ffbbcab17feaede4df33d9266af6f419d8002315b"
+  },
+  {
+    "id": "reference-cli.mjs:0013",
+    "test": "CLI live synthetic 1672 authority",
+    "function": "index.ts.release:authority",
+    "outcome": "return",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "60889ded0aa6b808b7e756262da0c10e08f4935a30727c5cdce5555eb2ca7868"
+  },
+  {
+    "id": "reference-cli.mjs:0014",
+    "test": "CLI live synthetic 1672 build-u",
+    "function": "index.ts.release:build-u",
+    "outcome": "return",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "03bc7e21920a604c85d94ddba5c91ddc6ef8e6cf55b0fe709583a0d6d5e639dd"
+  },
+  {
+    "id": "reference-cli.mjs:0015",
+    "test": "CLI live synthetic 688689 preflight",
+    "function": "index.ts.release:preflight",
+    "outcome": "return",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "3e6227c7014e77b7ec0cc00be9058d4391d065377fe066e895e6642d35a3a75f"
+  },
+  {
+    "id": "reference-cli.mjs:0016",
+    "test": "CLI live synthetic 688689 authority",
+    "function": "index.ts.release:authority",
+    "outcome": "return",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "620ad5136f98d14c0bfec2d767ab6896fede086e4150a09bd2300952dbc1daa7"
+  },
+  {
+    "id": "reference-cli.mjs:0017",
+    "test": "CLI live synthetic 688689 build-u",
+    "function": "index.ts.release:build-u",
+    "outcome": "return",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "aa6d1f9ad343438afe3c9f65a6d374cec963c72bedfd0f0fde344c91585e01e8"
+  },
+  {
+    "id": "reference-cli.mjs:0018",
+    "test": "CLI live synthetic 688689 testnet-handoff",
+    "function": "index.ts.release:testnet-handoff",
+    "outcome": "return",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "f37895aa584584381817e6c5dda78226a99c3b5784a8b8207f603748dd03ccf1"
+  },
+  {
+    "id": "reference-cli.mjs:0019",
+    "test": "CLI execution frozen bundle 1672",
+    "function": "index.ts.release:preflight",
+    "outcome": "return",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "f3b3ef3d4812de7e9bbbfa929d8e3de5392475b9dd9f3d115d29c2362a03e8d1"
+  },
+  {
+    "id": "reference-cli.mjs:0020",
+    "test": "CLI postcheck consumed nonce 1672",
+    "function": "index.ts.release:postcheck",
+    "outcome": "return",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "27e83db67ff3c0fb389b5a98bfbbe83fd293b6d259d1900337aade0c2794bae3"
+  },
+  {
+    "id": "reference-cli.mjs:0021",
+    "test": "CLI execution frozen bundle 688689",
+    "function": "index.ts.release:preflight",
+    "outcome": "return",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "13fd2e2326cf9c807ce1e1dc0e32c3079568905ac059f5a0a1784ab83f226cb6"
+  },
+  {
+    "id": "reference-cli.mjs:0022",
+    "test": "CLI postcheck consumed nonce 688689",
+    "function": "index.ts.release:postcheck",
+    "outcome": "return",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "98d63ede085094b8c5119040cfbf260546ead9b275b61f2c9c02f933101c6fee"
+  },
+  {
+    "id": "reference-cli.mjs:0023",
+    "test": "CLI refuses missing config",
+    "function": "index.ts.release:preflight",
+    "outcome": "throw",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "a18aece69ad6eafd7eb753ec06a11f9c79f6dbaae74656291c0085edde78cd09"
+  },
+  {
+    "id": "reference-cli.mjs:0024",
+    "test": "CLI refuses missing hash",
+    "function": "index.ts.release:preflight",
+    "outcome": "throw",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "8b9fb442a3fddb9903c829dad440f3805077e1782fdc159fbd474e361043cd23"
+  },
+  {
+    "id": "reference-cli.mjs:0025",
+    "test": "CLI refuses invalid hash",
+    "function": "index.ts.release:preflight",
+    "outcome": "throw",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "c20043f8d5dbc679a36bd1d451ef7ff853c33d10609ca9731dc8b60105e88e3d"
+  },
+  {
+    "id": "reference-cli.mjs:0026",
+    "test": "CLI refuses wrong hash",
+    "function": "index.ts.release:preflight",
+    "outcome": "throw",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "84d4922ec8beb27c6b441669e59fd2b14c55134668c5ed20772c78826cecc754"
+  },
+  {
+    "id": "reference-cli.mjs:0027",
+    "test": "CLI refuses uppercase hash",
+    "function": "index.ts.release:preflight",
+    "outcome": "throw",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "3018dc495cda3cd95c35f3bf2a47b6cdd7cb84a8ad02c43ba434d765134d51eb"
+  },
+  {
+    "id": "reference-cli.mjs:0028",
+    "test": "CLI refuses invalid checkpoint",
+    "function": "index.ts.release:preflight",
+    "outcome": "throw",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "7ad77ea505d796fcb9ef5d27a72822aa300ecc23f31e14839e7956b78b8a8326"
+  },
+  {
+    "id": "reference-cli.mjs:0029",
+    "test": "CLI refuses unknown RPC",
+    "function": "index.ts.release:preflight",
+    "outcome": "throw",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "f8145d4fd5af7b2221ba1c6eef0f1f06af26043c4616e83b0eb926575df090a8"
+  },
+  {
+    "id": "reference-cli.mjs:0030",
+    "test": "CLI refuses missing RPC",
+    "function": "index.ts.release:preflight",
+    "outcome": "throw",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "0c30ea6f46b1bb33b0d6fd86eba2f97952c20818a25203989eaa25f752d956d8"
+  },
+  {
+    "id": "reference-cli.mjs:0031",
+    "test": "CLI execution refuses missing execution proof",
+    "function": "index.ts.release:preflight",
+    "outcome": "throw",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "408ce329ab1ce1fba9b6b8c5983c1ca3b163f80a4602c997117343976783ac81"
+  },
+  {
+    "id": "reference-cli.mjs:0032",
+    "test": "CLI execution refuses missing proof hash",
+    "function": "index.ts.release:preflight",
+    "outcome": "throw",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "a218ec0938f63e6c5fbf8c2cc8c85ff728fedd6caea1eb937f15ad3ecc370602"
+  },
+  {
+    "id": "reference-cli.mjs:0033",
+    "test": "CLI execution refuses wrong proof hash",
+    "function": "index.ts.release:preflight",
+    "outcome": "throw",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "b430f9389172b59082aeb2d83277459ced3393b47b1e0aa09127313fe8c9aa28"
+  },
+  {
+    "id": "reference-cli.mjs:0034",
+    "test": "CLI local gas rejects public RPC",
+    "function": "index.ts.release:estimate-gas",
+    "outcome": "throw",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "c9278302a12d74159bf17594ea0b662bc62d9f59f6453f58fa853b5689e49b0a"
+  },
+  {
+    "id": "reference-cli.mjs:0035",
+    "test": "CLI local gas missing RPC",
+    "function": "index.ts.release:estimate-gas",
+    "outcome": "throw",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "9f1019771519b13cfadb33d5192c523b385f2cb27e2c0468a6df474e12044e49"
+  },
+  {
+    "id": "reference-cli.mjs:0036",
+    "test": "CLI per-call gas stays incomplete",
+    "function": "index.ts.release:estimate-gas",
+    "outcome": "return",
+    "file": "reference-cli.mjs.json.gz",
+    "sha256": "b6916b7f24124aaf4b36af6ca42dd667e1ac7888bd477818fe7afdfa6291311b"
+  },
+  {
+    "id": "reference-supplement.mjs:0001",
+    "test": "MAIN-P1 A completed=false",
+    "function": "core.mjs.p1Runbook",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "46a352b71c6a987e9384b1c5c565727733a092ae2b07b2554c741be99e04cb29"
+  },
+  {
+    "id": "reference-supplement.mjs:0002",
+    "test": "MAIN-P1 A completed=true",
+    "function": "core.mjs.p1Runbook",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "fb9779f62c188828a29e50c496e424ca805779134ff03bea7d40d3809ec1940b"
+  },
+  {
+    "id": "reference-supplement.mjs:0003",
+    "test": "MAIN-P1 B completed=false",
+    "function": "core.mjs.p1Runbook",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "db823a2fe357c3055c6a06003f08f55dbd837d6076afc70831260fa75e3a8391"
+  },
+  {
+    "id": "reference-supplement.mjs:0004",
+    "test": "MAIN-P1 B completed=true",
+    "function": "core.mjs.p1Runbook",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "3ae301016d39c00fb300049d09e2351b04e76004c35f5ec5b725caad80ed6564"
+  },
+  {
+    "id": "reference-supplement.mjs:0005",
+    "test": "MAIN-P1 C completed=false",
+    "function": "core.mjs.p1Runbook",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "8c0d04b72309080d78828c75bd36a8fb14e503ca79fe5a77d47ea16c1c78dd3d"
+  },
+  {
+    "id": "reference-supplement.mjs:0006",
+    "test": "MAIN-P1 C completed=true",
+    "function": "core.mjs.p1Runbook",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "e4b1ffe856b807aab950b2479d9be862867ed2e5c74da08aad499123d9ff9ce5"
+  },
+  {
+    "id": "reference-supplement.mjs:0007",
+    "test": "MAIN-P1 D completed=false",
+    "function": "core.mjs.p1Runbook",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "a8cfba1892070424b4deb606af7915462325e6716cf5671c124d6f3e9243957c"
+  },
+  {
+    "id": "reference-supplement.mjs:0008",
+    "test": "MAIN-P1 D completed=true",
+    "function": "core.mjs.p1Runbook",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "0fc45a60c4e52344557a56a6703710668daf28ea90c84e277613f33820047646"
+  },
+  {
+    "id": "reference-supplement.mjs:0009",
+    "test": "TESTNET flags {}",
+    "function": "core.mjs.testnetHandoff",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "c031ca44b0fe8df4ad91eac38968e910d5bfd076a9ff8011df487f132ccd6ce2"
+  },
+  {
+    "id": "reference-supplement.mjs:0010",
+    "test": "TESTNET flags {\"e2Unavailable\":true}",
+    "function": "core.mjs.testnetHandoff",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "8d21d43826e70089de5f0551c23e338887c0625820282c380eeabe751e41f0e3"
+  },
+  {
+    "id": "reference-supplement.mjs:0011",
+    "test": "TESTNET flags {\"incompleteT3\":true}",
+    "function": "core.mjs.testnetHandoff",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "da6fae6ad4b9617b8d36e886345ba9edab442c147340b1425bfb39b23d1b430c"
+  },
+  {
+    "id": "reference-supplement.mjs:0012",
+    "test": "TESTNET flags {\"e2Unavailable\":true,\"incompleteT3\":true}",
+    "function": "core.mjs.testnetHandoff",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "b1f15f840bb8d4c2cfb025f4b33e5ba4c98e710ba7dbb377330b8f2431436219"
+  },
+  {
+    "id": "reference-supplement.mjs:0013",
+    "test": "TESTNET partial-complete",
+    "function": "core.mjs.testnetHandoff",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "d81a437e394c5b87856258e585caa9f5adb3eed1cc04ceeab247a2697e117bcd"
+  },
+  {
+    "id": "reference-supplement.mjs:0014",
+    "test": "TESTNET all-complete",
+    "function": "core.mjs.testnetHandoff",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "84d322cb9723a17d1bf85e002b21f72e4d49948351f5eb240cc3aed179410853"
+  },
+  {
+    "id": "reference-supplement.mjs:0015",
+    "test": "TESTNET bad-role",
+    "function": "core.mjs.testnetHandoff",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "33fcb5263606fbf84a7971fa7989bf23eb5c4ad3718bac0c319683efd7922446"
+  },
+  {
+    "id": "reference-supplement.mjs:0016",
+    "test": "ARTIFACT normalize valid",
+    "function": "artifacts.mjs.freezeArtifact",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "022f7fa38ed9216d53e4bd9521c12439de64ec92786da1a58cef0bb5c5f9a411"
+  },
+  {
+    "id": "reference-supplement.mjs:0017",
+    "test": "ARTIFACT normalize wrapped output",
+    "function": "artifacts.mjs.freezeArtifact",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "68114f95ff624cf488e012fbc247ab02535ba8226af1a53c983b2111e701a737"
+  },
+  {
+    "id": "reference-supplement.mjs:0018",
+    "test": "ARTIFACT normalize bad compiler",
+    "function": "artifacts.mjs.freezeArtifact",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "71516072221965cd3229ec36c5c6471e3d4139f60dace88c0e64bf5c7a66294a"
+  },
+  {
+    "id": "reference-supplement.mjs:0019",
+    "test": "ARTIFACT normalize bad runs",
+    "function": "artifacts.mjs.freezeArtifact",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "f58275d499ea54b4852a2582dae515cb040b2c7d863dd9545b0a592146399b26"
+  },
+  {
+    "id": "reference-supplement.mjs:0020",
+    "test": "ARTIFACT normalize disabled optimizer",
+    "function": "artifacts.mjs.freezeArtifact",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "1a0e499fe42a5d0a4b1b3e403c0c500f3af790b3e6176891a13ad4b59e2e426c"
+  },
+  {
+    "id": "reference-supplement.mjs:0021",
+    "test": "ARTIFACT normalize bad evm",
+    "function": "artifacts.mjs.freezeArtifact",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "d026d2021178cb836909640c5c492c65835b2085ea443ce535b1b83eb70cb573"
+  },
+  {
+    "id": "reference-supplement.mjs:0022",
+    "test": "ARTIFACT normalize missing contract",
+    "function": "artifacts.mjs.freezeArtifact",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "a0281ca5b1aa512238acda722e08b89c85529828433da15eecab9584ce67fabc"
+  },
+  {
+    "id": "reference-supplement.mjs:0023",
+    "test": "ARTIFACT normalize linked library",
+    "function": "artifacts.mjs.freezeArtifact",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "074c0950cfeee7fa812506c154af56955984d089c590f4ad7f6a939ed2742eaf"
+  },
+  {
+    "id": "reference-supplement.mjs:0024",
+    "test": "ARTIFACT immutable valid all occurrences",
+    "function": "core.mjs.verifyRuntime",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "237967da5fd03f9c9c73a6f8648ebecf75acdd0642578c314f0569521a99255b"
+  },
+  {
+    "id": "reference-supplement.mjs:0025",
+    "test": "ARTIFACT immutable no code",
+    "function": "core.mjs.verifyRuntime",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "9dcd7c6479727ce36c19b71e5a13c981fbb63f4b4b4946ebaa77392b2d21beff"
+  },
+  {
+    "id": "reference-supplement.mjs:0026",
+    "test": "ARTIFACT immutable missing binding",
+    "function": "core.mjs.verifyRuntime",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "0b53990518dbf5904e126298e3d9ee9fdaee0055ab4b0a17c6f2fdfe15dadafc"
+  },
+  {
+    "id": "reference-supplement.mjs:0027",
+    "test": "ARTIFACT immutable wrong binding",
+    "function": "core.mjs.verifyRuntime",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "78af9f17b804c6067839f6a6639caee3ade09f36c7a89c68f484eece24db03b1"
+  },
+  {
+    "id": "reference-supplement.mjs:0028",
+    "test": "ARTIFACT immutable missing refs",
+    "function": "core.mjs.verifyRuntime",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "46ab33ccbb34739a5bc8ee4fc60f3e40bd444baee8427c3baa216bd754dbfced"
+  },
+  {
+    "id": "reference-supplement.mjs:0029",
+    "test": "ARTIFACT immutable wrong width",
+    "function": "core.mjs.verifyRuntime",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "1ce602766a74cdf9afd49f8811f677fe8119c94b1ef8975da5dd067455710061"
+  },
+  {
+    "id": "reference-supplement.mjs:0030",
+    "test": "ARTIFACT immutable out of bounds",
+    "function": "core.mjs.verifyRuntime",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "d3846c561dc239ebd7d421e32ca6752d46f653ffe3203a011b81840ba8003a47"
+  },
+  {
+    "id": "reference-supplement.mjs:0031",
+    "test": "ARTIFACT immutable multiple immutable IDs",
+    "function": "core.mjs.verifyRuntime",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "58b9b45a4e59ce7c19d8f44ab61c33fac87249848379dea9055c7e3a8aea315c"
+  },
+  {
+    "id": "reference-supplement.mjs:0032",
+    "test": "ARTIFACT immutable wrong full runtime",
+    "function": "core.mjs.verifyRuntime",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "61906330c2dac55baae50ded8bcbef83ce9dd4476e541bffe521c4ab529dee4c"
+  },
+  {
+    "id": "reference-supplement.mjs:0033",
+    "test": "ARTIFACT recorded mainnet/ProxyAdmin_V4",
+    "function": "core.mjs.verifyRuntime",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "2bac3539bf68658b54e558af5fad76ae6c46c6b53547fe610e9e4bddb7ed23f7"
+  },
+  {
+    "id": "reference-supplement.mjs:0034",
+    "test": "ARTIFACT recorded testnet/Oracle_V3",
+    "function": "core.mjs.verifyRuntime",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "7a479d2fe87ae87699c73bfa06ec6017722c8610485a474ba87b8839a0443afc"
+  },
+  {
+    "id": "reference-supplement.mjs:0035",
+    "test": "ARTIFACT reference admits odd hash nibble independently of typed ABI",
+    "function": "core.mjs.verifyRuntime",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "0ec278f90e08fc17675d0d7ff48d356d513eda6acfb7928f7bc9c60c9922c2df"
+  },
+  {
+    "id": "reference-supplement.mjs:0036",
+    "test": "ARCHIVE valid",
+    "function": "history.mjs.authenticateHistory",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "c0cda68a89c33c93096f63c4d0777b2b82d407b4febe0610436d3659bdc93ba5"
+  },
+  {
+    "id": "reference-supplement.mjs:0037",
+    "test": "ARCHIVE overlap",
+    "function": "history.mjs.authenticateHistory",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "839029d14fd8b096dbd990a29d913b8720f6464f3a9bdb9f9fde76f3bbe57899"
+  },
+  {
+    "id": "reference-supplement.mjs:0038",
+    "test": "ARCHIVE missing plan hash",
+    "function": "history.mjs.authenticateHistory",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "61f8caf68c8c5fda5cedcca6f7b624fd4048c95900cf3df6292ad7733b2b556f"
+  },
+  {
+    "id": "reference-supplement.mjs:0039",
+    "test": "ARCHIVE wrong plan hash",
+    "function": "history.mjs.authenticateHistory",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "5fee421126787eb472a63a613dd283687e7cef34360a9e7b5acce57bb693ad49"
+  },
+  {
+    "id": "reference-supplement.mjs:0040",
+    "test": "ARCHIVE bad target order",
+    "function": "history.mjs.authenticateHistory",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "d96268d5173f822452f70a10c0eba2cc6d6cf40e89b290a852dae271ca18c1f1"
+  },
+  {
+    "id": "reference-supplement.mjs:0041",
+    "test": "ARCHIVE bad filter",
+    "function": "history.mjs.authenticateHistory",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "a0543abafb40836d32dd3ec782a8396d6d2f6358c0a7b0dabddcfa28df1b6dc6"
+  },
+  {
+    "id": "reference-supplement.mjs:0042",
+    "test": "ARCHIVE missing coverage",
+    "function": "history.mjs.authenticateHistory",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "e4fb52e026056d6fd6f38bdc47586736dd8091aa49b92d47086b2042f26865f0"
+  },
+  {
+    "id": "reference-supplement.mjs:0043",
+    "test": "ARCHIVE duplicate target",
+    "function": "history.mjs.authenticateHistory",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "66dcc6eaa81f1fe20a1c3a2a218e8e5ba38ca0039f4ec8d04ce623571b9afdaa"
+  },
+  {
+    "id": "reference-supplement.mjs:0044",
+    "test": "ARCHIVE wrong chain name",
+    "function": "history.mjs.authenticateHistory",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "cf46df3cd08e3481d11d5a399f569308561da3db1a40c41d7438db40ed95ac13"
+  },
+  {
+    "id": "reference-supplement.mjs:0045",
+    "test": "ARCHIVE wrong window bound",
+    "function": "history.mjs.authenticateHistory",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "b5eceb7fac39a7b9ef0750e1a703dd594047606348e11c18b7d201f9375bdcb9"
+  },
+  {
+    "id": "reference-supplement.mjs:0046",
+    "test": "ARCHIVE duplicate log",
+    "function": "history.mjs.authenticateHistory",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "ac5043819e7e87ee5f3fe94abb7a76b3e2abfa0a1b7b61a22a96d6a15e547e63"
+  },
+  {
+    "id": "reference-supplement.mjs:0047",
+    "test": "ARCHIVE removed log",
+    "function": "history.mjs.authenticateHistory",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "723c61d855733c2ba7d9bca3699d397591d66b4f0f2a3bdb4570d5a0eca2d3be"
+  },
+  {
+    "id": "reference-supplement.mjs:0048",
+    "test": "ARCHIVE nonhex data",
+    "function": "history.mjs.authenticateHistory",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "3c04c18e3ed6d4d49d2411d1ccf0bb9be1c62e9d183816c9cf5bb146a3aafcdd"
+  },
+  {
+    "id": "reference-supplement.mjs:0049",
+    "test": "ARCHIVE odd data",
+    "function": "history.mjs.authenticateHistory",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "0cb3b835bccc2cb335bc9ceb76811fff4dd6b00dfa4ef5e797614fc318b8aa93"
+  },
+  {
+    "id": "reference-supplement.mjs:0050",
+    "test": "ARCHIVE wrong count",
+    "function": "history.mjs.authenticateHistory",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "5cc8478e4f87d4bf7d1b33879c8a58954192b0f8f1ad9c11608ba46fde1d68d3"
+  },
+  {
+    "id": "reference-supplement.mjs:0051",
+    "test": "ARCHIVE oversized window",
+    "function": "history.mjs.authenticateHistory",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "32e7f57aaecb7f1e8815d89807abe2211e4e63dba19f23b7f5986d82e83f523c"
+  },
+  {
+    "id": "reference-supplement.mjs:0052",
+    "test": "ARCHIVE missing log rows",
+    "function": "history.mjs.authenticateHistory",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "279f88c50aa6035c6fc3d4bf74482091cec1d59e80b9b4cf359ba73db4aa0f1b"
+  },
+  {
+    "id": "reference-supplement.mjs:0053",
+    "test": "ARCHIVE wrong chunk hash",
+    "function": "history.mjs.authenticateHistory",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "278de75ab9f6048f85ef81d025e4bd100314d0c0346e978da87851ac2a808db6"
+  },
+  {
+    "id": "reference-supplement.mjs:0054",
+    "test": "FRESHNESS age exact",
+    "function": "read-only.mjs.reviewedContext",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "b63fe76326792715e2fa400b5173f8cd0ec3e26af1e7e8d1efac2e17ed6c84e1"
+  },
+  {
+    "id": "reference-supplement.mjs:0055",
+    "test": "FRESHNESS age +1",
+    "function": "read-only.mjs.reviewedContext",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "98347c6b0ee23f8441171f8bc98351c645e379041e029866f0ffeb78155a0ac6"
+  },
+  {
+    "id": "reference-supplement.mjs:0056",
+    "test": "FRESHNESS future exact",
+    "function": "read-only.mjs.reviewedContext",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "221e30b5f73560471ae5ef883b2196fc8136bba225659d4e992ffd9d507bbbcc"
+  },
+  {
+    "id": "reference-supplement.mjs:0057",
+    "test": "FRESHNESS future +1",
+    "function": "read-only.mjs.reviewedContext",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "213e4bf128150f6a44ca58fd7579126772aa98196a04cd98741d77b13173c22a"
+  },
+  {
+    "id": "reference-supplement.mjs:0058",
+    "test": "FRESHNESS review exact",
+    "function": "read-only.mjs.reviewedContext",
+    "outcome": "return",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "e4b3ef2f94248e4c85f42be81c66b629f3a1600d45002d71cc7f2a6281be67de"
+  },
+  {
+    "id": "reference-supplement.mjs:0059",
+    "test": "FRESHNESS review +1",
+    "function": "read-only.mjs.reviewedContext",
+    "outcome": "throw",
+    "file": "reference-supplement.mjs.json.gz",
+    "sha256": "77c533da0fe04171fb017bf38b4f5a3d352b92532365d5f18f1d28def7904a74"
+  },
+  {
+    "id": "reference-rich-plans.mjs:0001",
+    "test": "rich inventoried roles / revoke every role / admin last / buildHandoff",
+    "function": "core.mjs.buildHandoff",
+    "outcome": "return",
+    "file": "reference-rich-plans.mjs.json.gz",
+    "sha256": "06440c02916e910f7081e8529a3f7edef5413625e99392b7a43ebc06c3b7c969"
+  },
+  {
+    "id": "reference-rich-plans.mjs:0002",
+    "test": "rich inventoried roles / revoke every role / admin last / p1Runbook",
+    "function": "core.mjs.p1Runbook",
+    "outcome": "return",
+    "file": "reference-rich-plans.mjs.json.gz",
+    "sha256": "a967b4f6351c7a4a5388175188bd4668b622fc0fabe7ffb8ba0067cfd833cec0"
+  },
+  {
+    "id": "reference-rich-plans.mjs:0003",
+    "test": "rich inventoried roles / revoke every role / admin last / testnetHandoff",
+    "function": "core.mjs.testnetHandoff",
+    "outcome": "return",
+    "file": "reference-rich-plans.mjs.json.gz",
+    "sha256": "edc6378d2b1670c06f5c5c194ca0f9f8bb98a47476233bb2d046b87361b95d8a"
+  }
+]

@@ -1,0 +1,1700 @@
+{
+  "sourceCommit": "4d9d48db1facb2ae54242f902a1344536ba21dfb",
+  "sourceSha256": {
+    "tasks/release/core.mjs": "50f302943bc5cdb61c91034c6b9fa338a4e1e389b1e430a7038335901778e3aa",
+    "tasks/release/read-only.mjs": "ef5ae6cc5cef818a16e2830c9d9f837ee3ccb34c40bd6597ededf9571782dc83",
+    "tasks/release/pool-replay.mjs": "92b1860d37d9801eafa62a0fc204099659d5e436e801e50129f2f26ef9bb809a",
+    "tasks/release/timelock-history.mjs": "3ecfab39d9cef9eed14567c8cd83a3b4909d95f24ccbe566ef6df07a5fcab157",
+    "tasks/release/residual-replay.mjs": "8629b1c11359a5fceac7e354a6404ca980187da4dd7c93baa537dbfda7594a4c"
+  },
+  "schemas": {
+    "core": [
+      {
+        "name": "transferOwnership",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "acceptOwnership",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [],
+        "outputs": []
+      },
+      {
+        "name": "grantRole",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [
+          {
+            "type": "bytes32"
+          },
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "revokeRole",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [
+          {
+            "type": "bytes32"
+          },
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "renounceRole",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [
+          {
+            "type": "bytes32"
+          },
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "upgradeAndCall",
+        "type": "function",
+        "stateMutability": "payable",
+        "inputs": [
+          {
+            "type": "address"
+          },
+          {
+            "type": "address"
+          },
+          {
+            "type": "bytes"
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "upgradeBeaconTo",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "retireVault",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "closeCreation",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [],
+        "outputs": []
+      },
+      {
+        "name": "emergencyCancel",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "scheduleBatch",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [
+          {
+            "type": "address[]"
+          },
+          {
+            "type": "uint256[]"
+          },
+          {
+            "type": "bytes[]"
+          },
+          {
+            "type": "bytes32"
+          },
+          {
+            "type": "bytes32"
+          },
+          {
+            "type": "uint256"
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "executeBatch",
+        "type": "function",
+        "stateMutability": "payable",
+        "inputs": [
+          {
+            "type": "address[]"
+          },
+          {
+            "type": "uint256[]"
+          },
+          {
+            "type": "bytes[]"
+          },
+          {
+            "type": "bytes32"
+          },
+          {
+            "type": "bytes32"
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "cancel",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [
+          {
+            "type": "bytes32"
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "migrateFromV1",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [
+          {
+            "type": "tuple",
+            "components": [
+              {
+                "type": "address",
+                "name": "reporter"
+              },
+              {
+                "type": "address",
+                "name": "vToken"
+              },
+              {
+                "type": "uint256",
+                "name": "maxUpdateAmount"
+              },
+              {
+                "type": "uint256",
+                "name": "updateInterval"
+              },
+              {
+                "type": "uint256",
+                "name": "maxAprPpm"
+              },
+              {
+                "type": "address",
+                "name": "commissionAccount"
+              },
+              {
+                "type": "uint256",
+                "name": "commissionRatePpm"
+              },
+              {
+                "type": "address",
+                "name": "guardian"
+              },
+              {
+                "type": "address",
+                "name": "timelock"
+              }
+            ]
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "migrateFromV3",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [
+          {
+            "type": "address"
+          },
+          {
+            "type": "uint256"
+          },
+          {
+            "type": "address"
+          },
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "migrateFromV2",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [
+          {
+            "type": "address"
+          },
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": []
+      },
+      {
+        "name": "migrateToR4",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [
+          {
+            "type": "address"
+          },
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": []
+      }
+    ],
+    "stMigrate": [
+      {
+        "name": "migrateFromV1",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [
+          {
+            "type": "address"
+          },
+          {
+            "type": "address"
+          },
+          {
+            "type": "address"
+          },
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": []
+      }
+    ],
+    "reads": [
+      {
+        "name": "bridgeVault",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "name": "totalManagedAssets",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "owner",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "name": "guardian",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "name": "pendingOwner",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "name": "getMinDelay",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "hasRole",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [
+          {
+            "type": "bytes32"
+          },
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "name": "getAllProxies",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "address[]"
+          }
+        ]
+      },
+      {
+        "name": "beacon",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "name": "implementation",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "name": "balanceOf",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "totalSupply",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "paused",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "name": "queuedWithdrawal",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "completedWithdrawal",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "withdrawalHead",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "withdrawalTail",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "maxRedeem",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "getOwners",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "address[]"
+          }
+        ]
+      },
+      {
+        "name": "getThreshold",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "nonce",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "getModulesPaginated",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [
+          {
+            "type": "address"
+          },
+          {
+            "type": "uint256"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "address[]"
+          },
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "name": "getStorageAt",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [
+          {
+            "type": "uint256"
+          },
+          {
+            "type": "uint256"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "bytes"
+          }
+        ]
+      },
+      {
+        "name": "oracle",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "name": "weth",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "name": "vTokenAddresses",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "name": "keeper",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "name": "getSlps",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "address[]"
+          }
+        ]
+      },
+      {
+        "name": "roundTermsHash",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "bytes32"
+          }
+        ]
+      },
+      {
+        "name": "tokenToVToken",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "name": "asset",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "name": "poolInfo",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "uint256"
+          },
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "totalCanWithdrawAmount",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "unbondingPeriod",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "maxWithdrawCount",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "slp",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "name": "commissionAccount",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "name": "commissionRatePpm",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "maxUpdateAmount",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "updateInterval",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "phase",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint8"
+          }
+        ]
+      },
+      {
+        "name": "roundIndex",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "factory",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "name": "isFactoryVault",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "name": "getTimestamp",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [
+          {
+            "type": "bytes32"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "isOperationDone",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [
+          {
+            "type": "bytes32"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "name": "lastUpdateAt",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      }
+    ],
+    "poolEvents": [
+      {
+        "name": "Transfer",
+        "type": "event",
+        "inputs": [
+          {
+            "type": "address",
+            "name": "from",
+            "indexed": true
+          },
+          {
+            "type": "address",
+            "name": "to",
+            "indexed": true
+          },
+          {
+            "type": "uint256",
+            "name": "value"
+          }
+        ]
+      },
+      {
+        "name": "Deposit",
+        "type": "event",
+        "inputs": [
+          {
+            "type": "address",
+            "name": "sender",
+            "indexed": true
+          },
+          {
+            "type": "address",
+            "name": "owner",
+            "indexed": true
+          },
+          {
+            "type": "uint256",
+            "name": "assets"
+          },
+          {
+            "type": "uint256",
+            "name": "shares"
+          }
+        ]
+      },
+      {
+        "name": "Withdraw",
+        "type": "event",
+        "inputs": [
+          {
+            "type": "address",
+            "name": "sender",
+            "indexed": true
+          },
+          {
+            "type": "address",
+            "name": "receiver",
+            "indexed": true
+          },
+          {
+            "type": "address",
+            "name": "owner",
+            "indexed": true
+          },
+          {
+            "type": "uint256",
+            "name": "assets"
+          },
+          {
+            "type": "uint256",
+            "name": "shares"
+          }
+        ]
+      },
+      {
+        "name": "PoolUpdated",
+        "type": "event",
+        "inputs": [
+          {
+            "type": "address",
+            "name": "token",
+            "indexed": true
+          },
+          {
+            "type": "uint256",
+            "name": "tokenAmount"
+          },
+          {
+            "type": "uint256",
+            "name": "vTokenAmount"
+          },
+          {
+            "type": "bool",
+            "name": "isMint"
+          }
+        ]
+      },
+      {
+        "name": "TokenAmountUpdated",
+        "type": "event",
+        "inputs": [
+          {
+            "type": "address",
+            "name": "token",
+            "indexed": true
+          },
+          {
+            "type": "uint256",
+            "name": "addedAmount"
+          },
+          {
+            "type": "uint256",
+            "name": "newTokenAmount"
+          }
+        ]
+      },
+      {
+        "name": "SetTokenAmount",
+        "type": "event",
+        "inputs": [
+          {
+            "type": "address",
+            "name": "token",
+            "indexed": true
+          },
+          {
+            "type": "uint256",
+            "name": "tokenAmount"
+          },
+          {
+            "type": "uint256",
+            "name": "vTokenAmount"
+          }
+        ]
+      },
+      {
+        "name": "CommissionMinted",
+        "type": "event",
+        "inputs": [
+          {
+            "type": "address",
+            "name": "caller",
+            "indexed": true
+          },
+          {
+            "type": "address",
+            "name": "account",
+            "indexed": true
+          },
+          {
+            "type": "uint256",
+            "name": "shares"
+          }
+        ]
+      },
+      {
+        "name": "CommissionMinted",
+        "type": "event",
+        "inputs": [
+          {
+            "type": "address",
+            "name": "token",
+            "indexed": true
+          },
+          {
+            "type": "address",
+            "name": "vToken",
+            "indexed": true
+          },
+          {
+            "type": "address",
+            "name": "account",
+            "indexed": true
+          },
+          {
+            "type": "uint256",
+            "name": "tokenAmount"
+          },
+          {
+            "type": "uint256",
+            "name": "vTokenAmount"
+          }
+        ]
+      }
+    ],
+    "timelockEvents": [
+      {
+        "name": "CallScheduled",
+        "type": "event",
+        "inputs": [
+          {
+            "type": "bytes32",
+            "name": "id",
+            "indexed": true
+          },
+          {
+            "type": "uint256",
+            "name": "index",
+            "indexed": true
+          },
+          {
+            "type": "address",
+            "name": "target"
+          },
+          {
+            "type": "uint256",
+            "name": "value"
+          },
+          {
+            "type": "bytes",
+            "name": "data"
+          },
+          {
+            "type": "bytes32",
+            "name": "predecessor"
+          },
+          {
+            "type": "uint256",
+            "name": "delay"
+          }
+        ]
+      },
+      {
+        "name": "CallExecuted",
+        "type": "event",
+        "inputs": [
+          {
+            "type": "bytes32",
+            "name": "id",
+            "indexed": true
+          },
+          {
+            "type": "uint256",
+            "name": "index",
+            "indexed": true
+          },
+          {
+            "type": "address",
+            "name": "target"
+          },
+          {
+            "type": "uint256",
+            "name": "value"
+          },
+          {
+            "type": "bytes",
+            "name": "data"
+          }
+        ]
+      },
+      {
+        "name": "Cancelled",
+        "type": "event",
+        "inputs": [
+          {
+            "type": "bytes32",
+            "name": "id",
+            "indexed": true
+          }
+        ]
+      },
+      {
+        "name": "CallSalt",
+        "type": "event",
+        "inputs": [
+          {
+            "type": "bytes32",
+            "name": "id",
+            "indexed": true
+          },
+          {
+            "type": "bytes32",
+            "name": "salt"
+          }
+        ]
+      }
+    ],
+    "residualEvents": [
+      {
+        "name": "RoundOpened",
+        "type": "event",
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "roundIndex",
+            "indexed": true
+          },
+          {
+            "type": "uint256",
+            "name": "openedAt"
+          },
+          {
+            "type": "uint256",
+            "name": "openDeadline"
+          },
+          {
+            "type": "uint256",
+            "name": "roundCap"
+          }
+        ]
+      },
+      {
+        "name": "OpenPeriodExtended",
+        "type": "event",
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "roundIndex",
+            "indexed": true
+          },
+          {
+            "type": "uint256",
+            "name": "previousOpenDeadline"
+          },
+          {
+            "type": "uint256",
+            "name": "newOpenDeadline"
+          }
+        ]
+      },
+      {
+        "name": "RoundLocked",
+        "type": "event",
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "roundIndex",
+            "indexed": true
+          },
+          {
+            "type": "uint256",
+            "name": "lockedAt"
+          },
+          {
+            "type": "uint256",
+            "name": "lockMaturity"
+          }
+        ]
+      },
+      {
+        "name": "SettlementProposed",
+        "type": "event",
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "roundIndex",
+            "indexed": true
+          },
+          {
+            "type": "uint8",
+            "name": "mode",
+            "indexed": true
+          },
+          {
+            "type": "uint256",
+            "name": "amount"
+          },
+          {
+            "type": "uint256",
+            "name": "proposedAt"
+          },
+          {
+            "type": "bool",
+            "name": "funded"
+          },
+          {
+            "type": "address",
+            "name": "funder",
+            "indexed": true
+          }
+        ]
+      },
+      {
+        "name": "SettlementCancelled",
+        "type": "event",
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "roundIndex",
+            "indexed": true
+          },
+          {
+            "type": "uint256",
+            "name": "at"
+          }
+        ]
+      },
+      {
+        "name": "SettlementFinalized",
+        "type": "event",
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "roundIndex",
+            "indexed": true
+          },
+          {
+            "type": "uint8",
+            "name": "mode",
+            "indexed": true
+          },
+          {
+            "type": "uint256",
+            "name": "amount"
+          },
+          {
+            "type": "uint256",
+            "name": "netProfit"
+          },
+          {
+            "type": "uint256",
+            "name": "fee"
+          },
+          {
+            "type": "uint256",
+            "name": "settledAt"
+          }
+        ]
+      },
+      {
+        "name": "EmergencyCancelled",
+        "type": "event",
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "at"
+          }
+        ]
+      },
+      {
+        "name": "Retired",
+        "type": "event",
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "at"
+          }
+        ]
+      },
+      {
+        "name": "ParSettlementForced",
+        "type": "event",
+        "inputs": [
+          {
+            "type": "uint256",
+            "name": "roundIndex",
+            "indexed": true
+          },
+          {
+            "type": "uint256",
+            "name": "at"
+          }
+        ]
+      }
+    ],
+    "residualReads": [
+      {
+        "name": "openWindow",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "lockDuration",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "settleTimelockWindow",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "roundCap",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "perAddressCap",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "minSubscription",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "performanceFeeBps",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "maxLossBps",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "openedAt",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "openDeadline",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "counterparty",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "name": "feeRecipient",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "name": "settleMode",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint8"
+          }
+        ]
+      },
+      {
+        "name": "settleAmount",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "profitFunded",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "bool"
+          }
+        ]
+      }
+    ],
+    "withdrawalsV1": [
+      {
+        "name": "getWithdrawals",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "tuple[]",
+            "components": [
+              {
+                "type": "uint256",
+                "name": "queued"
+              },
+              {
+                "type": "uint256",
+                "name": "pending"
+              },
+              {
+                "type": "uint256",
+                "name": "createdAt"
+              },
+              {
+                "type": "uint256",
+                "name": "unbondingPeriod"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "withdrawalsV3": [
+      {
+        "name": "getWithdrawals",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [
+          {
+            "type": "address"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "tuple[]",
+            "components": [
+              {
+                "type": "uint256",
+                "name": "queued"
+              },
+              {
+                "type": "uint256",
+                "name": "pending"
+              },
+              {
+                "type": "uint256",
+                "name": "createdAt"
+              },
+              {
+                "type": "uint256",
+                "name": "unbondingPeriod"
+              },
+              {
+                "type": "address",
+                "name": "receiver"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "openRoundV1": [
+      {
+        "name": "openNextRound",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [
+          {
+            "type": "tuple",
+            "name": "params",
+            "components": [
+              {
+                "type": "uint256",
+                "name": "openWindow"
+              },
+              {
+                "type": "uint256",
+                "name": "lockDuration"
+              },
+              {
+                "type": "uint256",
+                "name": "settleTimelockWindow"
+              },
+              {
+                "type": "uint256",
+                "name": "roundCap"
+              },
+              {
+                "type": "uint256",
+                "name": "perAddressCap"
+              },
+              {
+                "type": "uint256",
+                "name": "minSubscription"
+              },
+              {
+                "type": "uint256",
+                "name": "performanceFeeBps"
+              },
+              {
+                "type": "uint256",
+                "name": "maxLossBps"
+              },
+              {
+                "type": "uint256",
+                "name": "openedAt"
+              }
+            ]
+          }
+        ],
+        "outputs": []
+      }
+    ],
+    "openRoundV3": [
+      {
+        "name": "openNextRound",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [
+          {
+            "type": "tuple",
+            "name": "params",
+            "components": [
+              {
+                "type": "uint256",
+                "name": "openWindow"
+              },
+              {
+                "type": "uint256",
+                "name": "lockDuration"
+              },
+              {
+                "type": "uint256",
+                "name": "settleTimelockWindow"
+              },
+              {
+                "type": "uint256",
+                "name": "roundCap"
+              },
+              {
+                "type": "uint256",
+                "name": "perAddressCap"
+              },
+              {
+                "type": "uint256",
+                "name": "minSubscription"
+              },
+              {
+                "type": "uint256",
+                "name": "performanceFeeBps"
+              },
+              {
+                "type": "uint256",
+                "name": "maxLossBps"
+              }
+            ]
+          }
+        ],
+        "outputs": []
+      }
+    ]
+  }
+}
