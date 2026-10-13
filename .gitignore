@@ -23,3 +23,8 @@ __pycache__/
 !/snapshots/bytecode.json
 !/snapshots/capabilities.json
 !/snapshots/gas.json
+
+# Owner-local Agent configuration (kept on the owner's machine, never exported)
+/.claude/
+/AGENTS.md
+/AGENT.md

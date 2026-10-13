@@ -2,7 +2,7 @@
 """Render docs/DEPLOYED-STATE.md from the checked snapshots (no RPC).
 
 Inputs: snapshots/deployed/<chain>/state.json, snapshots/deployed/provenance.json,
-test/fixtures/legacy/manifest.json. Usage: deployed_doc.py [--check]
+tests/fixtures/legacy/manifest.json. Usage: deployed_doc.py [--check]
 """
 
 import argparse

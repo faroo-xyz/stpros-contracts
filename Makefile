@@ -8,14 +8,14 @@ SHELL := /bin/bash
 build:
 	@dest=$$(tools/verify/export.sh | tail -1); tools/verify/run.sh "$$dest" python3 tools/ci/canonical.py; echo "Artifacts: $$dest/cache/native-r4"
 toolchain-test:
-	@dest=$$(tools/verify/export.sh | tail -1); tools/verify/run.sh "$$dest" python3 -m unittest discover -s test/toolchain -p 'test_*.py' -v
+	@dest=$$(tools/verify/export.sh | tail -1); tools/verify/run.sh "$$dest" python3 -m unittest discover -s tests/toolchain -p 'test_*.py' -v
 upgrade-test:
 	@dest=$$(tools/verify/export.sh | tail -1); \
-	tools/verify/run.sh "$$dest" python3 test/release/native/gate.py; \
-	tools/verify/run.sh "$$dest" python3 -m unittest discover -s test/release/native -p 'test_*.py' -v; \
+	tools/verify/run.sh "$$dest" python3 tests/release/native/gate.py; \
+	tools/verify/run.sh "$$dest" python3 -m unittest discover -s tests/release/native -p 'test_*.py' -v; \
 	tools/verify/run.sh "$$dest" FOUNDRY_PROFILE=final forge test --offline --match-contract '^(FoundationWitnessTest|NativeReleaseWitnessTest|LossContingencyTest)$$' -vv
 upgrade-rehearsal:
 	@dest=$$(tools/verify/export.sh | tail -1); \
 	tools/verify/run.sh "$$dest" python3 tools/ci/canonical.py; \
 	tools/verify/run.sh "$$dest" FOUNDRY_PROFILE=final forge test --offline --match-contract 'Anvil.*Fixture' --match-test '^test_exportAnvil' -vv; \
-	tools/verify/run.sh "$$dest" python3 test/release/native/rehearsal.py
+	tools/verify/run.sh "$$dest" python3 tests/release/native/rehearsal.py

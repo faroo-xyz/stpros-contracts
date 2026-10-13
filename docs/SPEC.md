@@ -12,7 +12,7 @@ Oracle minimum update interval is 1 hour, maximum catch-up 7 days, hard APR ceil
 
 **Unbonding.** Future `setUnbondingPeriod` calls require 1–30 days. Initial/mainnet 7-day configuration is unchanged. Neither migration nor a setter rewrites any existing withdrawal's captured waiting period. The historical testnet zero global setting survives V3 migration; it remains effective for new requests until governance configures a new value, at which point the one-day minimum applies. Zero-wait historical records stay zero-wait.
 
-**Vault timing and LOSS.** OPEN is 1–90 days; lock <=365 days; scheduled opening delay <=30 days; round loss <=5,000 bps; settlement grace 30 days; minimum proposal window 7 days; maximum settlement window 23 days. Existing one-second minimum lock/settlement windows remain compatible. Existing rounds retain their recorded parameters. LOSS proposal/replacement/cancellation is Timelock-only; OPS controls bounded round operations and PROFIT. A scheduled OPEN permits redemption before openedAt; deposits wait.
+**Vault timing and LOSS.** OPEN is 1–90 days; lock <=365 days; scheduled opening delay <=30 days; round loss <=5,000 bps; settlement grace 30 days; minimum proposal window 7 days; maximum settlement window 23 days. Existing one-second minimum lock/settlement windows remain compatible. Existing rounds retain their recorded parameters. LOSS proposal/replacement/cancellation is Timelock-only; OPS controls bounded round operations and PROFIT. A Timelock LOSS operation may be scheduled before maturity: execution requires the operation to be Ready (`scheduleTime + minDelay`), the Vault proposal still requires maturity and `now + settleTimelockWindow <= D`, and finalization keeps the settlement window. The earliest LOSS settlement is therefore `max(scheduleTime + minDelay, maturity) + settleTimelockWindow`, subject to successful execution, current state and the cutoff (owner-approved clarification, 2026-10-13; it replaces the earlier `maturity + minDelay + settleTimelockWindow` wording without changing contract behavior). A scheduled OPEN permits redemption before openedAt; deposits wait.
 
 ## Implemented accounting, governance and compatibility
 
@@ -40,7 +40,7 @@ Mainnet Timelock minimum delay 48 hours; testnet 300 seconds. The mainnet govern
 
 A1 derives D = openDeadline + lockDuration + SETTLEMENT_GRACE; every proposal/replacement requires now + settleTimelockWindow <= D. At D, effective LOCKED (including unsynchronized OPEN) or an unfunded proposal can settle at par without asset transfers, even while paused. Funded PROFIT, zero PROFIT and LOSS remain binding and finalize under the existing unpause dependency. A late LOSS authorization may forfeit the counterparty's loss payment; unfunded profit can be lost to holders if force wins. OPS retains the already documented yield-only cancellation/refund behavior but cannot authorize LOSS principal outflows.
 
-These consequences are approved policy. Signed counterparty agreement remains an external release prerequisite; it is not proven by code or owner design approval.
+These consequences are approved policy. Counterparty terms must reflect the earliest LOSS settlement `max(scheduleTime + minDelay, maturity) + settleTimelockWindow` stated above. Signed counterparty agreement remains an external release prerequisite; it is not proven by code or owner design approval.
 
 ## External release inputs still required
 

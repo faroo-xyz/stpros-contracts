@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate test/helpers/LegacyInterfaces.sol from the *recorded* ABIs.
+"""Generate tests/helpers/LegacyInterfaces.sol from the *recorded* ABIs.
 
 Legacy tests must talk to recorded bytecode through the ABI it was deployed
 with, never through HEAD sources. Interfaces are produced by `cast interface`
@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 
 import common  # noqa: E402
 
-OUT = common.repo_path("test", "helpers", "LegacyInterfaces.sol")
+OUT = common.repo_path("tests", "helpers", "LegacyInterfaces.sol")
 
 INTERFACES = [
     ("mainnet/StPROS_Implementation", "ILegacyStPROSV1"),

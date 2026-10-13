@@ -66,6 +66,16 @@ unpaused. A fails while paused. Neither path works in both pause states. Replaci
 GRD is effective only when B succeeds; approve the exact replacement independently.
 No tooling may invent a Guardian, Safe, signer approval, amount or new round terms.
 
+Timing (owner-approved clarification, 2026-10-13): LOSS operations may be scheduled
+before maturity. The Timelock delay runs from scheduling, the Vault proposal still
+requires maturity and the cutoff, and finalization keeps the settlement window, so a
+LOSS round settles no earlier than
+`max(scheduleTime + minDelay, maturity) + settleTimelockWindow`. An operation that is
+Ready before maturity is refused (`VaultNotMatured`) until maturity and is not consumed
+by that failure; CAN or GOV may cancel it at any time before execution
+(`tests/security/LossSettlementTiming.t.sol`). Scheduling earlier lengthens the period
+in which unused operation IDs must be tracked and cancelled.
+
 Compute `D = openDeadline + lockDuration + SETTLEMENT_GRACE` and
 `proposalCutoff = D - settleTimelockWindow`. Schedule **both** operations no later
 than `proposalCutoff - actualMinDelay - reviewedMargin`. The margin is a positive,
@@ -117,7 +127,7 @@ remain pending, including blocked dependencies. Keep the original immutable bund
 a changed payload means a new operation requiring new review and the full delay.
 Reconcile and cancel every unused LOSS operation ID before the Vault opens its next
 round; an uncancelled ID remains executable by GOV against the later round's managed
-assets (`test/attack/StaleLossOperation.t.sol`). GC-03 action-bearing history and
+assets (`tests/security/StaleLossOperation.t.sol`). GC-03 action-bearing history and
 reconciliation remain authoritative. This command's two-ID check neither enumerates all operations nor satisfies GC-03 by itself. Paired
 LOSS operations do not bypass the existing H/U release inventory constraints.
 

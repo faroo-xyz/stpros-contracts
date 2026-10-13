@@ -11,13 +11,17 @@ import stat
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[2]
-ALLOW = ('contracts', 'test', 'tools', 'lib', 'snapshots', 'deployments', 'docs',
-         'foundry.toml', 'AGENTS.md', 'README.md', 'Makefile')
+ALLOW = ('contracts', 'tests', 'tools', 'lib', 'snapshots', 'deployments', 'docs',
+         'foundry.toml', 'README.md', 'Makefile')
+# Owner-local Agent configuration is never exported, whether tracked, untracked or absent.
+LOCAL_AGENT = ('agents.md', 'agent.md', '.claude')
 
 
 def allowed_name(path):
     for part in Path(path).parts:
         low = part.lower()
+        if low in LOCAL_AGENT:
+            return False
         if low.startswith(('.env', 'env.')) or any(x in low for x in
                 ('secret', 'credential', 'private_key', 'privatekey', 'private-key',
                  'keystore', 'mnemonic', 'id_rsa', 'id_ed25519')):

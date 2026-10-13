@@ -60,11 +60,16 @@ sequences, bundle admission, historical evidence and approval requirements.
 ```sh
 dest=$(tools/verify/export.sh | tail -1)
 tools/verify/run.sh "$dest" python3 tools/ci/canonical.py
-tools/verify/run.sh "$dest" python3 -m unittest discover -s test/toolchain -p 'test_*.py' -v
-tools/verify/run.sh "$dest" python3 test/release/native/gate.py
-tools/verify/run.sh "$dest" python3 -m unittest discover -s test/release/native -p 'test_*.py' -v
-tools/verify/run.sh "$dest" python3 test/release/rpc-transport.test.py -v
+tools/verify/run.sh "$dest" python3 -m unittest discover -s tests/toolchain -p 'test_*.py' -v
+tools/verify/run.sh "$dest" python3 tests/release/native/gate.py
+tools/verify/run.sh "$dest" python3 -m unittest discover -s tests/release/native -p 'test_*.py' -v
+tools/verify/run.sh "$dest" python3 tests/release/rpc-transport.test.py -v
+tools/verify/run.sh "$dest" FOUNDRY_PROFILE=final forge test --offline --match-path 'tests/security/*'
 ```
+
+Foundry discovers tests under `tests/` (`foundry.toml`). Root unit tests cover each
+contract; `tests/protocol/` holds the recorded-topology protocol and R4 migration
+regressions; `tests/security/` holds the permanent attack and settlement regressions.
 
 Run Release checks sequentially: historical replay uses one owned synthetic
 input directory. Selected original Node/viem goldens retain exact record hashes;
@@ -86,6 +91,29 @@ remain FAIL-existing. Missing historical creation, namespace and proxy/beacon
 provenance remains INCOMPLETE. Safe-forwarded residual evidence limitations remain.
 Real-state forks/FS-1–7, actual Safe/explorer checks, broad fuzz/formal campaigns
 and production readiness are not established by local checks.
+
+## Repository rules
+
+- Never read, print or commit `.env`, `.env.*`, keys, keystores or credentials.
+  Foundry binaries (`forge`, `cast`, `anvil`) load `.env` from their working
+  directory and every parent directory at startup, for every subcommand. Run them
+  only through `tools/verify/run.sh` inside a fresh export.
+- RPC use is read-only, against the public endpoints in `tools/lib/rpc.py`.
+  Development never deploys, signs, broadcasts or upgrades; local forks may
+  impersonate accounts.
+- `deployments/` is append-only. Tests of deployed behavior use the recorded
+  bytecode in `tests/fixtures/legacy/` through `tests/helpers/LegacyTopology.sol`,
+  never current sources, and `tests/mocks/WPROS9.sol` wherever the native unwrap
+  path matters.
+- Snapshots are regenerated only by their tools and compared with `--check`. Never
+  refresh a snapshot, golden or protected artifact hash, lower a bound, drop a test
+  or widen an assumption to obtain a pass. Report unrun checks as NOT RUN and
+  incomplete evidence as INCOMPLETE.
+- Vendored dependency bytes, compiler source names, metadata and the 13 protected
+  artifact identities stay fixed by `tools/ci/r4-reference.json`.
+- Cleanup uses an explicit verified manifest; unknown ignored local material is
+  never blanket-deleted. Agent-local configuration (`AGENTS.md`, `AGENT.md`,
+  `.claude/`) is ignored by Git and never exported.
 
 ## Scope
 

@@ -25,7 +25,7 @@ skip() { echo "NOT RUN  $1 (--offline)"; }
 run "selftest keccak" python3 tools/lib/keccak.py
 run "selftest abi" python3 -c "import sys; sys.path.insert(0,'tools/lib'); import abi; abi._selftest()"
 run "selftest logscan" python3 tools/release/logscan.py selftest
-run "export/run isolation guards" python3 -m unittest discover -s test/toolchain -p test_export.py -v
+run "export/run isolation guards" python3 -m unittest discover -s tests/toolchain -p test_export.py -v
 run "legacy interfaces" python3 tools/release/legacy_interfaces.py --check
 run "snapshot abi" python3 tools/snapshot/abi.py --check
 run "snapshot storage" python3 tools/snapshot/storage.py --check

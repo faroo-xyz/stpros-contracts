@@ -22,7 +22,7 @@ submit, deploy or execute transactions. Local simulation never authorizes releas
 - [Upgrade preparation](docs/UPGRADES.md)
 - [Governance](docs/GOVERNANCE.md) and [recovery](docs/RECOVERY.md)
 - [Toolchain identity and commands](docs/TOOLCHAIN.md)
-- [Source map](docs/CODE_MAP.md) and [repository rules](AGENTS.md)
+- [Source map](docs/CODE_MAP.md) and [repository rules](docs/TOOLCHAIN.md#repository-rules)
 
 Historical deployments, snapshots and recorded legacy bytecode remain essential
 upgrade inputs. Historical B0 failures and incomplete evidence remain unchanged.

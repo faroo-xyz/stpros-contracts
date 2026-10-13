@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Legacy bytecode fixtures for tests (test/fixtures/legacy/<chain>/*.json).
+"""Legacy bytecode fixtures for tests (tests/fixtures/legacy/<chain>/*.json).
 
 Fixtures are extracted from the *recorded deployment artifacts* of the
 implementations that are live on each chain (never from the current HEAD
@@ -32,7 +32,7 @@ import evm  # noqa: E402
 import rpc  # noqa: E402
 from keccak import keccak256  # noqa: E402
 
-OUT = common.repo_path("test", "fixtures", "legacy")
+OUT = common.repo_path("tests", "fixtures", "legacy")
 PINS = common.read_json(common.repo_path("snapshots", "deployed", "pins.json"))
 EIP1967_IMPL = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc"
 

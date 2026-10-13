@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Gas baselines (snapshots/gas.json) from test/gas/GasBaseline.t.sol.
+"""Gas baselines (snapshots/gas.json) from tests/gas/GasBaseline.t.sol.
 
 Builds a fresh .env-free export (tools/verify/export.sh), runs the gas suite
 there with a minimal environment (tools/verify/run.sh), and collects the
@@ -34,7 +34,7 @@ def measure():
     try:
         subprocess.run([common.repo_path("tools", "verify", "export.sh"), dest], check=True, capture_output=True)
         r = subprocess.run([common.repo_path("tools", "verify", "run.sh"), dest, "forge", "test",
-                            "--match-path", "test/gas/GasBaseline.t.sol", "-vv"], capture_output=True)
+                            "--match-path", "tests/gas/GasBaseline.t.sol", "-vv"], capture_output=True)
         out = r.stdout.decode()
         if r.returncode != 0:
             sys.exit("gas suite failed:\n" + out[-3000:] + r.stderr.decode()[-2000:])
