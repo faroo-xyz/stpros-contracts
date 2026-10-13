@@ -6,6 +6,11 @@ import {
 } from "./InvariantFixture.sol";
 import {ReleaseAssertions} from "../../contracts/release/ReleaseAssertions.sol";
 
+/// Synthetic restricted role subset: InvariantFixture revokes GOV's canceller role, so this
+/// model treats GOV cancellation as unauthorized. The approved configuration (GOV and CAN both
+/// cancel) is verified separately in test/release/GovernanceApprovedRoles.t.sol; this handler
+/// also does not model delayed LOSS operations across Vault rounds (see
+/// test/attack/StaleLossOperation.t.sol).
 contract GovernanceHandler is InvariantFixture {
     struct Operation {
         bytes data;

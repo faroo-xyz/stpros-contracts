@@ -63,6 +63,7 @@ tools/verify/run.sh "$dest" python3 tools/ci/canonical.py
 tools/verify/run.sh "$dest" python3 -m unittest discover -s test/toolchain -p 'test_*.py' -v
 tools/verify/run.sh "$dest" python3 test/release/native/gate.py
 tools/verify/run.sh "$dest" python3 -m unittest discover -s test/release/native -p 'test_*.py' -v
+tools/verify/run.sh "$dest" python3 test/release/rpc-transport.test.py -v
 ```
 
 Run Release checks sequentially: historical replay uses one owned synthetic

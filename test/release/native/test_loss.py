@@ -75,4 +75,112 @@ class LossTests(unittest.TestCase):
         loss.require_scheduling_window(100,10,110)
 
 
+class IndependentLossBoundaryTests(unittest.TestCase):
+    """Independent boundaries; expected values are computed here, never read from the tape.
+
+    The recorded case 0001 supplies only well-formed synthetic inputs. Timing follows the
+    contract: proposal valid iff now + settleTimelockWindow <= D, D = maturity + 30 days.
+    """
+    GRACE = 2592000
+
+    def setUp(self):
+        raw = (ROOT/'test/fixtures/native-release/loss.json.gz').read_bytes()
+        rows = json.loads(gzip.decompress(raw))
+        base = next(r for r in rows if r['id'] == 'loss-contingency.test.mjs:0001')
+        self.plan, self.state, self.clock = revive(base['arguments'])
+        self.now = int(self.clock)
+
+    def build(self):
+        return loss.build_loss_contingency(self.plan, self.state, self.clock)
+
+    def blocked(self, code):
+        with self.assertRaises(j.ReleaseError) as raised:
+            self.build()
+        self.assertEqual(str(raised.exception), 'BLOCKED — '+code)
+
+    def set_round(self, **values):
+        for name, value in values.items():
+            self.plan['round'][name] = str(value)
+        self.state['round'] = json.loads(json.dumps(self.plan['round']))
+        r = self.plan['round']
+        self.state['settlementDeadline'] = str(int(r['openDeadline'])+int(r['lockDuration'])+self.GRACE)
+
+    def timing(self):
+        r = self.plan['round']
+        maturity = int(r['openDeadline'])+int(r['lockDuration'])
+        cutoff = maturity+self.GRACE-int(r['settleTimelockWindow'])
+        ready = max(self.now, int(self.state['timestamp']))+int(self.plan['minDelay'])
+        return maturity, ready, cutoff
+
+    def test_readiness_dominates_and_exact_margin_boundary(self):
+        maturity, ready, cutoff = self.timing()
+        self.assertGreater(ready, maturity)
+        self.plan['marginSeconds'] = str(cutoff-ready)
+        out = self.build()['timing']
+        self.assertEqual(int(out['earliestReadyIfScheduledNow']), ready)
+        self.assertEqual(int(out['earliestExecutionIfScheduledNow']), ready)
+        self.assertEqual(int(out['proposalCutoff']), cutoff)
+        self.assertEqual(int(out['latestScheduleAt']), cutoff-int(self.plan['minDelay'])-(cutoff-ready))
+        self.plan['marginSeconds'] = str(cutoff-ready+1)
+        self.blocked('LOSS_SCHEDULING_WINDOW_CLOSED')
+
+    def test_maturity_later_than_readiness_sets_execution(self):
+        # Observed while LOCKED but before maturity: execution = max(ready, maturity) = maturity.
+        self.set_round(openDeadline=self.now-100, openedAt=self.now-100-86400, lockDuration=10*86400)
+        maturity, ready, cutoff = self.timing()
+        self.assertGreater(maturity, ready)
+        self.plan['marginSeconds'] = str(cutoff-maturity)
+        out = self.build()['timing']
+        self.assertEqual(int(out['earliestReadyIfScheduledNow']), ready)
+        self.assertEqual(int(out['earliestExecutionIfScheduledNow']), maturity)
+        self.assertEqual(int(out['D']), maturity+self.GRACE)
+        self.plan['marginSeconds'] = str(cutoff-maturity+1)          # passes only if readiness were used
+        self.assertLessEqual(ready+cutoff-maturity+1, cutoff)
+        self.blocked('LOSS_SCHEDULING_WINDOW_CLOSED')
+
+    def test_review_lifetime_is_at_most_3600_seconds(self):
+        reviewed = int(self.plan['reviewedAt'])
+        self.plan['expiresAt'] = str(reviewed+3600)
+        self.build()
+        self.plan['expiresAt'] = str(reviewed+3601)
+        self.blocked('STALE_REVIEW')
+
+    def test_expired_and_future_dated_approvals(self):
+        self.plan['expiresAt'] = str(self.now)
+        self.build()                                                    # expiry instant still valid
+        self.plan['expiresAt'] = str(self.now-1)
+        self.blocked('STALE_REVIEW')
+        self.plan['reviewedAt'], self.plan['expiresAt'] = str(self.now+1), str(self.now+100)
+        self.blocked('STALE_REVIEW')
+        self.plan['reviewedAt'], self.plan['expiresAt'] = str(self.now), str(self.now)
+        self.build()
+
+    def test_any_reviewed_round_field_drift_blocks(self):
+        for name in loss.ROUND_FIELDS:
+            with self.subTest(field=name):
+                self.setUp()
+                self.state['round'][name] = str(int(self.state['round'][name])+1)
+                self.blocked('ROUND_DRIFT')
+
+    def test_frozen_operation_identity_drift_blocks(self):
+        # Pinned IDs were recomputed with an independent encoder (Foundry cast abi-encode +
+        # keccak, research attack-lab/final-tree-review/evidence/id-witness.log).
+        a = '0xf8fcd9159e3ba81b204c860f2be60d4c21f1e8d5568210b05011efeeb991afae'
+        b = '0x5a5d7727f9191fd9d5552f9c9cf430425c6ba0e2942df661ed81cb4428e681f3'
+        out = self.build()
+        self.assertEqual((out['paths']['A']['id'], out['paths']['B']['id']), (a, b))
+        self.plan['frozenOperationIds'] = {'A': a, 'B': b}
+        self.build()
+        for path in ('A', 'B'):
+            with self.subTest(path=path):
+                self.plan['frozenOperationIds'] = {'A': a, 'B': b, path: '0x'+'11'*32}
+                self.blocked('FROZEN_OPERATION_ID_MISMATCH')
+        self.plan['frozenOperationIds'] = {'A': a, 'B': b}
+        self.plan['approvedLossAmount'] = str(50*10**18-1)               # changed payload, old frozen IDs
+        self.blocked('FROZEN_OPERATION_ID_MISMATCH')
+        self.plan['approvedLossAmount'] = str(50*10**18)
+        self.plan['saltB'] = '0x'+'00'*31+'16'
+        self.blocked('FROZEN_OPERATION_ID_MISMATCH')
+
+
 if __name__=='__main__':unittest.main()

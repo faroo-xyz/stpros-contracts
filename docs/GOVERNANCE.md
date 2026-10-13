@@ -21,7 +21,15 @@ A role-array hash binds calldata; it does **not** establish inventory completene
 
 The product policy is unchanged: mainnet launch commission 100,000 ppm on future yield, Treasury Safe recipient; approved APR is twice owner-selected expected gross APR and at most 500,000 ppm; update interval at least one hour. Factory launch performance fee is zero, future changes are Timelock-only and capped at 3,000 bps. Historical round fees and their 10,000 denominator remain unchanged. New unbonding settings have a one-day floor and thirty-day ceiling; migrations preserve the historical mainnet seven-day and testnet zero settings and individual withdrawal records.
 
-Legacy direct Oracle/StPROS upgrades, beacon upgrades, ownership-handoff and deprecated initializer/setter Tasks are no longer registered. The main `deploy` override and nine deploy stubs still refuse before runtime access. Release builders never produce `changeProxyAdmin`, `renounceOwnership`, an implementation-only core upgrade, or an unguarded initializer. Other ordinary administrative tasks are not a release workflow; only reviewed Timelock calldata is authorized for an R4 release.
+Reporting allowance (operational note, unchanged economics): each `update` may add at
+most `T × maxAprPpm × min(elapsed, 7 days) / (365 days × 10^6)`, also bounded by the
+absolute per-update cap, and `elapsed` restarts at every successful update. Unused
+elapsed-time allowance beyond seven days is therefore not banked. This does not by
+itself prove that earlier accrued yield can never be reported: reports carry no accrual
+period, so later permitted updates may include backlog within their own allowance and
+cap, and the allowance may already exceed actual accrued yield.
+
+Hardhat Tasks (including legacy direct Oracle/StPROS upgrades, beacon upgrades, ownership handoff, deprecated initializer/setter Tasks and `yield-vault:loss-calldata`), the `deploy` override and the deploy stubs were removed from Production with the framework. The native CLI exposes only the `release`, `artifact` and `loss contingency` routes and refuses deploy/sign/send or key arguments before reading any input. Release builders never produce `changeProxyAdmin`, `renounceOwnership`, an implementation-only core upgrade, or an unguarded initializer. Ordinary administrative calls are not a release workflow; only reviewed Timelock calldata is authorized for an R4 release.
 
 The RPC checks distinguish the approved historical block from the current chain head. They independently bind every selected historical target (including Oracle and testnet BridgeVault/SlpDistributor) to the chain-specific registry; mainnet fresh BridgeVault/SlpDistributor require separate reviewed deployment records. Standalone release builders enforce that registry binding too. Current proxy/Beacon code and upgrade/admin history are checked in addition to getters. No atomic assertion was moved off-chain during review closure; the Solidity refactor preserves its public ABI and only consolidates repeated Vault asset reads.
 
@@ -69,9 +77,12 @@ inclusion. If neither reviewed path can safely execute before cutoff, report
 Guardian, calldata, salts or operation IDs. OPS pre-emption, new pauses, unavailable
 signers, transaction inclusion and other state changes remain risks.
 
-`yield-vault:loss-contingency` is a separate unsigned/read-only task. The existing
-`yield-vault:loss-calldata` retains its single-call JSON interface. The new task
-checks current chain, approved runtimes, Factory proxy admin/implementation,
+`python3 -m tools.release.native loss contingency` is the only LOSS preparation
+route; it is unsigned and read-only (usage below). The former single-call
+`yield-vault:loss-calldata` Task was retired with the Hardhat framework under the
+owner's minimal native toolchain decision and has no replacement command. Path A's
+single call is byte-identical standalone `proposeSettlement(LOSS, amount, address(0))`
+calldata. The command checks current chain, approved runtimes, Factory proxy admin/implementation,
 Vault beacon/implementation/asset, Factory registry membership and Vault back-link,
 owners, authority getters, round terms, delay, backing and selected operation IDs.
 Release mode binds historical canonical Factory/asset/Beacon/ProxyAdmin identities
@@ -79,11 +90,18 @@ to the existing chain registry and the Timelock to the GC-03 pinned OZ runtime.
 Full runtime hashes (including Factory immutable binding) must be independently
 approved from known source/artifacts, never copied from unchecked observations.
 The pure builder is not a chain attestation; release-oriented output must use the
-observing task. Fresh read-only state is evidence at a pinned block, not a promise
+observing command. Fresh read-only state is evidence at a pinned block, not a promise
 that it remains unchanged through scheduling or execution.
 
-The task supports new paired plans for effective LOCKED, non-retired rounds only;
-it refuses existing proposals and selected IDs already scheduled or Done.
+The command supports new paired plans for effective LOCKED, non-retired rounds
+only; it refuses existing proposals and selected IDs already scheduled or Done, so it
+is a preparation check, **not** an execution-time checkpoint for operations that are
+already scheduled. It checks only the named role/operation subset, does not enumerate
+all role holders or Timelock operations, does not authenticate Safes, and does not
+schedule, execute or cancel. A reviewed plan is valid for at most 3,600 seconds after
+`reviewedAt`; observations must be fresh as stated below. Execution timing is
+`max(ready, maturity)` with `ready = max(now, observed block time) + minDelay`; plans
+may therefore be prepared before maturity.
 Existing proposal replacement, new unregistered Factory deployments, and arbitrary
 proxy topologies need separate review. All artifacts remain `deployable: false`:
 actual Safe identities, signer/control independence, nonces and execution approvals
@@ -97,8 +115,10 @@ still replace a proposal or act on a later round: LOSS calldata has no round-ind
 argument. A currently reverting Ready call is not closed. Waiting and Ready both
 remain pending, including blocked dependencies. Keep the original immutable bundle;
 a changed payload means a new operation requiring new review and the full delay.
-GC-03 action-bearing history and reconciliation remain authoritative. This task's
-two-ID check neither enumerates all operations nor satisfies GC-03 by itself. Paired
+Reconcile and cancel every unused LOSS operation ID before the Vault opens its next
+round; an uncancelled ID remains executable by GOV against the later round's managed
+assets (`test/attack/StaleLossOperation.t.sol`). GC-03 action-bearing history and
+reconciliation remain authoritative. This command's two-ID check neither enumerates all operations nor satisfies GC-03 by itself. Paired
 LOSS operations do not bypass the existing H/U release inventory constraints.
 
 Monitor each intended/scheduled LOSS for cutoff, latest scheduling time, actual

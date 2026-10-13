@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.28;
 
-import {InvariantFixture, StdInvariant, Test, Oracle, StPROS} from "./InvariantFixture.sol";
+import {InvariantFixture, StdInvariant, Test, Oracle, StPROS, BridgeVault} from "./InvariantFixture.sol";
 
 contract CoreAccountingHandler is InvariantFixture {
     uint256 public t;
@@ -14,6 +14,9 @@ contract CoreAccountingHandler is InvariantFixture {
     uint256 public lastReport;
     uint256 public partialClaims;
     uint256 public fullClaims;
+    // Claims whose frontier-derived release exceeded remaining custody (LAB-OBS-01) and
+    // were correctly rolled back by BridgeVault.
+    uint256 public custodyReverts;
     mapping(address => uint256) public shares;
 
     struct Ticket {
@@ -157,40 +160,122 @@ contract CoreAccountingHandler is InvariantFixture {
         }
     }
 
-    function claim(uint256 seed, bool asWrapped) external {
-        attempts[6]++;
-        address who = _actor(seed);
-        uint256 frontier = funded - recovered;
+    struct ClaimPlan {
+        uint256[] release;
         uint256 expected;
         uint256 userPay;
         uint256 otherPay;
+        uint256 full;
+        uint256 part;
+        bool insufficient;
+        uint256 shortfallRelease;
+        uint256 shortfallCustody;
+    }
+
+    function claim(uint256 seed, bool asWrapped) external {
+        _claim(seed, asWrapped, 0);
+    }
+
+    /// Same claim with a positive `maxRecords` limit (counts visited records from head).
+    function claimRecords(uint256 seed, bool asWrapped, uint256 raw) external {
+        _claim(seed, asWrapped, bound(raw, 1, 5));
+    }
+
+    /// Independent expectation, computed before the call and never written to the ghost
+    /// ledger until the real call has succeeded. The frontier F = custody + C is cached at
+    /// entry (as VToken does) and every record is paid immediately, so a record whose
+    /// release exceeds the custody still left must revert the whole claim.
+    function _plan(address who, uint256 limit) internal view returns (ClaimPlan memory p) {
         Ticket[] storage list = tickets[who];
+        p.release = new uint256[](list.length);
+        uint256 frontier = funded - recovered;
+        uint256 custody = funded - recovered - paid;
+        uint256 visited;
         for (uint256 i; i < list.length; i++) {
             Ticket storage q = list[i];
             if (q.claimed == q.amount) continue;
+            if (limit != 0 && visited == limit) break;
+            visited++;
             if (block.timestamp < q.mature || frontier <= q.start + q.claimed) break;
             uint256 x = frontier - q.start - q.claimed;
             if (x > q.amount - q.claimed) x = q.amount - q.claimed;
-            q.claimed += x;
-            expected += x;
-            if (q.receiver == who) userPay += x;
-            else otherPay += x;
-            if (q.claimed == q.amount) {
-                fullClaims++;
+            if (x > custody - p.expected) {
+                p.insufficient = true;
+                p.shortfallRelease = x;
+                p.shortfallCustody = custody - p.expected;
+                return p;
+            }
+            p.release[i] = x;
+            p.expected += x;
+            if (q.receiver == who) p.userPay += x;
+            else p.otherPay += x;
+            if (q.claimed + x == q.amount) {
+                p.full++;
             } else {
-                partialClaims++;
+                p.part++;
                 break;
             }
         }
+    }
+
+    function _claim(uint256 seed, bool asWrapped, uint256 limit) internal {
+        attempts[6]++;
+        address who = _actor(seed);
+        ClaimPlan memory p = _plan(who, limit);
         uint256 beforeUser = asWrapped ? wrapped.balanceOf(who) : who.balance;
         uint256 beforeOther = asWrapped ? wrapped.balanceOf(RECEIVER) : RECEIVER.balance;
+        uint256 beforeCustody = address(bridge).balance;
+        uint256 beforeC = st.completedWithdrawal();
         vm.prank(who);
-        uint256 actual = asWrapped ? st.withdrawComplete(who, 0) : st.withdrawCompleteToPROS(0);
-        assertEq(actual, expected);
-        assertEq((asWrapped ? wrapped.balanceOf(who) : who.balance) - beforeUser, userPay);
-        assertEq((asWrapped ? wrapped.balanceOf(RECEIVER) : RECEIVER.balance) - beforeOther, otherPay);
-        paid += expected;
-        _record(6, expected != 0);
+        if (p.insufficient) {
+            // Only the precise custody shortfall is acceptable; any other revert fails.
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    BridgeVault.InsufficientBalance.selector, address(wrapped), p.shortfallRelease, p.shortfallCustody
+                )
+            );
+        }
+        uint256 actual = asWrapped ? st.withdrawComplete(who, limit) : st.withdrawCompleteToPROS(limit);
+        if (p.insufficient) {
+            assertEq(address(bridge).balance, beforeCustody);
+            assertEq(st.completedWithdrawal(), beforeC);
+            assertEq(asWrapped ? wrapped.balanceOf(who) : who.balance, beforeUser);
+            assertEq(asWrapped ? wrapped.balanceOf(RECEIVER) : RECEIVER.balance, beforeOther);
+            _checkRecords(who);
+            custodyReverts++;
+            rejections[6]++;
+            return;
+        }
+        assertEq(actual, p.expected);
+        assertEq((asWrapped ? wrapped.balanceOf(who) : who.balance) - beforeUser, p.userPay);
+        assertEq((asWrapped ? wrapped.balanceOf(RECEIVER) : RECEIVER.balance) - beforeOther, p.otherPay);
+        Ticket[] storage list = tickets[who];
+        for (uint256 i; i < p.release.length; i++) {
+            list[i].claimed += p.release[i];
+        }
+        fullClaims += p.full;
+        partialClaims += p.part;
+        paid += p.expected;
+        _checkRecords(who);
+        _record(6, p.expected != 0);
+    }
+
+    /// Production records from head must equal the unclaimed ghost tickets in order.
+    function _checkRecords(address who) internal view {
+        StPROS.Withdrawal[] memory actual = st.getWithdrawals(who);
+        Ticket[] storage list = tickets[who];
+        uint256 k;
+        for (uint256 i; i < list.length; i++) {
+            Ticket storage q = list[i];
+            if (q.claimed == q.amount) continue;
+            assertLt(k, actual.length);
+            assertEq(actual[k].queued, q.start + q.claimed);
+            assertEq(actual[k].pending, q.amount - q.claimed);
+            assertEq(actual[k].createdAt + actual[k].unbondingPeriod, q.mature);
+            assertEq(actual[k].receiver, q.receiver == who ? address(0) : q.receiver);
+            k++;
+        }
+        assertEq(k, actual.length);
     }
 
     function unauthorized() external {
@@ -226,6 +311,12 @@ contract CoreAccountingHandler is InvariantFixture {
             }
         }
         assertEq(outstanding, issued - paid);
+        _checkRecords(ALICE);
+        _checkRecords(BOB);
+    }
+
+    function RECEIVER_ADDRESS() external pure returns (address) {
+        return RECEIVER;
     }
 
     function wrongNoCommissionDilution() external view {
@@ -239,8 +330,9 @@ contract CoreAccountingInvariant is StdInvariant, Test {
     function setUp() public {
         vm.createDir("cache_forge/invariant-coverage", true);
         vm.writeFile("cache_forge/invariant-coverage/INV-A.hex", "");
+        vm.writeFile("cache_forge/invariant-coverage/INV-A-custody.txt", "");
         h = new CoreAccountingHandler();
-        bytes4[] memory s = new bytes4[](8);
+        bytes4[] memory s = new bytes4[](9);
         s[0] = h.deposit.selector;
         s[1] = h.request.selector;
         s[2] = h.fund.selector;
@@ -249,6 +341,7 @@ contract CoreAccountingInvariant is StdInvariant, Test {
         s[5] = h.report.selector;
         s[6] = h.claim.selector;
         s[7] = h.unauthorized.selector;
+        s[8] = h.claimRecords.selector;
         targetSelector(FuzzSelector(address(h), s));
         targetContract(address(h));
     }
@@ -258,6 +351,8 @@ contract CoreAccountingInvariant is StdInvariant, Test {
         emit log_named_bytes("coverage-at-sequence-end", abi.encode(a, s, r));
         // Files live only in the approved isolated export, never in B0 snapshots.
         vm.writeLine("cache_forge/invariant-coverage/INV-A.hex", vm.toString(abi.encode(a, s, r)));
+        // Per-sequence count of expected custody-shortfall rollbacks (LAB-OBS-01 branch).
+        vm.writeLine("cache_forge/invariant-coverage/INV-A-custody.txt", vm.toString(h.custodyReverts()));
     }
 
     function invariant_accountingAndFifo() public view {
@@ -300,6 +395,85 @@ contract CoreAccountingInvariant is StdInvariant, Test {
         h.check();
         assertEq(h.issued(), h.paid());
         assertEq(h.v(), 0);
+    }
+
+    /// EV-01 regression (independently reproduced): later owner paid first, authorized
+    /// recovery, then the earlier owner's frontier release (10) exceeds custody (5). The
+    /// claim must revert precisely and leave Q, C, custody, balances and records unchanged.
+    function test_recoveryAfterOutOfOrderClaimRejectsEarlierRelease() public {
+        h.deposit(0, 10 ether, false);
+        h.deposit(1, 10 ether, false);
+        h.request(0, 10 ether, false, false);
+        h.request(1, 10 ether, false, false);
+        h.advance(1 days);
+        h.fund(10 ether);
+        h.fund(10 ether);
+        h.claim(1, false);
+        h.recover(5 ether);
+        assertEq(h.paid(), 10 ether);
+        assertEq(h.funded() - h.recovered() - h.paid(), 5 ether);
+        h.claim(0, false);
+        h.claim(0, true);
+        assertEq(h.custodyReverts(), 2);
+        assertEq(h.paid(), 10 ether);
+        h.check();
+        h.fund(4 ether);
+        h.claim(0, false);
+        assertEq(h.custodyReverts(), 3);
+        h.fund(1 ether);
+        h.claim(0, false);
+        assertEq(h.paid(), 20 ether);
+        assertEq(h.issued(), h.paid());
+        h.check();
+    }
+
+    /// Control: the same recovery without an out-of-order payment still pays a genuine partial.
+    function test_recoveryWithoutOutOfOrderClaimStillPaysPartial() public {
+        h.deposit(0, 10 ether, false);
+        h.deposit(1, 10 ether, false);
+        h.request(0, 10 ether, false, false);
+        h.request(1, 10 ether, false, false);
+        h.advance(1 days);
+        h.fund(10 ether);
+        h.fund(10 ether);
+        h.recover(15 ether);
+        uint256 partialBefore = h.partialClaims();
+        h.claim(0, false);
+        assertEq(h.paid(), 5 ether);
+        assertEq(h.partialClaims(), partialBefore + 1);
+        assertEq(h.custodyReverts(), 0);
+        h.check();
+    }
+
+    /// Multi-record and bound receiver: the first record fits custody but the second does not,
+    /// so the whole aggregate claim (including the first payout) rolls back. A one-record limit
+    /// pays only the first record; the bound receiver is paid once custody is restored.
+    function test_multiRecordBoundReceiverAggregateRollbackAndLimitedClaim() public {
+        h.deposit(0, 10 ether, false);
+        h.deposit(1, 10 ether, false);
+        h.request(0, 4 ether, false, false); // ALICE [0,4) unbound
+        h.request(0, 6 ether, false, true); // ALICE [4,10) bound to RECEIVER
+        h.request(1, 10 ether, false, false); // BOB [10,20)
+        h.advance(1 days);
+        h.fund(10 ether);
+        h.fund(10 ether);
+        h.claim(1, true);
+        h.recover(5 ether); // custody 5, frontier 15
+        h.claim(0, false); // 4 fits, then 6 > 1 remaining
+        h.claim(0, true);
+        assertEq(h.custodyReverts(), 2);
+        assertEq(h.paid(), 10 ether);
+        h.check();
+        h.claimRecords(0, true, 1); // first record only
+        assertEq(h.paid(), 14 ether);
+        h.claim(0, false); // 6 > 1
+        assertEq(h.custodyReverts(), 3);
+        h.fund(5 ether);
+        uint256 receiverBefore = h.RECEIVER_ADDRESS().balance;
+        h.claim(0, false);
+        assertEq(h.RECEIVER_ADDRESS().balance - receiverBefore, 6 ether);
+        assertEq(h.issued(), h.paid());
+        h.check();
     }
 
     function test_zeroSupplyRestart() public {

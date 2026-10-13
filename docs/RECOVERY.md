@@ -1,6 +1,6 @@
 # Handoff failure and recovery
 
-No recovery below is automatic. It requires fresh read-only identity checks and reviewed unsigned calldata; no task signs or broadcasts. Never change a proxy admin, renounce ownership or bypass guarded migration to recover. Do not modify a pending operation's payload under the same operation ID.
+No recovery below is automatic. It requires fresh read-only identity checks and reviewed unsigned calldata; no command signs or broadcasts. Never change a proxy admin, renounce ownership or bypass guarded migration to recover. Do not modify a pending operation's payload under the same operation ID.
 
 | State | Required response |
 |---|---|
