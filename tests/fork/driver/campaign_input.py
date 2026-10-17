@@ -10,6 +10,8 @@ import json
 from pathlib import Path
 import re
 
+import history
+
 SCHEMA = 'faroo-fork-campaign-input-v1'
 TOP_KEYS = frozenset({'schema', 'campaign', 'chain', 'chainId', 'evidenceClass', 'fork', 'source',
                       'inventory', 'actors', 'safe', 'decisions'})
@@ -52,6 +54,8 @@ DECISIONS = {
     'FR-D8': ('UNDECIDED', 'a', 'b'),
 }
 INPUT_ROOT = 'cache_forge/rehearsal/fork-campaign/'
+HISTORY_CONTENT_ONLY = ('history manifest content verified (faroo-fork-history-v1); chain provenance not '
+                        'authenticated: canonical anchor recheck NOT RUN, no independent approval')
 ZERO_HASH = '0x' + '0' * 64
 ZERO_ADDRESS = '0x' + '0' * 40
 _ADDRESS = re.compile(r'0x[0-9a-fA-F]{40}')
@@ -127,7 +131,7 @@ def validate(doc, pins):
     _hash(inv['sha256'], '.inventory.sha256')
     anchor = _int(inv['anchorBlock'], '.inventory.anchorBlock')
     _require(isinstance(inv['complete'], bool), '.inventory.complete must be boolean')
-    history = _hash(inv['historyManifestSha256'], '.inventory.historyManifestSha256')
+    history_sha = _hash(inv['historyManifestSha256'], '.inventory.historyManifestSha256')
     if cls == 'SYNTHETIC':
         _require(block == 0 and block_hash == ZERO_HASH, 'SYNTHETIC input must not claim a fork block')
     else:
@@ -138,7 +142,7 @@ def validate(doc, pins):
             _require(block == pins[chain], 'E-hist must fork at the B0 pin')
         else:
             _require(block > pins[chain], 'E-fresh must fork after the B0 pin')
-            _require(history != ZERO_HASH, 'INCOMPLETE: E-fresh requires an authenticated history manifest')
+            _require(history_sha != ZERO_HASH, 'INCOMPLETE: E-fresh requires an authenticated history manifest')
 
     actors = doc['actors']
     _require(isinstance(actors, dict), '.actors must be an object')
@@ -198,7 +202,8 @@ def sha256_file(path):
 
 
 def bind_to_export(doc, export_root):
-    """Checks the source bindings against the files of the export it will run in."""
+    """Checks the source bindings against the files of the export it will run in. Returns the
+    content-verified history (or None when no history manifest is declared or required)."""
     root = Path(export_root)
     manifest_path = root / 'EXPORT-MANIFEST.txt'
     _require(manifest_path.is_file(), 'not an approved export (no EXPORT-MANIFEST.txt)')
@@ -216,10 +221,20 @@ def bind_to_export(doc, export_root):
     inventory = root / INPUT_ROOT / doc['inventory']['path']
     _require(inventory.is_file(), 'INCOMPLETE: inventory file missing')
     _require(sha256_file(inventory) == doc['inventory']['sha256'], 'inventory SHA-256 mismatch')
-    if doc['evidenceClass'] == 'E_FRESH':
-        history = root / INPUT_ROOT / 'history' / (doc['inventory']['historyManifestSha256'] + '.json')
-        _require(history.is_file(), 'INCOMPLETE: history manifest file missing for the declared SHA-256')
-        _require(sha256_file(history) == doc['inventory']['historyManifestSha256'], 'history manifest SHA-256 mismatch')
+    declared = doc['inventory']['historyManifestSha256']
+    if doc['evidenceClass'] == 'E_FRESH' or (doc['evidenceClass'] == 'E_HIST' and declared != ZERO_HASH):
+        manifest = root / INPUT_ROOT / 'history' / (declared + '.json')
+        _require(manifest.is_file(), 'INCOMPLETE: history manifest file missing for the declared SHA-256')
+        _require(sha256_file(manifest) == declared, 'history manifest SHA-256 mismatch')
+        # Content verification against the fork identity and the inventory binding. A verified
+        # manifest is still not chain provenance (`history.provenance()`).
+        try:
+            return history.authenticate(manifest.name, declared[2:], manifest.parent, chain=doc['chain'],
+                                        anchor_block=doc['fork']['block'], anchor_hash=doc['fork']['blockHash'],
+                                        inventory_sha256=doc['inventory']['sha256'])
+        except history.HistoryRefused as error:
+            raise InputRefused(f'history manifest: {error}') from None
+    return None
 
 
 def load(path, export_root):
@@ -230,5 +245,6 @@ def load(path, export_root):
     except json.JSONDecodeError as error:
         raise InputRefused(f'not JSON: {error}') from None
     blockers = validate(doc, load_pins(export_root))
-    bind_to_export(doc, export_root)
+    if bind_to_export(doc, export_root) is not None:
+        blockers.append(('INCOMPLETE', HISTORY_CONTENT_ONLY))
     return doc, '0x' + hashlib.sha256(raw).hexdigest(), blockers
