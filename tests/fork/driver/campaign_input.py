@@ -56,6 +56,9 @@ DECISIONS = {
 INPUT_ROOT = 'cache_forge/rehearsal/fork-campaign/'
 HISTORY_CONTENT_ONLY = ('history manifest content verified (faroo-fork-history-v1); chain provenance not '
                         'authenticated: canonical anchor recheck NOT RUN, no independent approval')
+# IVH-D01 / FH-D11: v1 inputs cannot bind a complete state observation (faroo-fork-state-observation-v1), so every
+# E_FRESH input stays INCOMPLETE until a separately reviewed input version binds and verifies one.
+STATE_OBSERVATION_BLOCKER = 'state observation (IVH-D01/FH-D11) not bound or not verified'
 ZERO_HASH = '0x' + '0' * 64
 ZERO_ADDRESS = '0x' + '0' * 40
 _ADDRESS = re.compile(r'0x[0-9a-fA-F]{40}')
@@ -192,6 +195,7 @@ def validate(doc, pins):
     else:
         # A declared hash and `complete: true` are not provenance (review finding 2).
         blockers.append(('INCOMPLETE', 'authenticated history not verified: the native history verifier did not run'))
+        blockers.append(('INCOMPLETE', STATE_OBSERVATION_BLOCKER))
         blockers.append(('INCOMPLETE', 'final FS acceptance gate not implemented (fail-closed)'))
     return blockers
 
