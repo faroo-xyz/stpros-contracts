@@ -22,4 +22,7 @@ FORK = frozenset({
 })
 # Agent A's accepted S1/S2 reconciliation records (schema ``faroo-fork-s1-s2-reconciliation-v1``). An S3 fork
 # anchor binds only through one of these.
-RECONCILIATIONS = frozenset()
+RECONCILIATIONS = frozenset({
+    'a27ffd60d7105aa6aebfcc0d638da8b3488535b973e75f79245200d15888cf81',  # testnet S1/S2, anchor 31,580,881
+    '158afc230f468be8fb2ad5a68b4eb2036322c1c048fd8ef7ee68a106185bfd61',  # mainnet S1/S2, anchor 20,582,384
+})

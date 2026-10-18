@@ -251,7 +251,9 @@ def build(chain, topo, p0, actors, *, case='A', recovery=None, release_id=None):
         core.update(reporter=actors['reporter'], treasury=actors['treasury'], commissionPpm=100000,
                     maxUpdateAmount='100000000000000000000', interval=3600)
     else:
-        core.update(reporter=chain.addr(oracle, 'slp()'), treasury=chain.addr(oracle, 'commissionAccount()'),
+        # real state: the owner-confirmed reporter (owner_config), never the getter as its own expectation
+        reporter = m['expectedReporter'] if m.get('evidenceClass') == 'E_FRESH' else chain.addr(oracle, 'slp()')
+        core.update(reporter=reporter, treasury=chain.addr(oracle, 'commissionAccount()'),
                     commissionPpm=chain.uint(oracle, 'commissionRatePpm()'),
                     maxUpdateAmount=str(chain.uint(oracle, 'maxUpdateAmount()')), interval=chain.uint(oracle, 'updateInterval()'))
     observed = {'blockNumber': int(head['number'], 16), 'blockHash': head['hash'], 'timestamp': int(head['timestamp'], 16),
@@ -265,7 +267,10 @@ def build(chain, topo, p0, actors, *, case='A', recovery=None, release_id=None):
                    'deployer': actors['deployer'], 'treasury': actors['treasury'], 'reporter': actors['reporter'],
                    'keeper': actors['keeper'], 'legacyCoreOwner': m['safe'] if mainnet else m['e1'],
                    'legacyFactoryOwner': m['e1'] if mainnet else m['e2'], 'legacyTestVaultAdmin': m['e2']},
-        'addresses': a, 'implementations': impl, 'factories': cfg_factories, 'legacy': legacy, 'destinations': [],
+        # a migrated testnet SlpDistributor keeps its SLP list; on real state that list is the observed one, carried
+        # as a conditional diagnostic input (OWNER_DECISION_PENDING), never an approval
+        'addresses': a, 'implementations': impl, 'factories': cfg_factories, 'legacy': legacy,
+        'destinations': list(m.get('destinations', [])) if m.get('evidenceClass') == 'E_FRESH' and not mainnet else [],
         'policy': {'minDelay': 172800 if mainnet else 300, 'expectedGrossAprPpm': 250000, 'maxAprPpm': 500000,
                    'maxUpdateAmount': '100000000000000000000', 'updateInterval': 3600, 'approvedPerformanceFeeBps': 0,
                    **({'commissionRatePpm': 100000} if mainnet else {})},

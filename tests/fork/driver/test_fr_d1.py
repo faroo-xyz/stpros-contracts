@@ -182,7 +182,10 @@ class RecordTest(Base):
                           frozenset({
                             '3dd3ab07248c6e74d156d93978d00ea63c5d2cd6767d867f53f610ae560fd96c',  # fr-d1-s3-testnet-sl20261018
                             '19442bc39ee398f7e9daa9bc71818bf78019ee196ed239cb07bd05e37a77599f',  # fr-d1-s3-mainnet-sl20261018
-                        }), frozenset()))
+                        }), frozenset({
+                            'a27ffd60d7105aa6aebfcc0d638da8b3488535b973e75f79245200d15888cf81',  # testnet S1/S2
+                            '158afc230f468be8fb2ad5a68b4eb2036322c1c048fd8ef7ee68a106185bfd61',  # mainnet S1/S2
+                        })))
         self.assertIs(col.APPROVED_COLLECTION_AUTHORIZATIONS, approvals.COLLECTION)
         self.assertIs(fm.APPROVED_FORK_AUTHORIZATIONS, approvals.FORK)
 

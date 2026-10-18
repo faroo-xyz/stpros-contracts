@@ -279,7 +279,11 @@ def validate_case(cfg, name=None):
 
 def execution_events(receipt, safe):
     """The Safe's own ExecutionSuccess / ExecutionFailure events as (kind, txHash, payment).
-    A malformed event is kept as ('MALFORMED', None, None) so it can never match."""
+
+    Two encodings exist: Safe 1.3.0 (and the synthetic model) emits ``ExecutionSuccess(bytes32 txHash, uint256
+    payment)`` with both values in the data; Safe 1.4.x emits ``ExecutionSuccess(bytes32 indexed txHash, uint256
+    payment)`` with the hash as the second topic and only the payment in the data. Anything else is kept as
+    ('MALFORMED', None, None) so it can never match."""
     events = []
     for log in receipt['logs']:
         if log['address'].lower() != safe.lower() or not log['topics']:
@@ -287,11 +291,15 @@ def execution_events(receipt, safe):
         topic = log['topics'][0].lower()
         if topic not in (EXECUTION_SUCCESS, EXECUTION_FAILURE):
             continue
+        kind = 'SUCCESS' if topic == EXECUTION_SUCCESS else 'FAILURE'
         data = log['data'].lower()
-        if len(log['topics']) != 1 or re.fullmatch(r'0x[0-9a-f]{128}', data) is None:
+        if len(log['topics']) == 1 and re.fullmatch(r'0x[0-9a-f]{128}', data):
+            events.append((kind, '0x' + data[2:66], int(data[66:], 16)))
+        elif len(log['topics']) == 2 and re.fullmatch(r'0x[0-9a-f]{64}', log['topics'][1].lower()) \
+                and re.fullmatch(r'0x[0-9a-f]{64}', data):
+            events.append((kind, log['topics'][1].lower(), int(data[2:], 16)))
+        else:
             events.append(('MALFORMED', None, None))
-            continue
-        events.append(('SUCCESS' if topic == EXECUTION_SUCCESS else 'FAILURE', '0x' + data[2:66], int(data[66:], 16)))
     return events
 
 

@@ -463,13 +463,21 @@ class IsolationTest(unittest.TestCase):
                 continue
             text = path.read_text()
             self.assertNotIn('https://', text, path.name)
-            self.assertNotIn('--fork-url', text, path.name)
+            if path.name == 'fork_launcher.py':
+                # XR-I09: the single launcher may fork only through the budget proxy's loopback URL.
+                self.assertEqual(text.count('--fork-url'), 1, path.name)
+                self.assertIn("'--fork-url', proxy.url,", text)
+                self.assertIn("LOOPBACK_PREFIX = 'http://127.0.0.1:'", text)
+                self.assertIn('fm.ForkBudgetProxy(auth, ledger)', text)
+            else:
+                self.assertNotIn('--fork-url', text, path.name)
             # `.env` files (but not `os.environ`) are never referenced, except by the name guard.
             self.assertIsNone(re.search(r'\.env(?!iron)', text.replace("startswith('.env')", '')), path.name)
             self.assertNotIn('private_key', text.lower(), path.name)
-        command = (HERE / 'anvil.py').read_text()
-        for flag in ("'--accounts', '0'", "'--host', '127.0.0.1'", "'--block-base-fee-per-gas', '0'"):
-            self.assertIn(flag, command)
+        for name in ('anvil.py', 'fork_launcher.py'):
+            command = (HERE / name).read_text()
+            for flag in ("'--accounts', '0'", "'--host', '127.0.0.1'", "'--block-base-fee-per-gas', '0'"):
+                self.assertIn(flag, command, name)
 
 
 
@@ -662,6 +670,23 @@ class ExecutionEventTest(unittest.TestCase):
                 self.assertFalse(safe_route.inner_success(receipt, self.SAFE, self.HASH))
         malformed = safe_route.execution_events(self.receipt(self.event(extra=('0x' + '00' * 32,))), self.SAFE)
         self.assertEqual(malformed, [('MALFORMED', None, None)])
+
+    def indexed(self, topic=safe_route.EXECUTION_SUCCESS, tx_hash=HASH, payment=0, data=None):
+        """Safe 1.4.x: ``ExecutionSuccess(bytes32 indexed txHash, uint256 payment)``."""
+        return {'address': self.SAFE, 'topics': [topic, tx_hash], 'data': data or '0x' + format(payment, '064x')}
+
+    def test_safe_1_4_1_indexed_encoding(self):
+        ok = self.receipt(self.indexed())
+        self.assertTrue(safe_route.inner_success(ok, self.SAFE, self.HASH))
+        self.assertEqual(safe_route.execution_events(ok, self.SAFE), [('SUCCESS', self.HASH, 0)])
+        for label, receipt in (('wrong hash', self.receipt(self.indexed(tx_hash='0x' + 'ff' * 32))),
+                               ('non-zero payment', self.receipt(self.indexed(payment=1))),
+                               ('failure event', self.receipt(self.indexed(topic=safe_route.EXECUTION_FAILURE))),
+                               ('hash also in data', self.receipt(self.indexed(data='0x' + self.HASH[2:] + '00' * 32))),
+                               ('short topic', self.receipt(self.indexed(tx_hash='0x9a'))),
+                               ('reverted outer call', self.receipt(self.indexed(), status='0x0'))):
+            with self.subTest(label):
+                self.assertFalse(safe_route.inner_success(receipt, self.SAFE, self.HASH))
 
 
 class SyntheticDriverTest(unittest.TestCase):

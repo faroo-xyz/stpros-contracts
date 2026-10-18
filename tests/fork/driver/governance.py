@@ -285,3 +285,11 @@ def drills(run, ctx):
         g.isolated(lambda fn=fn, prefix=prefix: fn(prefix))
     return ([f'FS-3{c}.{n}' for n in range(1, 9)]
             + [f'FS-4{c}.R0', f'FS-4{c}.R1', f'FS-4{c}.R2', f'FS-4{c}.R3', f'FS-4{c}.R4'])
+
+
+def authority_only(run, ctx):
+    """FS-3.1 only (the tier-P post-U authority matrix), on its own discarded snapshot."""
+    g = Governance(run, ctx)
+    c = 'm' if g.mainnet else 't'
+    g.isolated(lambda: g.authority_matrix(f'FS-3{c}'))
+    return [f'FS-3{c}.1']

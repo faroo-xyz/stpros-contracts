@@ -50,6 +50,13 @@ GAS_CAP = 2_200_000
 SCHEMA = 'faroo-fork-execution-run-v1'
 FINAL_REASON = ('SYNTHETIC (class C) evidence cannot close an FS row; final FS acceptance gate not implemented '
                 '(fail-closed)')
+REAL_CLASS = 'E_FRESH (real-state local Fork; history CONTENT_VERIFIED, authenticated=false)'
+REAL_REASON = ('real-state Fork checks only: history not authenticated (FH-D2) and the final FS acceptance gate is not '
+               'implemented (fail-closed)')
+REAL_STATEMENT = ('Local anvil Fork of the public chain at the reconciled S1/S2 anchor, read through the budgeted proxy; '
+                  'every transaction executed locally with impersonated senders. Real contracts, balances, holders, vaults, '
+                  'roles and Safe; actors without a real identity are labelled synthetic (FR-D5 / FR-D6). Not public-chain '
+                  'execution and not a release approval.')
 V1_ROUND = {'type': 'tuple', 'components': [{'type': 'uint256'} for _ in range(9)]}
 V3_ROUND = {'type': 'tuple', 'components': [{'type': 'uint256'} for _ in range(8)]}
 
@@ -66,8 +73,13 @@ class Run:
     """One loopback node, its transcript, checks and stage records."""
 
     def __init__(self, topology, name, node=None):
-        self.topo = rc.load_topology(topology)
+        # A name loads a synthetic fixture; a document is a real-state topology (``real_state.topology``), which runs
+        # only on an injected forked node.
+        self.topo = topology if isinstance(topology, dict) else rc.load_topology(topology)
         self.m = self.topo['meta']
+        self.real = self.m.get('evidenceClass') == 'E_FRESH'
+        if self.real and node is None:
+            raise ExecutionError('a real-state topology runs only on a forked node')
         self.name = name
         self.chain = lc.LocalChain(self.m['chainId'], self.m['timestamp'], node)
         if node is None:
@@ -124,18 +136,23 @@ class Run:
         worst = 'PASS' if rows else 'NOT RUN'
         for c in rows:
             worst = max(worst, c['verdict'], key=scenarios.SEVERITY.get)
-        doc = {'schema': 'faroo-fork-ledger-v1', 'scenario': scenario, 'evidenceClass': 'SYNTHETIC (class C)',
+        doc = {'schema': 'faroo-fork-ledger-v1', 'scenario': scenario, 'evidenceClass': self.evidence_class(),
                'aggregate': worst, 'verdict': 'INCOMPLETE' if worst == 'PASS' else worst,
-               'verdictReason': FINAL_REASON if worst == 'PASS' else f'check aggregate {worst}',
+               'verdictReason': (REAL_REASON if self.real else FINAL_REASON) if worst == 'PASS' else f'check aggregate {worst}',
                'checks': rows, 'gas': self.gas_rows()}
         scenarios.require_ledger(doc)
         return doc
 
+    def evidence_class(self):
+        return REAL_CLASS if self.real else 'SYNTHETIC (class C)'
+
     def evidence(self, **extra):
+        statement = (REAL_STATEMENT if self.real else
+                     'Local loopback rehearsal on recorded legacy runtimes with a synthetic state, a synthetic Safe and '
+                     'labelled synthetic actors. Not real-state, Safe-identity or gas-gate evidence.')
         return {'schema': SCHEMA, 'run': self.name, 'topology': self.topo['name'], 'chainId': self.m['chainId'],
-                'evidenceClass': 'SYNTHETIC (class C)', 'statement': (
-                    'Local loopback rehearsal on recorded legacy runtimes with a synthetic state, a synthetic Safe and '
-                    'labelled synthetic actors. Not real-state, Safe-identity or gas-gate evidence.'),
+                'evidenceClass': self.evidence_class(), 'statement': statement,
+                'binding': self.topo.get('binding'),
                 'stages': self.stages, 'bundles': self.bundles, 'shapes': self.shapes, 'checks': self.checks,
                 'transcript': self.chain.transcript, **extra}
 
@@ -246,18 +263,47 @@ def lever_sweep(run, label, accounts, targets):
 
 
 # ------------------------------------------------------------------------------------------------ mainnet
-def mainnet(case='A', *, waiting=True, donation=False, variant=None, name=None, then=None, node=None):
+def mainnet(case='A', *, waiting=True, donation=False, variant=None, name=None, then=None, node=None,
+            topology='execution-mainnet-v1'):
     """FS-1 case ``case``. ``variant`` names an FS-1a adverse branch (see ``VARIANTS``); ``then(run, ctx)``
     runs on the post-U state (``governance.drills``) and returns the scenario ids it covered."""
     if case not in 'ABCD' or len(case) != 1:
         raise ValueError(case)
-    run = Run('execution-mainnet-v1', name or f'mainnet-{case}' + (f'-{variant}' if variant else ''), node)
+    run = Run(topology, name or f'mainnet-{case}' + (f'-{variant}' if variant else ''), node)
     run.then = then
     try:
         result = _mainnet(run, case, waiting, donation, variant)
         return result
+    except Exception as error:      # noqa: BLE001 - real state: the failure is evidence, never a silent stop
+        if not run.real:
+            raise
+        return _real_failure(run, error, REAL_FAILURE_IDS['mainnet'], lambda: _finish(run, case, variant, {}))
     finally:
         run.close()
+
+
+# One FAIL marker per ledger family a run writes, so no partially populated ledger of an interrupted real run can
+# aggregate to PASS.
+REAL_FAILURE_IDS = {
+    'mainnet': ('H-U.runException', 'FS-1a.runException', 'FS-7.runException', 'FS-6.P-0.runException',
+                'FS-6.P-1.runException', 'FS-6.H.runException', 'FS-6.U.runException', 'FS-5m.pre.runException',
+                'U.custody.runException', 'U.POST-4.runException', 'FS-5.perm.runException', 'FS-3m.runException'),
+    'testnet': ('FS-2.runException', 'FS-6.U_t.runException', 'FS-6.T.runException', 'FS-5t.I-runException',
+                'FS-5t.partial.runException', 'U_t.vault.runException', 'FS-3t.runException')}
+
+
+def _real_failure(run, error, ids, finish):
+    """An exception in a real-state run: recorded as a FAIL in every ledger family, with its traceback, the stages
+    and the full transcript (receipts, estimates and revert outcomes) kept as evidence."""
+    import traceback
+    detail = f'{type(error).__name__}: {str(error)[:300]}'
+    run.add(*[{'id': i, 'verdict': 'FAIL', 'expected': '0', 'actual': '1', 'detail': detail} for i in ids])
+    run.stage('exception', error=detail, traceback=traceback.format_exc()[-3000:])
+    if getattr(run, 'then', None):
+        run.extra_ids = []
+    result = finish()
+    result['exception'] = detail
+    return result
 
 
 def _post_hook(run, p0, actors, guarded):
@@ -391,7 +437,7 @@ def _mainnet(run, case, waiting, donation, variant):
     # ---- waiting period ---------------------------------------------------------------------------------
     hu = {}
     if waiting:
-        hu = _waiting_period(run, p0)
+        hu = _waiting_period_real(run) if run.real else _waiting_period(run, p0)
     if case in 'CD':
         hu['residualExposure'] = _residual_exposure(run)
     chain.warp(172800 + 1)
@@ -560,6 +606,54 @@ def _waiting_period(run, p0):
     run.tx('wait.vault001.redeem', alice, v, abi.calldata('redeem(uint256,address,address)', shares, alice, alice))
     run.add(row('wait.vault001.redeem.payout', want, chain.uint(st, 'balanceOf(address)', alice) - before))
     return {'claims': len(claims), 'newRequests': 2}
+
+
+def _waiting_period_real(run):
+    """FS-1a vii on real state: new deposits and requests by fresh local accounts, one legacy claim per real owner
+    whose record the queue model shows outstanding (six signatures across owners, payout = the model's pending), and
+    a redemption by the largest real vault 001 holder (SETTLED). Nothing is written to state outside transactions."""
+    chain, m = run.chain, run.m
+    st, wpros = m['stpros'], m['wpros']
+    chain.warp(7 * 86400)               # every record requested before the anchor has matured (unbonding 7 days)
+    newcomer = '0x' + keccak256(b'faroo waiting-period newcomer').lower()[-40:]
+    wrapper = '0x' + keccak256(b'faroo waiting-period wpros depositor').lower()[-40:]
+    chain.fund(newcomer, 50 * 10 ** 18)
+    chain.fund(wrapper, 50 * 10 ** 18)
+    run.tx('wait.depositWithPROS', newcomer, st, abi.calldata('depositWithPROS()'), value=20 * 10 ** 18)
+    run.tx('wait.wrap', wrapper, wpros, abi.calldata('deposit()'), value=12 * 10 ** 18)
+    run.tx('wait.approve', wrapper, wpros, abi.calldata('approve(address,uint256)', st, 12 * 10 ** 18))
+    run.tx('wait.depositWPROS', wrapper, st, abi.calldata('deposit(uint256,address)', 12 * 10 ** 18, wrapper))
+    queued_before = chain.uint(st, 'queuedWithdrawal()')
+    run.tx('wait.redeem.newcomer', newcomer, st, abi.calldata('redeem(uint256,address,address)', 4 * 10 ** 18, newcomer, newcomer))
+    run.tx('wait.redeem.wrapper', wrapper, st, abi.calldata('redeem(uint256,address,address)', 6 * 10 ** 18, wrapper, wrapper))
+    run.add(truth('wait.requests.baseline>=Q', chain.uint(st, 'queuedWithdrawal()') > queued_before))
+    model = models.QueueModel(rc.history(chain, run.topo, [st]), st)
+    owners = sorted(o for o, recs in model.records.items() if recs and o not in (newcomer, wrapper))
+    signatures = ('withdrawComplete(uint256)', 'withdrawComplete(address,uint256)', 'withdrawCompleteToPROS()',
+                  'withdrawComplete()', 'withdrawCompleteToPROS(uint256)', 'withdrawComplete(address)')
+    run.add(truth('wait.realOwnersForSixSignatures', len(owners) >= len(signatures), f'{len(owners)} owners'))
+    for sig, who in zip(signatures, owners):
+        receiver = '0x' + keccak256(f'faroo receiver {who}'.encode()).lower()[-40:] if sig == 'withdrawComplete(address)' else who
+        args = {'withdrawComplete(uint256)': [1], 'withdrawComplete(address,uint256)': [who, 1],
+                'withdrawCompleteToPROS(uint256)': [1], 'withdrawComplete(address)': [receiver]}.get(sig, [])
+        expected_records = model.records.get(who, [])
+        max_records = args[-1] if sig.endswith('uint256)') else 0
+        expected = sum(r['pending'] for r in (expected_records[:max_records] if max_records else expected_records))
+        native = 'ToPROS' in sig
+        before = chain.balance(receiver) if native else chain.uint(wpros, 'balanceOf(address)', receiver)
+        run.tx(f'wait.claim.{sig}', who, st, abi.calldata(sig, *args))
+        after = chain.balance(receiver) if native else chain.uint(wpros, 'balanceOf(address)', receiver)
+        run.add(row(f'wait.claim.{sig}.payout==modelPending', expected, after - before))
+        model = models.QueueModel(rc.history(chain, run.topo, [st]), st)
+    v, holder = m['vault001'], m['vault001Holder']
+    shares = chain.uint(v, 'balanceOf(address)', holder) // 3
+    tma, supply = chain.uint(v, 'totalManagedAssets()'), chain.uint(v, 'totalSupply()')
+    want = shares * (tma + 1) // (supply + 10 ** 6)
+    before = chain.uint(st, 'balanceOf(address)', holder)
+    run.tx('wait.vault001.redeem', holder, v, abi.calldata('redeem(uint256,address,address)', shares, holder, holder))
+    run.add(row('wait.vault001.redeem.payout', want, chain.uint(st, 'balanceOf(address)', holder) - before))
+    return {'claims': min(len(owners), len(signatures)), 'newRequests': 2, 'claimOwners': owners[:len(signatures)],
+            'vault001Holder': holder}
 
 
 def _residual_exposure(run):
@@ -1079,14 +1173,18 @@ DEBUG_SETTERS = ('setPhase(uint8)', 'setRoundCap(uint256)', 'setMaxLossBps(uint2
 TESTNET_CASES = ('normal', 'a', 'b', 'c', 'd', 'e', 'f', 'g')
 
 
-def testnet(case='normal', *, waiting=True, name=None, then=None, node=None):
+def testnet(case='normal', *, waiting=True, name=None, then=None, node=None, topology='execution-testnet-v3'):
     """FS-2 normal path or recovery case (a) ... (g) of the matrix; ``then`` as for ``mainnet``."""
     if case not in TESTNET_CASES:
         raise ValueError(case)
-    run = Run('execution-testnet-v3', name or f'testnet-{case}', node)
+    run = Run(topology, name or f'testnet-{case}', node)
     run.then = then
     try:
         return _testnet(run, case, waiting)
+    except Exception as error:      # noqa: BLE001 - real state: the failure is evidence, never a silent stop
+        if not run.real:
+            raise
+        return _real_failure(run, error, REAL_FAILURE_IDS['testnet'], lambda: _finish_t(run, case, {}))
     finally:
         run.close()
 
@@ -1101,8 +1199,20 @@ def _testnet(run, case, waiting):
     recovery = _recovery(case)
     e2_out = bool(recovery and recovery['e2Unavailable'])
     actors = {**rc.actor_set('testnet'), 'gov': '0x' + keccak256(b'faroo-execution testnet synthetic gov').lower()[-40:]}
-    # the existing SlpDistributor is migrated, not replaced: its keeper is the observed one (D5 input unchanged)
-    actors['keeper'] = chain.addr(m['distributor'], 'keeper()')
+    # the existing SlpDistributor is migrated, not replaced: its keeper is the observed one (D5 input unchanged). On
+    # real state that keeper is OWNER_DECISION_PENDING: the run is diagnostic and U_t acceptance stays BLOCKED.
+    actors['keeper'] = m['keeper'] if run.real else chain.addr(m['distributor'], 'keeper()')
+    if run.real:
+        run.add(truth('FS-2.real.keeper.observedAtFork==topology', chain.addr(m['distributor'], 'keeper()') == m['keeper']),
+                {'id': 'FS-2.real.keeper.ownerDecision', 'verdict': 'BLOCKED', 'expected': '0', 'actual': '0',
+                 'detail': f'keeper {m["keeper"]} is {m["keeperStanding"]}: U_t acceptance BLOCKED until the owner decides'},
+                truth('FS-2.real.reporter.forkGetter==ownerConfirmed', chain.addr(m['oracle'], 'slp()') == m['expectedReporter']),
+                truth('FS-2.real.sink.forkGetter==SlpDistributor', chain.addr(m['stpros'], 'slp()') == m['distributor']),
+                {'id': 'FS-2.real.destinations.ownerDecision', 'verdict': 'BLOCKED', 'expected': '0', 'actual': '0',
+                 'detail': f'SLP destinations {m["destinations"]} are the observed list ({m["destinationsStanding"]}): '
+                           'conditional diagnostic only, U_t acceptance BLOCKED until the owner supplies them (D5)'},
+                {'id': 'FS-6.U_t.ownerInputsPending', 'verdict': 'BLOCKED', 'expected': '0', 'actual': '0',
+                 'detail': 'keeper and SLP destinations are OWNER_DECISION_PENDING: U_t gas is diagnostic only'})
     gov = actors['gov']
     run.stage('loaded', note='recorded V3 runtimes, synthetic state; GOV_t/CAN_t/GRD_t/OPS_t labelled synthetic EOAs (FR-D6)')
     p0, identity, _ = lc.deploy_p0(chain, network='testnet', actors=actors, proxy_admin=m['proxyAdmin'], stpros=m['stpros'],
