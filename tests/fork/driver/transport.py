@@ -107,6 +107,10 @@ class BudgetLedger:
     Files below ``directory``: ``<id>.jsonl`` (append-only, each line carries the SHA-256 of the previous
     line), ``<id>.hwm.json`` (the highest sequence ever written and its line digest) and ``<id>.lock``
     (present while an invocation holds the ledger). The first line fixes the ceiling and the restart bound.
+
+    FR-D1 scope pins (``fr_d1_scope``): one ``select`` invocation may read the head and pin the run anchor
+    (``anchor``, at most once per ledger, never after a collection invocation); every collection run pins its
+    spec SHA-256 (``spec``) before its first network read. A second ``select`` counts against the restart bound.
     """
 
     SCHEMA = 'faroo-fork-http-budget-v1'
@@ -124,6 +128,9 @@ class BudgetLedger:
         self.lock = self.directory / f'{self.id}.lock'
         self.used = 0
         self.opens = 0
+        self.selects = 0
+        self.anchor = None
+        self.specs = []
         self.seq = -1
         self.head = '0' * 64
         self.genesis = None
@@ -131,9 +138,11 @@ class BudgetLedger:
         self._held = False
 
     # -- lifecycle -------------------------------------------------------------------------------------
-    def open(self, known_heads=(), expected_genesis=None):
+    def open(self, known_heads=(), expected_genesis=None, *, selection=False):
         """Takes the exclusive lock, verifies the chain, the high-water mark and every (seq, sha) the run
-        journals recorded, then journals this invocation. Refuses at the ceiling or past the restart bound."""
+        journals recorded, then journals this invocation. Refuses at the ceiling or past the restart bound.
+        ``selection`` opens the single anchor-selection invocation, refused once an anchor is pinned or a
+        collection invocation exists."""
         if self._held:
             raise CollectionStop('BUDGET_LEDGER_REOPENED', self.id, 'REFUSED')
         self.directory.mkdir(parents=True, exist_ok=True)
@@ -165,12 +174,20 @@ class BudgetLedger:
             if self.used >= self.ceiling:
                 self._append({'kind': 'refused', 'reason': 'ceiling reached at open', 'invocation': self.invocation})
                 raise BudgetExhausted(f'{self.used}/{self.ceiling} POSTs already used')
-            if self.opens > self.max_restarts:
+            if selection and (self.anchor is not None or self.opens):
+                self._append({'kind': 'refused', 'reason': 'anchor selection', 'invocation': self.invocation})
+                raise CollectionStop('ANCHOR_ALREADY_PINNED' if self.anchor is not None else 'ANCHOR_SELECTION_ORDER',
+                                     'an anchor is selected once, before any collection invocation', 'REFUSED')
+            if self.opens + max(self.selects - 1, 0) > self.max_restarts:
                 self._append({'kind': 'refused', 'reason': 'restart bound', 'invocation': self.invocation})
-                raise CollectionStop('SUPERVISOR_BOUND', f'{self.opens} invocations already opened; at most '
-                                     f'{self.max_restarts} restarts are authorized', 'REFUSED')
-            self.opens += 1
-            self._append({'kind': 'open', 'invocation': self.invocation, 'restart': self.opens - 1})
+                raise CollectionStop('SUPERVISOR_BOUND', f'{self.opens + self.selects} invocations already opened; at '
+                                     f'most {self.max_restarts} restarts are authorized', 'REFUSED')
+            if selection:
+                self.selects += 1
+                self._append({'kind': 'select', 'invocation': self.invocation})
+            else:
+                self.opens += 1
+                self._append({'kind': 'open', 'invocation': self.invocation, 'restart': self.opens - 1})
         except BaseException:
             self.close(record=False)
             raise
@@ -201,6 +218,14 @@ class BudgetLedger:
                 self.used += 1
             elif kind == 'open':
                 self.opens += 1
+            elif kind == 'select':
+                self.selects += 1
+            elif kind == 'anchor':
+                if self.anchor is not None:
+                    raise CollectionStop('BUDGET_LEDGER_CORRUPT', f'line {index}: second anchor', 'REFUSED')
+                self.anchor = {k: v for k, v in record.items() if k not in ('kind', 'seq', 'prev', 'atMs', 'invocation')}
+            elif kind == 'spec':
+                self.specs.append({k: v for k, v in record.items() if k not in ('kind', 'seq', 'prev', 'atMs')})
             elif kind not in ('close', 'refused'):
                 raise CollectionStop('BUDGET_LEDGER_CORRUPT', f'line {index}: kind {kind!r}', 'REFUSED')
             prev = line_sha(line)
@@ -242,6 +267,31 @@ class BudgetLedger:
         self._append({'kind': 'attempt', 'items': items, 'purpose': purpose, 'invocation': self.invocation})
         self.used += 1
         return self.seq
+
+    def pin_anchor(self, anchor):
+        """Records the run anchor once (block, hash and how it was chosen); never replaced."""
+        if self.anchor is not None:
+            raise CollectionStop('ANCHOR_ALREADY_PINNED', self.id, 'REFUSED')
+        self._append({**anchor, 'kind': 'anchor', 'invocation': self.invocation})
+        self.anchor = dict(anchor)
+        return self.anchor
+
+    def pin_spec(self, record):
+        """Records a run's spec SHA-256 before that run sends anything."""
+        self._append({**record, 'kind': 'spec', 'invocation': self.invocation})
+        self.specs.append({**record, 'invocation': self.invocation})
+
+    def inspect(self):
+        """Read-only verification of a finished ledger (no lock, nothing written): the hash chain, the genesis
+        binding to this authorization and the high-water mark. Refuses a ledger an invocation still holds."""
+        if self.lock.exists():
+            raise CollectionStop('BUDGET_LEDGER_LOCKED', f'{self.lock.name}: the ledger is in use', 'REFUSED')
+        if not self.path.is_file():
+            raise CollectionStop('BUDGET_LEDGER_MISSING', str(self.path), 'REFUSED')
+        self._load(())
+        if self.genesis is None:
+            raise CollectionStop('BUDGET_LEDGER_MISSING', f'{self.path.name} is empty', 'REFUSED')
+        return self
 
     def position(self):
         return self.seq, self.head

@@ -46,7 +46,7 @@ ZERO20 = '0x' + '00' * 20
 ADMIN = '0x' + '00' * 32
 E2 = '0xb29eaea575bd4bae7d9a301446e6204c3a23adf1'
 ALICE, BOB = '0x' + 'a1' * 20, '0x' + 'b2' * 20
-SAFE = h.EXTRA_TARGETS['mainnet'][0]
+SAFE = h.GOV_SAFE
 
 
 def run(coro):
@@ -89,6 +89,8 @@ class FakeChain:
         self.faults = []
         self.posts, self.bodies = 0, []
         self.header_overrides = {}
+        self.block_extra = {}                 # n -> extra header fields (gasUsed, gasLimit, transactions)
+        self.txs = {}                         # hash -> eth_getTransactionByHash result
 
     def hash(self, n):
         if n in self.hash_overrides:
@@ -100,7 +102,8 @@ class FakeChain:
             return self.header_overrides[n]
         if n > self.head or n < 0:
             return None
-        return {'number': hex(n), 'hash': self.hash(n), 'parentHash': self.hash(n - 1), 'timestamp': hex(1_700_000_000 + n)}
+        return {'number': hex(n), 'hash': self.hash(n), 'parentHash': self.hash(n - 1), 'timestamp': hex(1_700_000_000 + n),
+                **self.block_extra.get(n, {})}
 
     def row(self, address, topics, block, index, data='0x', tx=None):
         return {'address': address, 'topics': topics, 'data': data, 'blockNumber': hex(block), 'blockHash': self.hash(block),
@@ -138,6 +141,8 @@ class FakeChain:
                 return {'jsonrpc': '2.0', 'id': rid, 'error': {'code': 3, 'message': 'execution reverted'}}
             value = self.calls[key]
             return ok(value(int(params[1], 16)) if callable(value) else value)
+        if method == 'eth_getTransactionByHash':
+            return ok(copy.deepcopy(self.txs.get(params[0])))
         if method == 'eth_getBalance':
             value = self.balances.get(params[0].lower(), 0)
             if value == 'UNAVAILABLE':
@@ -626,7 +631,12 @@ class GateTest(Tmp):
         self.stop(lambda: tp.HttpGate('mainnet', ledger), 'FR_D1_NOT_AUTHORIZED', 'REFUSED')
         path, digest = authorization(self.root, mode='PUBLIC_READ_ONLY', ident='real-auth')
         self.stop(lambda: col.load_authorization(path, digest), 'FR_D1_NOT_AUTHORIZED', 'REFUSED')
-        self.assertEqual(col.APPROVED_COLLECTION_AUTHORIZATIONS, frozenset())
+        self.assertEqual(col.APPROVED_COLLECTION_AUTHORIZATIONS, frozenset({
+            '6963e58be871b15ff3be92bbd0654cbd784b183fecd1c9050379a6b1a10782c1',  # fr-d1-s1-testnet-sl20261018
+            'f4ca9cf3ccb8a5241aefaaa51497171e877f8f7e25f701bd6cdac19f2a4c28cf',  # fr-d1-s2-testnet-sl20261018
+            '00c6ab29bf49d545608306a1543b309b555e04e943ad3cd4358018227512b669',  # fr-d1-s1-mainnet-sl20261018
+            '71357ba54d74ccaa04aad6acb39dc02cacdda9993effd3fefa2e5618c05efe74',  # fr-d1-s2-mainnet-sl20261018
+        }))
         self.assertFalse(ledger.lock.exists())
 
     def test_balance_reader_scope_and_envelope(self):
@@ -798,16 +808,14 @@ class PlanTest(Tmp):
                 spec = w.spec()
                 self.assertEqual(cp.check_spec(copy.deepcopy(spec), w.b0_plan), spec)
                 ids = [s['id'] for s in spec['segments']]
-                self.assertEqual(ids, ['S1', 'S2', 'S3', 'S4'] if chain == 'mainnet' else ['S1', 'S3', 'S4'])
+                self.assertEqual(ids, ['S1', 'S3', 'S4'])           # no GOV Safe log segment on either chain
                 s1 = cp.segment(spec, 'S1')
                 self.assertEqual((s1['start'], s1['end']), (PIN + 1, ANCHOR))
                 labels = {e['address']: e['labels'] for e in s1['addresses']}
                 for entry in w.b0_plan['addresses']:
                     self.assertEqual(labels[entry['address']], sorted(entry['labels']))
-                if chain == 'mainnet':
-                    self.assertEqual(labels[SAFE], ['safe:GOV'])
-                    s2 = cp.segment(spec, 'S2')
-                    self.assertEqual((s2['start'], s2['end'], [e['address'] for e in s2['addresses']]), (FROM, PIN, [SAFE]))
+                self.assertEqual(spec['extraTargets'], [])
+                self.assertFalse(any(SAFE == e['address'] for seg in spec['segments'] for e in seg['addresses']))
                 factory, index, vault = w.new_vault
                 self.assertEqual(cp.segment(spec, 'S4')['addresses'], [{'address': vault, 'labels': [f'vault:{factory}[1]']}])
                 edited = copy.deepcopy(spec)
@@ -885,8 +893,8 @@ class CollectorTest(Tmp):
                 self.assertEqual(result['status'], 'CONTENT_VERIFIED')
                 self.assertFalse(result['provenance']['authenticated'])
                 self.assertIn((w.new_vault[2]), verified['targets'])
-                if chain == 'mainnet':
-                    self.assertIn(SAFE, verified['targets'])
+                self.assertNotIn(SAFE, verified['targets'])
+                self.assertFalse(any(SAFE in json.dumps(b) for b in w.fake.bodies if is_logs(b)))
                 self.assertEqual(headers['scope'], 'H1')
                 sidecar = json.loads((w.root / 'run-b/headers.json').read_text())
                 ends = {e['number'] for e in sidecar['headers'] if 'windowEnd' in e['reason']}
@@ -1006,15 +1014,15 @@ class CollectorTest(Tmp):
         case('header null', 'testnet', lambda w: w.fake.header_overrides.update({3999: None}), 'HEADER_MISSING_OR_MISMATCH')
         case('gc01', 'mainnet', lambda w: w.fake.storage.update({(w.vaults[w.factories[0]], 4): amount(1)}),
              'GC01_NOT_SETTLED', 'BLOCKED')
-        case('safe code before fromBlock', 'mainnet', lambda w: w.fake.code.update({SAFE: (50, '0x6080')}),
-             'CODE_BEFORE_FROM_BLOCK', 'BLOCKED')
+        case('new vault code before fromBlock', 'mainnet', lambda w: w.fake.code.update({w.new_vault[2]: (50, '0x6080')}),
+             'CODE_BEFORE_FROM_BLOCK', 'BLOCKED', new_vault=True)
         case('archive missing', 'mainnet', lambda w: w.fake.faults.append(
             lambda c, b: (200, [{'jsonrpc': '2.0', 'id': i['id'], 'error': {'code': -32000, 'message': 'missing trie node'}}
                                 for i in b]) if isinstance(b, list) and b[0]['method'] == 'eth_getCode'
             and b[0]['params'][1] == hex(FROM - 1) else (200, {'jsonrpc': '2.0', 'id': b['id'],
                                                               'error': {'code': -32000, 'message': 'missing trie node'}})
             if not isinstance(b, list) and b['method'] == 'eth_getCode' and b['params'][1] == hex(FROM - 1) else None),
-             'ARCHIVE_STATE_UNAVAILABLE', 'BLOCKED')
+             'ARCHIVE_STATE_UNAVAILABLE', 'BLOCKED', new_vault=True)
         case('undeclared new vault', 'testnet', None, 'NEW_VAULT_REQUIRES_SPEC', 'INCOMPLETE', undeclared=True)
         case('removed log', 'testnet', lambda w: w.fake.add_rows([{**w.fake.row(w.stpros, [T['Transfer'], word(BOB), word(ALICE)],
                                                                                     3600, 3, amount(1)), 'removed': True}]),
@@ -1023,7 +1031,8 @@ class CollectorTest(Tmp):
             {3100: {**w.fake.header(3100), 'hash': '0x' + '66' * 32}}), 'HISTORY_EVENT_REORG')
         for name, chain, setup, code, status, kw in cases:
             with self.subTest(name):
-                w = World(self.root / name.replace(' ', '-'), chain, new_vault=kw.get('undeclared', False))
+                w = World(self.root / name.replace(' ', '-'), chain,
+                          new_vault=kw.get('undeclared', False) or kw.get('new_vault', False))
                 if setup:
                     setup(w)
                 with w.patch():
@@ -1083,24 +1092,24 @@ class CollectorTest(Tmp):
             self.assertIn(ctx.exception.code, ('SUPERVISOR_BOUND', 'RPC_HTTP'))
 
     def test_approved_checkpoint_is_reused_by_sha_and_never_recollected(self):
-        w = World(self.root, 'mainnet')
+        w = World(self.root, 'mainnet', new_vault=True)
         with w.patch():
             collect(w)
             manifest = json.loads((w.root / 'run-b/manifest.json').read_bytes())
-            s2 = next(s for s in manifest['segments'] if 'segments/S2/' in s['planFile'])
+            s3 = next(s for s in manifest['segments'] if 'segments/S3/' in s['planFile'])
             headers_sha = hashlib.sha256((w.root / 'run-b/headers.json').read_bytes()).hexdigest()
-            ref = {'planFile': s2['planFile'], 'planSha256': s2['planSha256'], 'chunks': s2['chunks'],
+            ref = {'planFile': s3['planFile'], 'planSha256': s3['planSha256'], 'chunks': s3['chunks'],
                    'headersFile': 'run-b/headers.json', 'headersSha256': headers_sha}
             anchor = ANCHOR + 50
             with self.assertRaises(HistoryRefused) as ctx:
-                w.spec(anchor=anchor, checkpoints={'S2': ref})
+                w.spec(anchor=anchor, checkpoints={'S3': ref})
             self.assertEqual(ctx.exception.code, 'CHECKPOINT_NOT_APPROVED')
-            approval = {s2['planSha256']: {'chain': 'mainnet', 'start': FROM, 'end': PIN,
-                                           'filterId': j.historical_filter_id([SAFE]),
-                                           'chunkListSha256': h.chunk_list_sha256(c['sha256'] for c in s2['chunks']),
+            approval = {s3['planSha256']: {'chain': 'mainnet', 'start': FROM, 'end': PIN,
+                                           'filterId': j.historical_filter_id([w.new_vault[2]]),
+                                           'chunkListSha256': h.chunk_list_sha256(c['sha256'] for c in s3['chunks']),
                                            'headersSha256': headers_sha}}
             with mock.patch.dict(cp.APPROVED_CHECKPOINTS, approval):
-                spec = w.spec(anchor=anchor, checkpoints={'S2': ref})
+                spec = w.spec(anchor=anchor, checkpoints={'S3': ref})
                 self.assertEqual(cp.check_spec(copy.deepcopy(spec), w.b0_plan), spec)
                 before = len(w.fake.bodies)
                 summary, _, _ = collect(w, spec=spec, run_id='run-refresh')
@@ -1115,7 +1124,7 @@ class CollectorTest(Tmp):
                 sidecar = json.loads((w.root / 'run-refresh/headers.json').read_text())
                 self.assertEqual(sidecar['imported'][0]['headersSha256'], headers_sha)
                 # a modified checkpoint file is refused, never silently re-collected
-                chunk = w.root / s2['chunks'][0]['path']
+                chunk = w.root / s3['chunks'][0]['path']
                 chunk.write_bytes(chunk.read_bytes().replace(b'"fetched_utc":"', b'"fetched_utc":"X'))
                 self.stop(lambda: collect(w, spec=spec, run_id='run-refresh-2'), 'CHECKPOINT_MODIFIED', 'REFUSED')
             self.assertEqual(cp.APPROVED_CHECKPOINTS, {})
@@ -1127,11 +1136,131 @@ class CollectorTest(Tmp):
         self.stop(lambda: col.atomic_write(self.root, 'link/x.json', b'{}'), 'RUN_ROOT_SYMLINK', 'REFUSED')
 
 
+
+# ------------------------------------------------------------------------------------------------ gas envelope
+DEPLOYER = '0x' + 'de' * 20
+
+
+def creation(fake, block, *, nonce=7, runtime=100, to=None, data='0x6080' + '00' * 10):
+    """A sample whose block is a synthetic B0 event block and whose transaction creates ``CREATE(DEPLOYER, nonce)``."""
+    tx = '0x' + hashlib.sha256(f'deploy {block}'.encode()).hexdigest()
+    sample = {'label': f'Sample{block}', 'block': block, 'runtimeBytes': runtime,
+              'address': cp.create_address(DEPLOYER, nonce), 'tx': tx}
+    fake.block_extra[block] = {'gasUsed': hex(5_000_000), 'gasLimit': hex(1_000_000_000), 'transactions': [tx]}
+    fake.txs[tx] = {'hash': tx, 'blockNumber': hex(block), 'blockHash': fake.hash(block), 'from': DEPLOYER,
+                    'nonce': hex(nonce), 'to': to, 'gas': hex(7_000_000), 'input': data}
+    return sample
+
+
+class GasEnvelopeTest(Tmp):
+    def test_doc_records_and_never_decides(self):
+        fake = FakeChain('testnet')
+        anchor = {'block': ANCHOR, 'hash': fake.hash(ANCHOR)}
+        fake.block_extra[ANCHOR] = {'gasLimit': hex(1_000_000_000)}
+        good = creation(fake, 150)
+        entries = {150: {'hash': fake.hash(150)}}
+
+        def doc(sample, block=None, tx='same', head=None):
+            values = [head or fake.header(ANCHOR), block or fake.header(sample['block']),
+                      fake.txs[sample['tx']] if tx == 'same' else tx]
+            return col.gas_envelope_doc('testnet', anchor, entries, [sample], values)
+        d = doc(good)
+        row = d['samples'][0]
+        self.assertEqual(row['status'], 'VERIFIED')
+        self.assertEqual((row['txCount'], row['singleTxGasUsed'], row['txGasLimit']), (1, 5_000_000, 7_000_000))
+        self.assertEqual(row['calldataGas'], 2 * 16 + 10 * 4)
+        self.assertEqual((row['inputBytes'], row['inputSha256']),
+                         (12, hashlib.sha256(bytes.fromhex('6080' + '00' * 10)).hexdigest()))
+        self.assertEqual(row['evmLowerBound'], 21_000 + 32_000 + 72 + 200 * 100)
+        self.assertEqual(d['summary'], {'maxAcceptedTxGasLimit': 7_000_000, 'maxSingleTxGasUsed': 5_000_000,
+                                        'maxEvmLowerBound': 53_072 + 20_000})
+        self.assertEqual(d['anchor']['gasLimit'], 1_000_000_000)
+        self.assertIn('not a per-transaction cap approval', d['statement'])
+        # two transactions in the block: the block gas is only an upper bound
+        two = {**fake.header(150), 'transactions': [good['tx'], '0x' + '11' * 32]}
+        self.assertIsNone(doc(good, block=two)['samples'][0]['singleTxGasUsed'])
+        # a wrong creation, another nonce, a missing or unlisted transaction: recorded, never counted
+        for name, tx in (('call', {**fake.txs[good['tx']], 'to': DEPLOYER}),
+                         ('nonce', {**fake.txs[good['tx']], 'nonce': '0x8'}),
+                         ('other block', {**fake.txs[good['tx']], 'blockNumber': hex(151)})):
+            with self.subTest(name):
+                bad = doc(good, tx=tx)
+                self.assertEqual(bad['samples'][0]['status'], 'MISMATCH')
+                self.assertEqual(bad['summary']['maxAcceptedTxGasLimit'], None)
+        self.assertEqual(doc(good, tx=None)['samples'][0]['status'], 'INCOMPLETE')
+        self.assertEqual(doc(good, block={**fake.header(150), 'transactions': []})['samples'][0]['status'], 'MISMATCH')
+        no_gas = {k: v for k, v in fake.header(150).items() if k != 'gasUsed'}
+        self.assertEqual(doc(good, block=no_gas)['samples'][0]['status'], 'INCOMPLETE')
+        failed = col.gas_envelope_doc('testnet', anchor, entries, [good], [fake.header(ANCHOR), None, None])   # null results
+        self.assertEqual((failed['samples'][0]['status'], failed['samples'][0]['blockHash']), ('INCOMPLETE', None))
+        # a header that differs from the verified one is a reorg STOP, never a record
+        self.stop(lambda: doc(good, block={**fake.header(150), 'hash': '0x' + '66' * 32}), 'HISTORY_EVENT_REORG')
+        self.stop(lambda: doc(good, head={**fake.header(ANCHOR), 'hash': '0x' + '55' * 32}), 'HISTORY_REORG')
+
+    def test_collection_reads_samples_at_reread_b0_event_blocks_in_one_post(self):
+        w = World(self.root, 'mainnet')
+        sample = creation(w.fake, 150)
+        absent = {**creation(w.fake, 160, nonce=9), 'label': 'not a B0 event block'}
+        w.fake.block_extra[ANCHOR] = {'gasLimit': hex(1_000_000_000)}
+        with w.patch(), mock.patch.dict(cp.GAS_ENVELOPE, {'mainnet': (sample, absent)}):
+            summary, gate, spec = collect(w)
+        self.assertIn('gas-envelope.json', summary['files'])
+        doc = json.loads((w.root / 'run-b/gas-envelope.json').read_text())
+        self.assertEqual([r['block'] for r in doc['samples']], [150])
+        self.assertEqual(doc['samples'][0]['status'], 'VERIFIED')
+        self.assertEqual(doc['summary']['maxAcceptedTxGasLimit'], 7_000_000)
+        reads = [b for b in w.fake.bodies if isinstance(b, list)
+                 and any(i['method'] == 'eth_getTransactionByHash' for i in b)]
+        self.assertEqual(len(reads), 1)
+        self.assertEqual([(i['method'], i['params'][0]) for i in reads[0]],
+                         [('eth_getBlockByNumber', hex(ANCHOR)), ('eth_getBlockByNumber', hex(150)),
+                          ('eth_getTransactionByHash', sample['tx'])])
+        self.assertEqual(gate.ledger.used, w.fake.posts)
+        self.assertIn('"event":"gasEnvelope"', (w.root / 'run-b/journal.jsonl').read_text())
+
+    def test_a_provider_error_is_recorded_transport_stops_propagate(self):
+        w = World(self.root, 'mainnet')
+        sample = creation(w.fake, 150)
+
+        def tx_error(c, body):
+            if isinstance(body, list) and any(i['method'] == 'eth_getTransactionByHash' for i in body):
+                return 200, [c.answer(i) if i['method'] != 'eth_getTransactionByHash' else
+                             {'jsonrpc': '2.0', 'id': i['id'], 'error': {'code': -32000, 'message': 'pruned'}} for i in body]
+        w.fake.faults.append(tx_error)
+        with w.patch(), mock.patch.dict(cp.GAS_ENVELOPE, {'mainnet': (sample,)}):
+            summary, _, _ = collect(w)
+            self.assertEqual(summary['status'], 'COLLECTED')
+            doc = json.loads((w.root / 'run-b/gas-envelope.json').read_text())
+            self.assertEqual((doc['status'], doc['detail']), ('NOT_COLLECTED', 'RPC_ERROR: pruned'))
+            self.assertNotIn('samples', doc)
+            w2 = World(self.root / 'w2', 'mainnet')
+            creation(w2.fake, 150)
+            w2.fake.faults.append(lambda c, body: (503, None) if isinstance(body, list) and any(
+                i['method'] == 'eth_getTransactionByHash' for i in body) else None)
+            with self.assertRaises(CollectionStop) as ctx:
+                collect(w2)
+            self.assertIn(ctx.exception.code, ('RPC_HTTP', 'TRANSPORT_ERROR'))
+            self.assertFalse((w2.root / 'run-b/manifest.json').exists())
+
+    def test_samples_are_the_recorded_deployments(self):
+        names = {'YieldVaultFactory_Implementation': 'YieldVaultFactory_Implementation', 'YieldVault': 'YieldVault',
+                 'YieldVaultFactory_test_Implementation': 'YieldVaultFactory_test_Implementation'}
+        for chain, samples in cp.GAS_ENVELOPE.items():
+            self.assertEqual(sorted(cp.GAS_ENVELOPE), ['mainnet', 'testnet'])
+            for sample in samples:
+                record = json.loads((ROOT / 'deployments' / chain / f'{names[sample["label"]]}.json').read_text())
+                self.assertEqual(sample['address'], record['address'].lower())
+                self.assertEqual(sample['runtimeBytes'], (len(record['deployedBytecode']) - 2) // 2)
+                self.assertEqual(sample['block'], int(record['receipt']['blockNumber'], 16))
+
 # ------------------------------------------------------------------------------------------------ C. headers.verify
 class HeadersVerifyTest(Tmp):
     def setUp(self):
         super().setUp()
-        self.w = World(self.root, 'mainnet')
+        # The new vault adds the pre-pin segment S3 (empty windows) and post-pin event blocks; a second post-pin
+        # transfer at 3101 makes two adjacent event blocks for the parent-link check.
+        self.w = World(self.root, 'mainnet', new_vault=True)
+        self.w.fake.add_rows([self.w.fake.row(self.w.stpros, [T['Transfer'], word(BOB), word(ALICE)], 3101, 0, amount(1))])
         self.patcher = self.w.patch()
         self.patcher.start()
         self.addCleanup(self.patcher.stop)
@@ -1163,7 +1292,7 @@ class HeadersVerifyTest(Tmp):
 
     def test_missing_event_block_header(self):
         doc = copy.deepcopy(self.sidecar)
-        doc['headers'] = [e for e in doc['headers'] if e['number'] != 3300]
+        doc['headers'] = [e for e in doc['headers'] if e['number'] != 3200]
         self.check(doc, 'HEADER_MISSING', 'INCOMPLETE')
 
     def test_plan_end_and_anchor_mismatch(self):
@@ -1193,9 +1322,10 @@ class HeadersVerifyTest(Tmp):
 
     def test_parent_link_and_unknown_reason(self):
         doc = copy.deepcopy(self.sidecar)
-        self.assertIn('eventBlock', self.entry(doc, 111)['reason'])
+        self.assertIn('eventBlock', self.entry(doc, 3100)['reason'])
+        self.assertIn('eventBlock', self.entry(doc, 3101)['reason'])
         self.assertIn('b0EventBlock', self.entry(doc, 110)['reason'])
-        self.entry(doc, 111)['parentHash'] = '0x' + '11' * 32
+        self.entry(doc, 3101)['parentHash'] = '0x' + '11' * 32
         self.check(doc, 'HEADER_CHAIN')
         doc = copy.deepcopy(self.sidecar)
         doc['headers'] = sorted(doc['headers'] + [{'number': 4499, 'hash': '0x' + '12' * 32, 'parentHash': '0x' + '12' * 32,
@@ -1427,6 +1557,15 @@ class RealB0CollectionTest(unittest.TestCase):
             self.assertEqual(result['status'], 'CONTENT_VERIFIED')
             self.assertEqual(verified['b0Prefix']['chunkListSha256'], h.B0_PREFIX[chain]['chunkListSha256'])
             self.assertEqual(gate.ledger.used, fake.posts)
+            # every gas-envelope sample is a re-read B0 event block of the real archive and its deployment row
+            sidecar = json.loads((self.root / f'run-{chain}/headers.json').read_text())
+            b0_blocks = {e['number'] for e in sidecar['headers'] if 'b0EventBlock' in e['reason']}
+            envelope = json.loads((self.root / f'run-{chain}/gas-envelope.json').read_text())
+            self.assertEqual([r['block'] for r in envelope['samples']], [x['block'] for x in cp.GAS_ENVELOPE[chain]])
+            for x in cp.GAS_ENVELOPE[chain]:
+                self.assertIn(x['block'], b0_blocks)
+                self.assertTrue(any(r['transactionHash'] == x['tx'] and r['address'] == x['address']
+                                    and int(r['blockNumber'], 16) == x['block'] for r in rows))
 
 
 if __name__ == '__main__':

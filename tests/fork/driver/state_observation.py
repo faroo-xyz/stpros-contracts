@@ -87,8 +87,11 @@ BRIDGE_KEYS = frozenset({'profile', 'owner', 'paused', 'weth', 'vTokenAddressCou
 SLP_KEYS = frozenset({'profile', 'owner', 'keeper', 'slps', 'slpCount', 'isSlp', 'storage'})
 GOVERNANCE_KEYS = frozenset({'proxyAdmin', 'accountCodeKeccak'})
 SAFE_KEYS = frozenset({'address', 'runtimeKeccak', 'singleton', 'singletonRuntimeKeccak', 'version', 'owners',
-                       'threshold', 'nonce', 'modules', 'modulePagination', 'guard', 'fallbackHandler', 'scanStart',
-                       'setupEvents', 'multiSendCallOnlyCandidate'})
+                       'threshold', 'nonce', 'modules', 'modulePagination', 'guard', 'fallbackHandler', 'eventHistory',
+                       'multiSendCallOnlyCandidate'})
+# Streamlined upgrade-readiness scope (owner decision 2026-10-18): the GOV Safe is observed by state reads at the anchor
+# only; its event history is not collected, so no event census or scan start exists to compare.
+SAFE_EVENT_HISTORY = 'NOT_COLLECTED'
 # getModulesPaginated: page size and the explicit page bound (at most 100 modules are enumerated; more is INCOMPLETE).
 MODULE_PAGE, MODULE_MAX_PAGES = 10, 10
 MODULE_PAGINATION_KEYS = frozenset({'pageSize', 'maxPages', 'pages'})
@@ -535,7 +538,7 @@ def check(verified, derived, doc, chain, *, observation_v1, observation_v1_sha25
     # governance and Safe
     sections['governance'] = _governance(doc['governance'], derived, reviewed, chain, doc['safe'])
     if chain == 'mainnet':
-        sections['safe'] = _safe(doc['safe'], derived, reviewed)
+        sections['safe'] = _safe(doc['safe'], reviewed)
     else:
         _require(doc['safe'] == NOT_APPLICABLE, 'STATE_VALUE', 'safe')
 
@@ -1002,7 +1005,7 @@ def _governance(d, derived, reviewed, chain, safe):
     _keys(d['proxyAdmin'], {'owner', 'runtimeKeccak'}, 'governance.proxyAdmin')
     owner = _addr(d['proxyAdmin']['owner'], 'pa owner')
     sec.equal(owner, derived['owners'].get(reg['proxy_admin']), 'PROXY_ADMIN_OWNER_REPLAY')
-    sec.equal(owner, h.EXTRA_TARGETS['mainnet'][0] if chain == 'mainnet' else
+    sec.equal(owner, h.GOV_SAFE if chain == 'mainnet' else
               next(a for a, label in reg['accounts'].items() if label.startswith('E1')), 'PROXY_ADMIN_OWNER_REGISTRY')
     sec.equal(_word(d['proxyAdmin']['runtimeKeccak'], 'pa'), _fixture(reviewed, 'ProxyAdmin_V4'), 'PROXY_ADMIN_RUNTIME')
     accounts = {'0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd', '0xb29eaea575bd4bae7d9a301446e6204c3a23adf1'}
@@ -1015,12 +1018,11 @@ def _governance(d, derived, reviewed, chain, safe):
     return sec
 
 
-def _safe(d, derived, reviewed):
+def _safe(d, reviewed):
     """FR-X8 candidate facts only: OBSERVED / UNAPPROVED. Nothing here is a trust anchor."""
     sec = Section('safe')
     _keys(d, SAFE_KEYS, 'safe')
-    address = h.EXTRA_TARGETS['mainnet'][0]
-    sec.equal(d['address'], address, 'SAFE_ADDRESS')
+    sec.equal(d['address'], h.GOV_SAFE, 'SAFE_ADDRESS')
     sec.equal(_word(d['runtimeKeccak'], 'safe'), reviewed['state']['safe']['code']['keccak256'], 'SAFE_PROXY_RUNTIME')
     _addr(d['singleton'], 'singleton')
     _word(d['singletonRuntimeKeccak'], 'singleton runtime')
@@ -1035,16 +1037,10 @@ def _safe(d, derived, reviewed):
     sec.derived['moduleCount'] = len(modules)
     _word(d['guard'], 'guard')
     _word(d['fallbackHandler'], 'fallbackHandler')
-    census = derived['safe'].get(address, {})
-    _keys(d['setupEvents'], {'logCount', 'firstLogBlock'}, 'safe.setupEvents')
-    sec.equal(d['setupEvents'], {'logCount': census.get('logCount'), 'firstLogBlock': census.get('firstLogBlock')},
-              'SAFE_CENSUS')
-    _keys(d['scanStart'], {'label', 'block', 'codeBefore'}, 'safe.scanStart')
-    _require(d['scanStart']['label'] == 'scanStart', 'STATE_VALUE', 'a scan start is never a creation block')
-    sec.fail_if(d['scanStart']['codeBefore'] not in ('0x', '0x0'), 'CODE_BEFORE_FROM_BLOCK',
-                'BLOCKED / NEEDS DESIGN DECISION (CR-D11)')
-    sec.add('INCOMPLETE', 'FR-X8', 'Safe identity OBSERVED / UNAPPROVED; event replay BLOCKED until an approved '
-                                  'identity manifest fixes the singleton version')
+    _require(d['eventHistory'] == SAFE_EVENT_HISTORY, 'STATE_VALUE', 'safe event history is out of scope')
+    sec.derived['eventHistory'] = SAFE_EVENT_HISTORY
+    sec.add('INCOMPLETE', 'FR-X8', 'Safe identity OBSERVED / UNAPPROVED until an approved identity manifest fixes the '
+                                  'singleton version; the Safe event history is not collected (current state only)')
     sec.derived['candidate'] = 'faroo-safe-identity-candidate-v1 facts only; no expected value'
     return sec
 

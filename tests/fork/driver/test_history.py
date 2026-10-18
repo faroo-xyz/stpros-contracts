@@ -176,7 +176,7 @@ def testnet_case(root, *, new_vault=True, drop_new_vault=False, extra_rows=(), n
 
 def mainnet_case(root, *, safe_segment=True, safe_target=True, safe_from=FROM, safe_code_before=()):
     reg = REG['mainnet']
-    stpros, safe = reg['stpros'], h.EXTRA_TARGETS['mainnet'][0]
+    stpros, safe = reg['stpros'], h.GOV_SAFE
     v1 = '0x' + 'd1' * 20
     base = [*reg['factories'], stpros, v1]
     a = Archive(root, 'mainnet')
@@ -362,13 +362,37 @@ class ContentVerificationTest(Tmp):
         self.refused(lambda: self.auth(a, shaped, name, digest), 'B0_PREFIX_MODIFIED')
 
 
+def with_safe_target():
+    """The retained generic extra-target mechanism, exercised with the GOV Safe as an explicit extra target. The
+    streamlined scope declares none (``StreamlinedSafeScopeTest``)."""
+    return mock.patch.dict(h.EXTRA_TARGETS, {'mainnet': (h.GOV_SAFE,)})
+
+
+class StreamlinedSafeScopeTest(Tmp):
+    def test_no_default_extra_target_and_a_safe_target_is_unexpected(self):
+        self.assertEqual(h.EXTRA_TARGETS, {'mainnet': (), 'testnet': ()})
+        a, prefix, targets = mainnet_case(self.root, safe_target=False)
+        name, digest, _ = a.manifest(FROM, ANCHOR, targets)
+        derived = hi.derive(self.auth(a, prefix, name, digest), 'mainnet')
+        self.assertEqual(derived['safe'], {})
+        a, prefix, targets = mainnet_case(self.root / 'with-safe')
+        name, digest, _ = a.manifest(FROM, ANCHOR, targets)
+        self.refused(lambda: self.auth(a, prefix, name, digest), 'HISTORY_TARGET_UNEXPECTED')
+
+
 class SafeHistoryTest(Tmp):
+    def setUp(self):
+        super().setUp()
+        patch = with_safe_target()
+        patch.start()
+        self.addCleanup(patch.stop)
+
     def test_safe_complete_history_required(self):
         a, prefix, targets = mainnet_case(self.root)
         name, digest, _ = a.manifest(FROM, ANCHOR, targets)
         result = self.auth(a, prefix, name, digest)
         derived = hi.derive(result, 'mainnet')
-        safe = h.EXTRA_TARGETS['mainnet'][0]
+        safe = h.GOV_SAFE
         self.assertTrue(derived['safe'][safe]['replay'].startswith('BLOCKED'))
         self.assertEqual(derived['safe'][safe]['firstLogBlock'], 110)
 
@@ -381,7 +405,7 @@ class SafeHistoryTest(Tmp):
         self.refused(lambda: self.auth(a, prefix, name, digest), 'HISTORY_TARGET_MISSING', 'INCOMPLETE')
 
     def test_safe_history_starting_after_creation_refused(self):
-        safe = h.EXTRA_TARGETS['mainnet'][0]
+        safe = h.GOV_SAFE
         a, prefix, targets = mainnet_case(self.root, safe_code_before=[safe])
         name, digest, _ = a.manifest(FROM, ANCHOR, targets)
         self.refused(lambda: self.auth(a, prefix, name, digest), 'HISTORY_START_HAS_CODE', 'INCOMPLETE')
@@ -390,7 +414,7 @@ class SafeHistoryTest(Tmp):
         self.refused(lambda: self.auth(b, prefix, name, digest), 'HISTORY_TARGET_GAP_OR_OVERLAP', 'INCOMPLETE')
 
     def test_safe_target_is_the_reviewed_gov_identity(self):
-        safe = h.EXTRA_TARGETS['mainnet'][0]
+        safe = h.GOV_SAFE
         self.assertEqual(safe, ci.REAL_IDENTITIES['mainnet']['GOV'])
         self.assertIn(safe, REG['mainnet']['accounts'])
         self.assertEqual(h.EXTRA_TARGETS['testnet'], ())
@@ -1131,9 +1155,10 @@ class AuthorityGateTest(Tmp):
         self.assertEqual(docs['summary.json']['checks']['post_pin_unclassified_review']['status'], 'PASS')
         self.assert_gated(docs, 'unclassified_history_review')
 
+    @with_safe_target()
     def test_post_pin_safe_events_are_unclassified(self):
         a, prefix, targets = mainnet_case(self.root)
-        safe = h.EXTRA_TARGETS['mainnet'][0]
+        safe = h.GOV_SAFE
         a.segments.pop()
         a.segment('incremental', targets, PIN + 1, ANCHOR, [log(safe, [topic('ChangedThreshold(uint256)')], 3300, 0)])
         name, digest, _ = a.manifest(FROM, ANCHOR, targets)
@@ -1371,26 +1396,21 @@ class RealB0ArchiveTest(unittest.TestCase):
         for chain in ('testnet', 'mainnet'):
             manifest = self.manifest(chain)
             b0 = self.b0(chain)
-            if chain == 'testnet':
-                verified = h.verify_manifest(manifest, self.root / 'logscan', chain)
-                self.assertEqual(verified['b0Prefix']['chunkListSha256'], h.B0_PREFIX[chain]['chunkListSha256'])
-            else:
-                # The GOV Safe has no history in B0: the mainnet prefix alone is INCOMPLETE.
-                with self.assertRaises(HistoryRefused) as ctx:
+            # No extra log target (streamlined scope): the B0 prefix alone closes the target set on both chains.
+            verified = h.verify_manifest(manifest, self.root / 'logscan', chain)
+            self.assertEqual(verified['b0Prefix']['chunkListSha256'], h.B0_PREFIX[chain]['chunkListSha256'])
+            if chain == 'mainnet':
+                with with_safe_target(), self.assertRaises(HistoryRefused) as ctx:
                     h.verify_manifest(manifest, self.root / 'logscan', chain)
                 self.assertEqual((ctx.exception.code, ctx.exception.status), ('HISTORY_TARGET_MISSING', 'INCOMPLETE'))
-                verified = h.verify_archive(manifest, self.root / 'logscan', chain)
             derived = hi.derive(verified, chain)
             self.assertEqual(derived['authorityEventsAfterPin'], [])
             docs, mism = hi.check_observation(derived, self.observation(derived, chain, b0), chain)
             self.assertFalse(any(mism.values()), chain)
             self.assertEqual(docs['summary.json']['beaconIdentityNotVerified'], [], chain)
             stpros = REG[chain]['stpros']
-            if chain == 'testnet':
-                self.assertEqual(inv.normalize(docs, chain, stpros), inv.normalize(b0, chain, stpros))
-            else:
-                with self.assertRaisesRegex(inv.InventoryRefused, 'INCOMPLETE: log coverage'):
-                    inv.normalize(docs, chain, stpros)
+            # Both chains now re-derive the B0 inventory exactly (mainnet no longer waits for a Safe history).
+            self.assertEqual(inv.normalize(docs, chain, stpros), inv.normalize(b0, chain, stpros))
             for token, x in b0['holders.json'].items():
                 self.assertEqual({a: v for a, v in derived['holders'][token]['balances'].items() if int(v)}, x['holders'])
             self.assertEqual(len(derived['withdrawOwners']), b0['withdrawals.json']['request_owners'])

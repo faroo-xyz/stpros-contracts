@@ -63,11 +63,13 @@ B0_PREFIX = {
                 'chunkCount': 383,
                 'chunkListSha256': 'ede624d0307bd3879613a24e27a98c15d269d6f4c467c11e17375ed4f88fa5dd'},
 }
-# Campaign targets beyond the B0 plan. The mainnet GOV Safe (`tools/release/registry.json`, the
-# `GOV` identity of `campaign_input.REAL_IDENTITIES`) needs its complete history from before its
-# creation, not only events after the B0 pin. WPROS is deliberately not a target (state reads only;
-# see the research design record).
-EXTRA_TARGETS = {'mainnet': ('0x3658e00f5ddb9fa0c7e9820e8d16c3c17eab73ca',), 'testnet': ()}
+# Campaign log targets beyond the B0 plan: none. The mainnet GOV Safe (`tools/release/registry.json`, the
+# `GOV` identity of `campaign_input.REAL_IDENTITIES`) is observed by state reads at the anchor only (singleton,
+# owners, threshold, nonce, modules, guard, fallback handler); its event history (about 8.7M pre-pin blocks) is
+# not collected in the streamlined upgrade-readiness scope (owner decision 2026-10-18). WPROS is deliberately
+# not a target either (state reads only; see the research design record).
+EXTRA_TARGETS = {'mainnet': (), 'testnet': ()}
+GOV_SAFE = '0x3658e00f5ddb9fa0c7e9820e8d16c3c17eab73ca'
 
 
 class HistoryRefused(ValueError):

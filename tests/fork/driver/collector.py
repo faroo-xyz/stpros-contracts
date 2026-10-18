@@ -4,15 +4,18 @@
 ``<historyRoot>/<runId>/`` only:
 
   spec.json, segments/<id>/plan.json, segments/<id>/chunks/*.json, headers/part-*.json, headers.json,
-  observation.json, state-observation.json, inventory/*.json, inventory.json, manifest.json, journal.jsonl
+  gas-envelope.json, observation.json, state-observation.json, inventory/*.json, inventory.json, manifest.json,
+  journal.jsonl
 
 The immutable B0 archive is referenced in place (``<historyRoot>/<b0Dir>/``) by its pinned SHA-256 values and
 is never copied or rewritten. Every network read goes through ``transport`` (one ``HttpGate`` with a persistent
 ``BudgetLedger``); nothing reads the environment, a key or a wallet, and nothing is ever sent.
 
 A real collection needs an owner FR-D1 authorization whose SHA-256 is pinned in
-``APPROVED_COLLECTION_AUTHORIZATIONS``; that set is empty, so only a SIMULATION authorization over an injected
-offline transport can run. Statuses written here are ``COLLECTED`` and ``CONTENT_VERIFIED``; the state
+``APPROVED_COLLECTION_AUTHORIZATIONS`` (``fr_d1_approvals.COLLECTION``); that set is empty, so only a SIMULATION
+authorization over an injected offline transport can run. A public collection also needs the v2 schema
+(``fr_d1_scope``): its campaign envelope is checked against the code, the spec against the envelope, and the anchor
+and spec SHA-256 are pinned in the budget ledger before the run's first read. Statuses written here are ``COLLECTED`` and ``CONTENT_VERIFIED``; the state
 observation's B-local section statuses come from ``state_observation.check``. No code path writes a C-level or
 approval status.
 
@@ -32,6 +35,8 @@ import time
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import collection_plan as cp  # noqa: E402
+import fr_d1_approvals as approvals  # noqa: E402
+import fr_d1_scope as scope  # noqa: E402
 import headers as hd  # noqa: E402
 import history as h  # noqa: E402
 import history_inventory as hi  # noqa: E402
@@ -45,9 +50,9 @@ AUTHORIZATION_SCHEMA = 'faroo-fork-collection-authorization-v1'
 AUTH_KEYS = frozenset({'schema', 'authorizationId', 'mode', 'chains', 'methods', 'maxHttpPosts', 'maxRestarts',
                        'statement'})
 AUTH_MODES = ('SIMULATION', 'PUBLIC_READ_ONLY')
-# FR-D1 owner authorizations of public read-only collection, pinned by a separate reviewed change. Empty: no
-# real collection is authorized. Never add an entry from this package.
-APPROVED_COLLECTION_AUTHORIZATIONS = frozenset()
+# FR-D1 owner authorizations of public read-only collection, pinned by a separate reviewed change in
+# ``fr_d1_approvals.py``. Empty: no real collection is authorized. Never add an entry from this package.
+APPROVED_COLLECTION_AUTHORIZATIONS = approvals.COLLECTION
 AUTHORIZED_METHODS = tuple(sorted(tp.COLLECTION_METHODS | {tp.BALANCE_METHOD}))
 JOURNAL_SCHEMA = 'faroo-fork-collection-journal-v1'
 RESTARTABLE = frozenset(('RPC_HTTP', 'TRANSPORT_ERROR'))
@@ -55,19 +60,23 @@ EMPTY_CODE = ('0x', '0x0')
 SETTLED = 3
 _RUN_ID = re.compile(r'[A-Za-z0-9][A-Za-z0-9._-]{0,63}')
 ZERO_HASH = '0x' + '00' * 32
+GAS_ENVELOPE_SCHEMA = 'faroo-fork-gas-envelope-v1'
+TX_BASE_GAS, CREATE_GAS, CODE_DEPOSIT_GAS = 21_000, 32_000, 200
+GAS_ENVELOPE_STATEMENT = ('provider data at collection time (OBSERVED); not a per-transaction cap approval. evmLowerBound '
+                          'assumes the Ethereum gas schedule for creation (G-A1, NOT VERIFIED for Pharos)')
 
 
 def _canonical(doc):
     return cp.canonical_bytes(doc)
 
 
-def load_authorization(path, sha256):
-    """Reads an authorization by raw SHA-256. PUBLIC_READ_ONLY is refused unless pinned as approved."""
-    raw = Path(path).read_bytes()
-    if hashlib.sha256(raw).hexdigest() != sha256:
-        raise CollectionStop('AUTHORIZATION_HASH', str(path), 'REFUSED')
-    doc = json.loads(raw)
-    ok = (isinstance(doc, dict) and set(doc) == AUTH_KEYS and doc['schema'] == AUTHORIZATION_SCHEMA
+def load_authorization(path, sha256, *, bind_sources=True):
+    """Reads an authorization by raw SHA-256. PUBLIC_READ_ONLY is refused unless pinned as approved. A v2 record
+    (``fr_d1_scope.COLLECTION_SCHEMA``) is checked against the code's envelope first."""
+    _, doc = scope.read_record(path, sha256, 'AUTHORIZATION_HASH')
+    v2 = isinstance(doc, dict) and doc.get('schema') == scope.COLLECTION_SCHEMA
+    ok = (isinstance(doc, dict) and set(doc) == (scope.COLLECTION_KEYS if v2 else AUTH_KEYS)
+          and doc['schema'] in (AUTHORIZATION_SCHEMA, scope.COLLECTION_SCHEMA)
           and doc['mode'] in AUTH_MODES and isinstance(doc['authorizationId'], str)
           and _RUN_ID.fullmatch(doc['authorizationId']) is not None
           and isinstance(doc['chains'], list) and doc['chains'] and set(doc['chains']) <= set(h.CHAINS)
@@ -78,6 +87,8 @@ def load_authorization(path, sha256):
         raise CollectionStop('AUTHORIZATION_KEYS', str(path), 'REFUSED')
     if doc['mode'] == 'SIMULATION' and 'SIMULATION' not in doc['statement']:
         raise CollectionStop('AUTHORIZATION_KEYS', 'a simulation authorization must say so', 'REFUSED')
+    if v2:
+        scope.check_collection_authorization(doc, bind_sources=bind_sources)
     if doc['mode'] == 'PUBLIC_READ_ONLY' and sha256 not in APPROVED_COLLECTION_AUTHORIZATIONS:
         raise CollectionStop('FR_D1_NOT_AUTHORIZED', 'owner FR-D1 authorization is not approved', 'REFUSED')
     return {**doc, 'sha256': sha256}
@@ -204,7 +215,8 @@ def _header_entry(raw, number):
 
 class Collector:
     def __init__(self, spec, spec_sha256, history_root, run_id, gate, *, b0_dir, utc, clock_ms=None,
-                 observe=None, reviewed_runtimes=None, reviewed_state=None, classifier=None, collector='B'):
+                 observe=None, reviewed_runtimes=None, reviewed_state=None, classifier=None, collector='B',
+                 reference=None):
         self.spec, self.spec_sha256 = spec, spec_sha256
         self.history_root = Path(history_root)
         if _RUN_ID.fullmatch(run_id) is None or run_id == b0_dir:
@@ -217,6 +229,7 @@ class Collector:
         self.reviewed_state = reviewed_state
         self.classifier = tp.REVIEWED_SIZE_ERRORS if classifier is None else classifier
         self.collector = collector
+        self.reference = reference          # S2: the verified S1 ledger reference (fr_d1_scope.s1_reference)
         self.chain = spec['chain']
 
     # -- step 0 ----------------------------------------------------------------------------------------
@@ -236,6 +249,9 @@ class Collector:
             import fork_mode
             fork_mode.require_export_root(self.history_root, 'collection')
             fork_mode.require_export_root(self.gate.ledger.directory, 'collection')
+            if 'scope' not in auth:
+                raise CollectionStop('AUTHORIZATION_SCOPE_REQUIRED', 'a public collection needs a v2 authorization '
+                                     'that binds the campaign envelope', 'REFUSED')
         spec_bytes = _canonical(self.spec)
         if hashlib.sha256(spec_bytes).hexdigest() != self.spec_sha256:
             raise CollectionStop('SPEC_SHA', 'the spec differs from the reviewed SHA-256', 'REFUSED')
@@ -244,6 +260,8 @@ class Collector:
             cp.check_spec(self.spec, b0_plan)
         except h.HistoryRefused as error:
             raise CollectionStop(error.code, str(error), 'REFUSED') from None
+        if 'scope' in auth:
+            scope.check_spec(self.spec, auth)
         self.b0_plan = b0_plan
         self.run_root.mkdir(parents=True, exist_ok=True)
         _inside(self.history_root, self.run_root / 'spec.json')
@@ -473,6 +491,31 @@ class Collector:
             if parent is not None and e['parentHash'] != parent['hash']:
                 raise CollectionStop('HISTORY_REORG', f'parent link {n - 1} -> {n}')
 
+    async def gas_envelope(self, entries):
+        """One POST (FR-D3 / FR-D4 evidence): the anchor header and every ``cp.GAS_ENVELOPE`` sample whose block this
+        run re-read as a B0 event block, with its transaction. None when the chain has no samples."""
+        if not cp.GAS_ENVELOPE.get(self.chain):
+            return None
+        anchor = self.spec['anchor']
+        samples = [s for s in cp.GAS_ENVELOPE[self.chain] if s['block'] in entries]
+        calls = [('eth_getBlockByNumber', [hex(anchor['block']), False])]
+        for sample in samples:
+            calls += [('eth_getBlockByNumber', [hex(sample['block']), False]),
+                      ('eth_getTransactionByHash', [sample['tx']])]
+        try:
+            values = await self.lane.values(calls)
+        except CollectionStop as stop:
+            if stop.code != 'RPC_ERROR':            # transport, budget and envelope STOPs propagate
+                raise
+            # A provider error answer fails the whole batch (native ReleaseRpc): recorded, never retried here.
+            self.journal.append('gasEnvelope', status='NOT_COLLECTED', detail=stop.detail[:300], **self._ledger_mark())
+            return {'schema': GAS_ENVELOPE_SCHEMA, 'chain': self.chain, 'chainId': h.CHAINS[self.chain],
+                    'status': 'NOT_COLLECTED', 'detail': f'{stop.code}: {stop.detail[:300]}',
+                    'statement': GAS_ENVELOPE_STATEMENT}
+        doc = gas_envelope_doc(self.chain, anchor, entries, samples, values)
+        self.journal.append('gasEnvelope', status='OBSERVED', samples=len(samples), **self._ledger_mark())
+        return doc
+
     # -- the run ---------------------------------------------------------------------------------------
     async def run(self, invocation):
         self.preflight()
@@ -485,6 +528,10 @@ class Collector:
             self.rpc = tp.release_rpc(self.gate)
             self.lane = tp.Lane(self.rpc, self.gate)
             try:
+                pin = scope.bind_run(self)              # before the first read; None for a v1 SIMULATION run
+                if pin is not None:
+                    self.journal.append('scopePin', **{k: v for k, v in pin.items() if k != 'newVaults'},
+                                        **self._ledger_mark())
                 return await self._run()
             except CollectionStop as stop:
                 self.journal.append('stop', code=stop.code, status=stop.status, detail=stop.detail[:500],
@@ -522,6 +569,7 @@ class Collector:
         imported, need_fetch = self.imported_headers(plans, need)
         entries = {**await self.ensure_headers({n: r for n, r in need.items() if n in need_fetch}), **imported}
         self.check_headers(entries, plans, all_rows + b0_rows, need)
+        envelope = await self.gas_envelope(entries)
         manifest = {'schema': h.SCHEMA, 'chain': self.chain, 'chainId': h.CHAINS[self.chain],
                     'fromBlock': spec['fromBlock'], 'blockNumber': spec['anchor']['block'],
                     'blockHash': spec['anchor']['hash'], 'inventorySha256': ZERO_HASH,
@@ -530,7 +578,7 @@ class Collector:
                     'segments': segments}
         verified = self._verify(manifest)
         derived = hi.derive(verified, self.chain)
-        outputs = {}
+        outputs = {} if envelope is None else {'gas-envelope.json': envelope}
         if self.observe is not None:
             balance = tp.BalanceReader(self.gate, self.chain, [spec['balance']['address']], spec['balance']['block'])
             observation, state = await self.observe(self, verified, derived, balance)
@@ -626,6 +674,63 @@ class Collector:
         digest = atomic_write(self.run_root, 'inventory.json', inv.canonical(normalized))
         manifest['inventorySha256'] = '0x' + digest
         return {'inventory': 'BOUND', 'inventorySha256': '0x' + digest, 'inventoryOverall': docs['summary.json']['overall']}
+
+
+def _quantity(raw, key):
+    value = raw.get(key) if isinstance(raw, dict) else None
+    return int(value, 16) if isinstance(value, str) and re.fullmatch(r'0x[0-9a-f]+', value) else None
+
+
+def calldata_gas(data):
+    return sum(4 if b == 0 else 16 for b in bytes.fromhex(data[2:]))
+
+
+def gas_envelope_doc(chain, anchor, entries, samples, values):
+    """``faroo-fork-gas-envelope-v1`` from one POST: the anchor header, then (header, transaction) per sample.
+
+    Each sample block must be a header this run already verified (``entries``); a different hash is a reorg STOP.
+    Everything else is recorded, never decided: a sample whose header or transaction is null, incomplete or not the
+    expected direct creation is ``INCOMPLETE`` / ``MISMATCH`` and contributes nothing to the summary."""
+    head = values[0]
+    if not isinstance(head, dict) or head.get('number') != hex(anchor['block']) or head.get('hash') != anchor['hash']:
+        raise CollectionStop('HISTORY_REORG', 'anchor header differs at the gas-envelope read')
+    rows = []
+    for k, sample in enumerate(samples):
+        block, tx = values[1 + 2 * k], values[2 + 2 * k]
+        block = block if isinstance(block, dict) else {}
+        if block and block.get('hash') != entries[sample['block']]['hash']:
+            raise CollectionStop('HISTORY_EVENT_REORG', f'gas-envelope block {sample["block"]}')
+        listed = block.get('transactions') if isinstance(block.get('transactions'), list) else None
+        row = {'label': sample['label'], 'block': sample['block'], 'blockHash': block.get('hash'), 'tx': sample['tx'],
+               'address': sample['address'], 'runtimeBytes': sample['runtimeBytes'],
+               'blockGasUsed': _quantity(block, 'gasUsed'), 'blockGasLimit': _quantity(block, 'gasLimit'),
+               'txCount': None if listed is None else len(listed), 'txGasLimit': None, 'inputBytes': None,
+               'inputSha256': None, 'calldataGas': None, 'evmLowerBound': None, 'singleTxGasUsed': None,
+               'status': 'INCOMPLETE'}
+        if block and isinstance(tx, dict) and isinstance(tx.get('input'), str) and re.fullmatch(r'0x([0-9a-f]{2})*', tx['input']):
+            creation = (tx.get('to') is None and isinstance(tx.get('from'), str) and _quantity(tx, 'nonce') is not None
+                        and cp.create_address(tx['from'].lower(), _quantity(tx, 'nonce')) == sample['address'])
+            placed = (tx.get('hash') == sample['tx'] and _quantity(tx, 'blockNumber') == sample['block']
+                      and tx.get('blockHash') == block['hash'] and listed is not None and sample['tx'] in listed)
+            row['txGasLimit'] = _quantity(tx, 'gas')
+            row['inputBytes'] = len(tx['input']) // 2 - 1
+            row['inputSha256'] = hashlib.sha256(bytes.fromhex(tx['input'][2:])).hexdigest()
+            row['calldataGas'] = calldata_gas(tx['input'])
+            row['evmLowerBound'] = TX_BASE_GAS + CREATE_GAS + row['calldataGas'] + CODE_DEPOSIT_GAS * sample['runtimeBytes']
+            complete = None not in (row['txGasLimit'], row['blockGasUsed'], row['blockGasLimit'], row['txCount'])
+            row['status'] = ('VERIFIED' if complete else 'INCOMPLETE') if creation and placed else 'MISMATCH'
+            if row['status'] == 'VERIFIED' and row['txCount'] == 1:
+                row['singleTxGasUsed'] = row['blockGasUsed']
+        rows.append(row)
+    ok = [r for r in rows if r['status'] == 'VERIFIED']
+    return {'schema': GAS_ENVELOPE_SCHEMA, 'chain': chain, 'chainId': h.CHAINS[chain], 'status': 'OBSERVED',
+            'anchor': {'block': anchor['block'], 'hash': anchor['hash'], 'gasLimit': _quantity(head, 'gasLimit')},
+            'samples': rows,
+            'summary': {'maxAcceptedTxGasLimit': max((r['txGasLimit'] for r in ok), default=None),
+                        'maxSingleTxGasUsed': max((r['singleTxGasUsed'] for r in ok
+                                                   if r['singleTxGasUsed'] is not None), default=None),
+                        'maxEvmLowerBound': max((r['evmLowerBound'] for r in ok), default=None)},
+            'statement': GAS_ENVELOPE_STATEMENT}
 
 
 def content_verify(history_root, run_id, spec, *, manifest_sha256=None):

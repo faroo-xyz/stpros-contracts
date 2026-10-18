@@ -48,9 +48,6 @@ class Plan:
     def code(self, key, address):
         self.items.append((key, 'eth_getCode', [address, self.block]))
 
-    def code_at(self, key, address, block):
-        self.items.append((key, 'eth_getCode', [address, hex(block)]))
-
     def slot(self, key, address, slot):
         self.items.append((key, 'eth_getStorageAt', [address, hex(slot), self.block]))
 
@@ -190,7 +187,7 @@ def assemble_v1(derived, chain, block, block_hash, r, stpros_profile):
 
 
 # ------------------------------------------------------------------------------------------------ identity stage
-def plan_identity(derived, chain, block, from_block):
+def plan_identity(derived, chain, block):
     reg = h.registry(chain)
     p = Plan(block)
     for proxy in reg['expected_proxies']:
@@ -208,10 +205,9 @@ def plan_identity(derived, chain, block, from_block):
     p.code(('pacode',), reg['proxy_admin'])
     p.call(('paowner',), reg['proxy_admin'], 'owner()')
     if chain == 'mainnet':
-        safe = h.EXTRA_TARGETS['mainnet'][0]
+        safe = h.GOV_SAFE
         p.code(('safecode',), safe)
         p.slot(('singleton',), safe, 0)
-        p.code_at(('safebefore',), safe, from_block - 1)
     return p
 
 
@@ -305,7 +301,7 @@ def plan_state(derived, chain, block, prof, identity, counterparties=None, regis
     for account in ('0x4597c97a43dfbb4a398e2b16aa9ce61f90d801dd', '0xb29eaea575bd4bae7d9a301446e6204c3a23adf1'):
         p.code(('acode', account), account)
     if chain == 'mainnet':
-        safe = h.EXTRA_TARGETS['mainnet'][0]
+        safe = h.GOV_SAFE
         for name in ('getOwners', 'getThreshold', 'nonce', 'VERSION'):
             p.call(('safe', name), safe, f'{name}()')
         p.call(('safe', 'modules', SENTINEL), safe, MODULES_SIGNATURE, SENTINEL, MODULE_PAGE)   # page 1
@@ -393,7 +389,7 @@ def universes(derived, verified, chain):
 
 # ------------------------------------------------------------------------------------------------ assembly
 def assemble_state(derived, chain, block, block_hash, block_timestamp, v1_sha256, prof, identity, impl_codes, r,
-                   native_balance, from_block, pages=None):
+                   native_balance, pages=None):
     reg = h.registry(chain)
     stpros, wpros = reg['stpros'], reg['wpros']
     doc = {'schema': so.SCHEMA, 'chain': chain, 'chainId': h.CHAINS[chain], 'block': block, 'blockHash': block_hash,
@@ -472,7 +468,7 @@ def assemble_state(derived, chain, block, block_hash, block_timestamp, v1_sha256
     doc['governance'] = {'proxyAdmin': {'owner': address(identity[('paowner',)]), 'runtimeKeccak': code_hash(identity[('pacode',)])},
                          'accountCodeKeccak': {k[1]: code_hash(val) for k, val in r.items() if k[0] == 'acode'}}
     if chain == 'mainnet':
-        doc['safe'] = {'address': h.EXTRA_TARGETS['mainnet'][0], 'runtimeKeccak': code_hash(identity[('safecode',)]),
+        doc['safe'] = {'address': h.GOV_SAFE, 'runtimeKeccak': code_hash(identity[('safecode',)]),
                        'singleton': slot_address(identity[('singleton',)]),
                        'singletonRuntimeKeccak': code_hash(impl_codes[('singletoncode',)]),
                        'version': text(r[('safe', 'VERSION')]), 'owners': addresses(r[('safe', 'getOwners')]),
@@ -480,10 +476,7 @@ def assemble_state(derived, chain, block, block_hash, block_timestamp, v1_sha256
                        'modules': [m for page in pages for m in page['modules']],
                        'modulePagination': {'pageSize': MODULE_PAGE, 'maxPages': MODULE_MAX_PAGES, 'pages': pages},
                        'guard': word(r[('safe', 'guard')]), 'fallbackHandler': word(r[('safe', 'fallback')]),
-                       'scanStart': {'label': 'scanStart', 'block': from_block,
-                                     'codeBefore': identity[('safebefore',)]},
-                       'setupEvents': {'logCount': derived['safe'][h.EXTRA_TARGETS['mainnet'][0]]['logCount'],
-                                       'firstLogBlock': derived['safe'][h.EXTRA_TARGETS['mainnet'][0]]['firstLogBlock']},
+                       'eventHistory': so.SAFE_EVENT_HISTORY,
                        'multiSendCallOnlyCandidate': 'NOT_SUPPLIED'}
     else:
         doc['safe'] = so.NOT_APPLICABLE
@@ -530,7 +523,7 @@ async def read(collector, verified, derived, balance):
     block, block_hash = spec['anchor']['block'], spec['anchor']['hash']
     reviewed = collector.reviewed_state or so.reviewed_sources(chain)
     full = universes(derived, verified, chain)
-    identity = await run_plan(lane, plan_identity(full, chain, block, spec['fromBlock']))
+    identity = await run_plan(lane, plan_identity(full, chain, block))
     impl_codes = await run_plan(lane, plan_impl_codes(identity, chain, block))
     prof, _ = profiles(reviewed, identity, impl_codes, full, chain)
     stpros = h.registry(chain)['stpros']
@@ -547,11 +540,11 @@ async def read(collector, verified, derived, balance):
     native = await balance.get(stpros, block) if prof[stpros] != so.UNKNOWN else tp.NOT_OBSERVED
     pages = None
     if chain == 'mainnet':
-        safe = h.EXTRA_TARGETS['mainnet'][0]
+        safe = h.GOV_SAFE
         pages = await module_pages(lane, safe, block, reads[('safe', 'modules', SENTINEL)])
     v1_sha = sha256(canonical_bytes(observation))
     state = assemble_state(full, chain, block, block_hash, collector.anchor_header['timestamp'], v1_sha, prof, identity,
-                           impl_codes, reads, native, spec['fromBlock'], pages)
+                           impl_codes, reads, native, pages)
     if isinstance(state['stpros'], dict) and 'wrapped' in state['stpros']:
         state['stpros']['wrapped'] = state['wpros']['balanceOf'][stpros]
     if chain == 'mainnet':

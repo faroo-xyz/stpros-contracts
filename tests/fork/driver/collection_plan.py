@@ -3,8 +3,9 @@
 The spec is the reviewed input of both collections (B's and C's): chain, the common ``fromBlock``, the B0
 pin, the anchor ``B`` and its hash, the header scope and the A' segment layout (CR-D6):
 
-- ``S1`` post-pin ``[pin + 1, B]`` over every B0 target plus the campaign's extra targets (mainnet GOV Safe);
-- ``S2`` Safe-only pre-pin ``[fromBlock, pin]`` (mainnet), which also re-reads the pin hash as its plan end;
+- ``S1`` post-pin ``[pin + 1, B]`` over every B0 target plus the campaign's extra targets (none since the
+  streamlined scope of 2026-10-18: the mainnet GOV Safe is observed by state reads only);
+- ``S2`` extra-target pre-pin ``[fromBlock, pin]``, only if an extra target exists (none);
 - ``S3`` / ``S4`` for vaults created after the pin: ``[fromBlock, pin]`` and ``[pin + 1, B]`` over them.
 
 Every derived value is a function of the spec inputs, and ``check_spec`` re-derives the whole document, so
@@ -50,6 +51,26 @@ CHECKPOINT_KEYS = frozenset({'planFile', 'planSha256', 'chunks', 'headersFile', 
 # change (the approval record of an earlier collection). Empty: no checkpoint is approved, so every segment is
 # collected. Never add an entry from a collector or from its own output.
 APPROVED_CHECKPOINTS = {}
+# FR-D3 / FR-D4 gas-envelope samples: the largest recorded deployment transactions of each chain (``deployments/``,
+# runtime sizes checked against the recorded bytecode). Each block is a B0 event block (the implementation's
+# ``Initialized``), so its header is already re-read under the B0 event-block recheck; one extra POST reads the full
+# header gas fields, the anchor's block gas limit and the transactions. Observation only: never a cap approval.
+GAS_ENVELOPE = {
+    'testnet': (
+        {'label': 'YieldVaultFactory_Implementation', 'block': 24_233_934, 'runtimeBytes': 36_576,
+         'address': '0xf51f16d97c80db2c55291e1add00ddfd4e7420d1',
+         'tx': '0xb870501eedb5442989b69dfa442c711febfb49e5fc7d8d48e3d6d2713a12a629'},
+        {'label': 'YieldVault', 'block': 24_233_990, 'runtimeBytes': 24_357,
+         'address': '0x2e388f1a9c0ca3529e82e46b2ce01fdfdf635984',
+         'tx': '0x755188264d6fbdfa5c2660a1c81caa1bdb1ab3ba1984116a2b73bd3691967395'}),
+    'mainnet': (
+        {'label': 'YieldVaultFactory_Implementation', 'block': 11_165_188, 'runtimeBytes': 20_176,
+         'address': '0x772e27a320a60aeeb0b5c68dc6c8633460ef5706',
+         'tx': '0x76f8a14005632961e9fad13361351429643eb6668a2594905f09cc670cfeb42d'},
+        {'label': 'YieldVaultFactory_test_Implementation', 'block': 11_146_083, 'runtimeBytes': 20_176,
+         'address': '0x9d40ca58ef5392a8fb161ab27c7f61de5dfbf0e2',
+         'tx': '0x99929fa67a00a0e5db1fd816c2d322bf0383e9bfba1c5317801241af212ee801'}),
+}
 
 
 def _require(condition, code, detail='', status='REFUSED'):

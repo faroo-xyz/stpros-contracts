@@ -358,7 +358,10 @@ class ForkBoundaryTest(unittest.TestCase):
         self.assertEqual(ctx.exception.code, code)
 
     def test_authorization_is_fail_closed(self):
-        self.assertEqual(fm.APPROVED_FORK_AUTHORIZATIONS, frozenset())
+        self.assertEqual(fm.APPROVED_FORK_AUTHORIZATIONS, frozenset({
+            '3dd3ab07248c6e74d156d93978d00ea63c5d2cd6767d867f53f610ae560fd96c',  # fr-d1-s3-testnet-sl20261018
+            '19442bc39ee398f7e9daa9bc71818bf78019ee196ed239cb07bd05e37a77599f',  # fr-d1-s3-mainnet-sl20261018
+        }))
         from tools.lib.rpc import PUBLIC_RPC
         self.refused('FR_D1_NOT_AUTHORIZED', mode='LOCAL_FORK_PUBLIC_READ_ONLY', endpoint=PUBLIC_RPC['mainnet'])
         self.refused('FORK_ENDPOINT', mode='LOCAL_FORK_PUBLIC_READ_ONLY', endpoint=PUBLIC_RPC['testnet'])

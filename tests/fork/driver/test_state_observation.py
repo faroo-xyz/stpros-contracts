@@ -832,14 +832,20 @@ class CustodyGovernanceControlTest(Case):
         report = self.check('mainnet', lambda d: d['safe'].update(runtimeKeccak='0x' + '47' * 32))
         self.assertIn(('FAIL', 'SAFE_PROXY_RUNTIME'), self.rules(report, 'safe'))
         self.refused('mainnet', lambda d: d['safe'].update(expectedSingleton=SINGLETON), 'SELF_EXPECTATION')
-        self.refused('mainnet', lambda d: d['safe']['scanStart'].update(label='creationBlock'), 'STATE_VALUE')
+        # Streamlined scope: no Safe event history, so neither an event census nor a scan start can be supplied.
+        self.assertEqual(self.inputs['mainnet']['doc']['safe']['eventHistory'], 'NOT_COLLECTED')
+        self.refused('mainnet', lambda d: d['safe'].update(eventHistory='COLLECTED'), 'STATE_VALUE')
+        self.refused('mainnet', lambda d: d['safe'].update(scanStart={'label': 'scanStart', 'block': 1,
+                                                                      'codeBefore': '0x'}), 'STATE_KEYS')
+        self.refused('mainnet', lambda d: d['safe'].pop('eventHistory'), 'STATE_KEYS', 'INCOMPLETE')
+        report = self.check('mainnet')
+        self.assertIn(('INCOMPLETE', 'FR-X8'), self.rules(report, 'safe'))
+        self.assertEqual(report['sections']['safe']['eventHistory'], 'NOT_COLLECTED')
 
         def nested(d):
             d['governance']['accountCodeKeccak'] = {**d['governance']['accountCodeKeccak']}
-            d['safe']['setupEvents']['expectedCount'] = 1
+            d['safe']['modulePagination']['expectedPages'] = 1
         self.refused('mainnet', nested, 'SELF_EXPECTATION')
-        report = self.check('mainnet', lambda d: d['safe']['scanStart'].update(codeBefore='0x60'))
-        self.assertIn(('FAIL', 'CODE_BEFORE_FROM_BLOCK'), self.rules(report, 'safe'))
         self.assertEqual(ci.APPROVED_SAFE_IDENTITY_MANIFESTS, frozenset())
         candidate = so.safe_candidate(copy.deepcopy(self.inputs['mainnet']['doc']))
         self.assertEqual(candidate['status'], 'CANDIDATE / UNAPPROVED (FR-X8)')
