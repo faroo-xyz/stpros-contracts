@@ -25,6 +25,7 @@ ROOT = HERE.parents[2]
 sys.path[:0] = [str(HERE), str(ROOT)]
 from tools.lib import abi  # noqa: E402
 from tools.lib.keccak import keccak256  # noqa: E402
+import safe_governance as sg  # noqa: E402
 
 RECORD_SCHEMA = 'faroo-e2e-release-record-v1'
 APPROVED_E2E_RECORDS = frozenset()          # raw SHA-256 of independently approved records (reviewed-source pin)
@@ -36,9 +37,15 @@ TL_ROLES = {'PROPOSER': '0x' + keccak256(b'PROPOSER_ROLE')[2:], 'EXECUTOR': '0x'
 OPERATOR = '0x' + keccak256(b'OPERATOR_ROLE')[2:]
 SAFE_GUARD_SLOT = '0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8'
 SENTINEL = '0x' + '00' * 19 + '01'
-# The upgrade transaction and the checks that must exist after it, per chain.
+# The upgrade transaction and the checks that must exist after it, per chain and governance route.
 POSTCHECK = {
     688689: {'tx': 'U_t.executeBatch', 'checks': ('tx.U_t.executeBatch', 'GC-03.afterU_t.doneNoPending'), 'postMin': 20},
+    (688689, 'SAFE'): {'tx': 'U_t.execTransaction', 'postMin': 20, 'checks': (
+        'SAFE.gov.identity==approved', 'SAFE.can.identity==approved', 'SAFE.policy.signerIsolation',
+        'T-5.scheduleBatch.executionSuccess', 'T-5.scheduleBatch.innerEffect', 'T-5.scheduleBatch.outer==inner',
+        'U_t.safeTxHash==independentEIP712', 'U_t.signers.validOrderedThreshold', 'U_t.approvalsRecorded',
+        'U_t.executionSuccess', 'U_t.outer==inner', 'U_t.innerEffect', 'U_t.nonceAdvanced', 'SAFE.gov.nonce.afterU_t',
+        'GC-03.afterU_t.doneNoPending')},
     1672: {'tx': 'U.execTransaction', 'checks': ('U.innerSuccess', 'GC-03.afterU.doneNoPending'), 'postMin': 25},
 }
 
@@ -92,18 +99,7 @@ def binding_problems(record, spec_sha256, spec, canonical_hashes):
 
 # ------------------------------------------------------------------------------------------- chain reads
 def safe_state(chain, safe):
-    code = chain.code(safe)
-    if code in ('0x', '0x0', None):
-        return {'code': False}
-    owners = [a.lower() for a in abi.decode_parameters([{'type': 'address[]'}], chain.call(safe, 'getOwners()'))[0]]
-    try:
-        raw = chain.call(safe, 'getModulesPaginated(address,uint256)', SENTINEL, 10)
-        modules = [a.lower() for a in abi.decode_parameters([{'type': 'address[]'}, {'type': 'address'}], raw)[0]]
-    except ValueError:
-        modules = None
-    return {'code': True, 'owners': owners, 'threshold': chain.uint(safe, 'getThreshold()'), 'modules': modules,
-            'guard': '0x' + chain.slot(safe, SAFE_GUARD_SLOT)[-40:].lower(), 'singleton': '0x' + chain.slot(safe, '0x0')[-40:].lower(),
-            'codeHash': keccak256(bytes.fromhex(code[2:]))}
+    return sg.safe_state(chain, safe)
 
 
 def identity_problems(chain, ctx, record, approved_manifests):
@@ -125,13 +121,40 @@ def identity_problems(chain, ctx, record, approved_manifests):
             out.append(f'BLOCKED identity: {key}.guardian() is not the approved GRD')
     if chain.addr(a['oracle'], 'slp()') != _lower(act['reporter']):
         out.append('BLOCKED identity: Oracle.slp() is not the approved reporter')
-    if chain.addr(a['oracle'], 'commissionAccount()') != _lower(act['treasury']):
-        out.append('BLOCKED identity: Oracle.commissionAccount() is not the approved treasury')
+    # the commission recipient follows the owner's TD-9 decision: K2 = the Treasury Safe; K1 = the approved account
+    # (E1 kept) plus Agent A's written NOT-APPLICABLE ruling for the Treasury Safe gate. No decision: BLOCKED.
+    oi = record.get('ownerInputs') or {}
+    commission = oi.get('commission') or {}
+    account_now = chain.addr(a['oracle'], 'commissionAccount()')
+    if commission.get('decision') == 'K2':
+        if account_now != _lower(act['treasury']) or _lower(commission.get('account')) != _lower(act['treasury']):
+            out.append('BLOCKED identity: K2 but Oracle.commissionAccount() is not the approved Treasury Safe')
+    elif commission.get('decision') == 'K1':
+        if account_now != _lower(commission.get('account')):
+            out.append('BLOCKED identity: K1 but Oracle.commissionAccount() is not the approved (kept) account')
+        if not (isinstance(commission.get('treasuryGateException'), str) and commission['treasuryGateException'].strip()):
+            out.append('BLOCKED identity: K1 without the written Treasury Safe gate ruling (K1b)')
+    else:
+        out.append('BLOCKED identity: commission decision (TD-9 K1 or K2) not in the approved record')
+    approved_dests = [_lower(d) for d in oi.get('destinations') or []]
+    if not isinstance(oi.get('destinations'), list):
+        out.append('BLOCKED identity: no approved ordered SLP destinations in the record')
+    else:
+        raw = chain.call(a['distributor'], 'getSlps()')
+        if [x.lower() for x in abi.decode_parameters([{'type': 'address[]'}], raw)[0]] != approved_dests:
+            out.append('BLOCKED identity: SlpDistributor.getSlps() differs from the approved ordered destinations')
     if chain.addr(a['distributor'], 'keeper()') != _lower(act['keeper']):
         out.append('BLOCKED identity: SlpDistributor.keeper() is not the approved keeper')
     for v in a['governedVaults']:
         if not has(v, OPERATOR, act['ops']):
             out.append(f'BLOCKED identity: approved OPS lacks OPERATOR_ROLE on governed vault {v[:10]}')
+    if has(tl, TL_ROLES['PROPOSER'], act['can']) or has(tl, TL_ROLES['EXECUTOR'], act['can']):
+        out.append('BLOCKED identity: approved CAN is also a Timelock proposer or executor')
+    for key in ('e1', 'e2'):
+        who = ctx['actors'].get(key)
+        if who and any(has(tl, TL_ROLES[r], who) for r in ('PROPOSER', 'EXECUTOR', 'CANCELLER')):
+            out.append(f'BLOCKED identity: {key} still holds a Timelock role')
+    safes = {}
     for role in SAFE_ROLES:
         s = record['safes'].get(role)
         if s is None:
@@ -140,25 +163,21 @@ def identity_problems(chain, ctx, record, approved_manifests):
         if _lower(s.get('address')) != _lower(act[role]):
             out.append(f'BLOCKED identity: approved {role} Safe address differs from the approved actor')
             continue
-        st = safe_state(chain, s['address'])
-        if not st['code']:
-            out.append(f'BLOCKED identity: {role} Safe has no code on the Fork')
-            continue
-        if sorted(st['owners']) != sorted(_lower(o) for o in s.get('owners', [])):
-            out.append(f'BLOCKED identity: {role} Safe owners on the Fork differ from the approved owners')
-        if st['threshold'] != s.get('threshold'):
-            out.append(f'BLOCKED identity: {role} Safe threshold {st["threshold"]} is not the approved {s.get("threshold")}')
-        if st['modules'] != [] or st['guard'] != '0x' + '00' * 20:
-            out.append(f'BLOCKED identity: {role} Safe has modules or a guard')
+        safes[role] = s
+        out += [f'BLOCKED identity: {p}' for p in sg.safe_problems(chain, role, s)]
         if s.get('safeManifestSha256') not in approved_manifests:
             out.append(f'BLOCKED identity: {role} Safe identity manifest is not approved (FR-X8)')
+    out += [f'BLOCKED identity: {p}' for p in sg.policy_problems(safes, deployer=act.get('deployer'), keeper=act['keeper'],
+                                                                   reporter=act['reporter'])]
     return out
 
 
 def postcheck(run):
     """The upgrade transaction executed and the required POST / GC-03 checks exist and pass. Zero checks is MISSING,
     never PASS."""
-    rule = POSTCHECK.get(run.m['chainId'])
+    route = getattr(run, 'gov_route', None) or {}
+    mode = route.get('mode', 'SAFE' if run.m['chainId'] == 1672 else 'EOA')
+    rule = POSTCHECK.get((run.m['chainId'], mode)) or POSTCHECK.get(run.m['chainId'])
     if rule is None:
         return {'verdict': 'MISSING', 'why': ['no postcheck rule for this chain']}
     why = []
@@ -177,11 +196,16 @@ def postcheck(run):
     failed = [c['id'] for c in post if c['verdict'] != 'PASS']
     if failed:
         why.append(f'POST checks not PASS: {failed[:5]}')
+    s_post = getattr(run, 's_post', None)
+    linked = s_post is not None and run.chain.block()['hash'] == s_post['hash']
+    if s_post is not None and not linked:
+        why.append('the node moved after the upgrade postchecks: the E2E would not start from S_post')
     verdict = 'PASS' if not why else ('MISSING' if not txs or len(post) < rule['postMin'] else 'FAIL')
     upgrade_time = int(run.chain.block(hex(txs[-1]['block']))['timestamp'], 16) if txs and 'block' in txs[-1] else None
     return {'verdict': verdict, 'why': why, 'postChecks': len(post), 'upgradeTx': rule['tx'],
             'upgradeTxHash': txs[-1]['transactionHash'] if txs else None,
-            'upgradeTxFrom': txs[-1]['from'] if txs else None, 'upgradeTime': upgrade_time}
+            'upgradeTxFrom': txs[-1]['from'] if txs else None, 'upgradeTime': upgrade_time, 'route': mode,
+            'routeClass': route.get('class'), 'sPost': s_post, 'sPostLinked': linked if s_post else None}
 
 
 def history_authenticated(run, record, provenance_implemented):

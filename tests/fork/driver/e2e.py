@@ -43,6 +43,7 @@ ROOT = HERE.parents[2]
 sys.path[:0] = [str(HERE), str(ROOT)]
 from tools.lib import abi  # noqa: E402
 from tools.lib.keccak import keccak256  # noqa: E402
+import approved_inputs  # noqa: E402
 
 SCHEMA = 'faroo-post-upgrade-e2e-v1'
 # Integration contracts outside the V4 scope (RewardsVault, staking proxies): events the harness decodes.
@@ -197,7 +198,9 @@ def context_problems(ctx):
         out.append('anchor block/hash missing')
     if not ctx['source'].get('commit') or not ctx['source'].get('artifactSha256'):
         out.append('source commit / artifact hashes missing')
-    if ctx['postcheck'].get('verdict') not in ('PASS', 'FAIL'):
+    if ctx.get('recordMismatch'):
+        out.append(ctx['recordMismatch'])
+    if ctx['postcheck'].get('verdict') != 'PASS':
         out.append(f'upgrade postcheck {ctx["postcheck"].get("verdict", "missing")}: {ctx["postcheck"].get("why", [])[:3]}')
     if not isinstance(ctx['history'].get('owners'), list):
         out.append('history owners missing')
@@ -226,6 +229,8 @@ def formal_blockers(ctx):
     route = ctx.get('upgradeRoute', {})
     if route.get('mode') != 'SAFE' or not route.get('approved'):
         out.append(f'upgrade route: {route.get("why", "the upgrade was not executed through the approved GOV Safe")}')
+    if (ctx.get('releaseInputs') or {}).get('source') != 'APPROVED_RECORD':
+        out.append('release inputs SYNTHETIC: simulation policy and labelled actors, never release parameters')
     if ctx.get('rehearsal'):
         out.append(f'rehearsal setup applied before S_post ({len(ctx["rehearsal"])} construction steps): not release evidence')
     if ctx['evidence'] == REAL and not ctx['integrations'].get('approved'):
@@ -587,7 +592,8 @@ class Harness:
         self.ctx['governance'] = {'mode': 'SAFE', 'safe': _lower(record['actors']['gov']), 'owners': gov['owners'],
                                   'threshold': gov['threshold'], 'delay': self.ctx['governance']['delay'], 'source': 'approved record, Fork-verified'}
         route = self.ctx.get('upgradeRoute', {})
-        if route.get('mode') == 'SAFE' and _lower(route.get('safe')) == _lower(record['actors']['gov']):
+        if (route.get('mode') == 'SAFE' and route.get('class') != 'SYNTHETIC'
+                and _lower(route.get('safe')) == _lower(record['actors']['gov'])):
             route['approved'] = True
         integ = record.get('integrations') or {}
         self.ctx['integrations'] = {**integ, 'approved': True}
@@ -697,7 +703,7 @@ class Harness:
                 _, _, receipt, rec = safe_exec.execute(self.chain, f'E2E.{rid}.execute', g['safe'], g['owners'], g['threshold'],
                                                        safe_exec.safe_tx(tl, execute, 0), expect=ok)
                 rec = {'status': int(receipt['status'], 16), 'transactionHash': receipt['transactionHash'],
-                       'gasUsed': int(receipt['gasUsed'], 16)}
+                       'gasUsed': int(receipt['gasUsed'], 16), 'route': 'Safe approved-hash', 'safe': _lower(g['safe'])}
             return receipt, rec, observed
         return self._record(rid, entry, target, tl, data, expect, 0, watch, vaults, note, via, transport)
 
@@ -883,6 +889,8 @@ class Harness:
         failures = [r['id'] for r in executed if r['verdict'] == FAIL] + [p for p in self.problems if p.startswith('FAIL')]
         if self.broken:
             failures.append(f'snapshot discipline: {self.broken}')
+        if (self.ctx.get('postcheck') or {}).get('verdict') == 'FAIL':
+            failures.append(f'upgrade postcheck FAIL: {self.ctx["postcheck"].get("why", [])[:3]}')
         uncovered = sorted(k for k, v in cov.items() if v['status'] in (NOT_RUN, BLOCKED))
         review = sorted(k for k, v in cov.items() if v['status'] == NEEDS_REVIEW)
         scenarios = {}
@@ -1020,15 +1028,26 @@ def context_from_run(run, p0, actors, *, record=None, integrations=None):
             governance_problems.append('the Safe signers on the node differ from the topology signers used for H/U (stale signer set)')
         route = {'mode': 'SAFE', 'safe': _lower(m['safe']), 'approved': False,
                  'why': 'mainnet U executed through the GOV Safe route; the Safe is approved only by an approved record'}
+    elif (getattr(run, 'gov_route', None) or {}).get('mode') == 'SAFE':
+        r = run.gov_route
+        safe = e2e_identity.safe_state(chain, r['gov']['address'])
+        acts['gov'], acts['can'] = r['gov']['address'], r['can']['address']
+        governance = {'mode': 'SAFE', 'safe': r['gov']['address'], 'owners': safe.get('owners', []), 'threshold': safe.get('threshold'),
+                      'delay': delay, 'source': f'GOV_t Safe route of the run ({r["class"]}), read from the node at S_post'}
+        if sorted(safe.get('owners', [])) != sorted(r['gov']['owners']) or safe.get('threshold') != r['gov']['threshold']:
+            governance_problems.append('the GOV_t Safe signers on the node differ from the signers that executed T-5/U_t (stale signer set)')
+        route = {'mode': 'SAFE', 'safe': r['gov']['address'], 'approved': False, 'class': r['class'],
+                 'why': f'testnet U_t executed through the GOV_t Safe route ({r["class"]}); the Safe is approved only by an approved record'}
     else:
-        governance = {'mode': 'EOA', 'delay': delay, 'source': 'execution.testnet synthetic GOV_t EOA'}
+        governance = {'mode': 'EOA', 'delay': delay, 'source': 'execution.testnet synthetic GOV_t EOA (legacy test path)'}
         route = {'mode': 'EOA', 'approved': False, 'from': post.get('upgradeTxFrom'),
-                 'why': 'testnet U_t was executed by an EOA: execution.testnet has no GOV_t Safe route yet'}
+                 'why': 'testnet U_t was executed by a synthetic GOV_t EOA (legacy test path; use the GOV_t Safe route)'}
     holders = sorted(_lower(u) for u in m.get('users', []))
     ctx = {
         'chainId': m['chainId'], 'evidence': REAL if real else SYNTHETIC,
-        'anchor': {'block': binding.get('forkBlock') or int(chain.block()['number'], 16),
-                   'hash': binding.get('forkBlockHash') or chain.block()['hash']},
+        # the anchor an approved record binds: the Fork block, or the node head when the run started
+        'anchor': approved_inputs.run_anchor(run) if hasattr(run, 'start_anchor') else
+                  {'block': binding.get('forkBlock') or int(chain.block()['number'], 16), 'hash': binding.get('forkBlockHash') or chain.block()['hash']},
         'source': {'commit': e2e_identity.FROZEN_COMMIT + ' (export tree verified by the run script)',
                    'artifactSha256': artifact_entries()[1], 'executionSource': binding.get('executionSource')},
         'addresses': {'stpros': _lower(st), 'wpros': _lower(m['wpros']), 'oracle': _lower(m['oracle']),
@@ -1046,10 +1065,18 @@ def context_from_run(run, p0, actors, *, record=None, integrations=None):
                     'source': 'synthetic fixture history' if not real else 'content-verified history'},
         'governance': governance, 'governanceProblems': governance_problems, 'upgradeRoute': route,
         'safes': ({governance['safe']: {'role': 'gov', 'owners': governance['owners'], 'threshold': governance['threshold']}}
-                  if mainnet else {}),
+                  if governance['mode'] == 'SAFE' else {}),
         'formal': {'readAuthorization': False, 'ownerInputsApproved': False, 'safeManifestApproved': False},
         'integrations': {**(integrations or {'rewardsVault': None, 'rewardsCaller': None, 'stakingProxies': []}), 'approved': False},
+        'releaseInputs': getattr(run, 'release_inputs', None) or {'source': 'SYNTHETIC', 'label': 'mainnet simulation policy'},
     }
+    # the record that drove the upgrade is the E2E record: inherited when none is given, refused when another one is
+    run_record = (getattr(run, 'gov_route', None) or {}).get('record')
+    if run_record:
+        if record is None:
+            record = (Path(run_record[0]), run_record[1])
+        elif record[1] != run_record[1]:
+            ctx['recordMismatch'] = f'E2E record {record[1][:16]} is not the record {run_record[1][:16]} that drove the upgrade'
     return apply_record(ctx, run, record)
 
 
@@ -1063,8 +1090,15 @@ def apply_record(ctx, run, record):
     authenticated, reasons = e2e_identity.history_authenticated(run, doc, fs.FINAL_GATE_PROVENANCE_IMPLEMENTED)
     ctx.update(record=doc, recordProblems=problems, recordSha256=record[1] if record else None)
     ctx['history'].update(authenticated=authenticated, authenticationReasons=reasons)
+    # owner inputs count only when every item is approved in the record AND the upgrade was driven by that record and
+    # its INPUT checks all passed on the node
+    run_inputs = getattr(run, 'release_inputs', None) or {}
+    input_rows = [c for c in run.checks if c['id'].startswith('INPUT.')]
     ctx['formal'].update(readAuthorization=e2e_identity.read_authorization(run, doc),
-                         ownerInputsApproved=bool(doc and (doc.get('ownerInputs') or {}).get('approvalReference')))
+                         ownerInputsApproved=bool(doc and not approved_inputs.missing_approvals(doc)
+                                                  and run_inputs.get('source') == 'APPROVED_RECORD'
+                                                  and run_inputs.get('recordSha256') == ctx.get('recordSha256')
+                                                  and input_rows and all(c['verdict'] == 'PASS' for c in input_rows)))
     return ctx
 
 

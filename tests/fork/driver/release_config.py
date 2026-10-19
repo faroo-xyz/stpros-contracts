@@ -193,8 +193,12 @@ def actor_set(network):
     return {name: '0x' + keccak256(f'faroo-execution {network} synthetic {name}'.encode())[-40:] for name in labels}
 
 
-def build(chain, topo, p0, actors, *, case='A', recovery=None, release_id=None):
-    """The simulation release config (``tools/release/native/inputs.py`` contract) and its inventory."""
+def build(chain, topo, p0, actors, *, case='A', recovery=None, release_id=None, inputs=None):
+    """The simulation release config (``tools/release/native/inputs.py`` contract) and its inventory.
+
+    ``inputs`` (testnet, ``approved_inputs`` APPROVED_RECORD mode) replaces the simulation values: the ordered
+    destinations, the APR / reporting policy and the reporter come from the approved record (already checked against
+    the node). Without it the policy and the labelled actors are SYNTHETIC."""
     m, network = topo['meta'], topo['meta']['chain']
     mainnet = network == 'mainnet'
     head = chain.block()
@@ -252,7 +256,8 @@ def build(chain, topo, p0, actors, *, case='A', recovery=None, release_id=None):
                     maxUpdateAmount='100000000000000000000', interval=3600)
     else:
         # real state: the owner-confirmed reporter (owner_config), never the getter as its own expectation
-        reporter = m['expectedReporter'] if m.get('evidenceClass') == 'E_FRESH' else chain.addr(oracle, 'slp()')
+        reporter = (inputs['actors']['reporter'] if inputs else
+                    m['expectedReporter'] if m.get('evidenceClass') == 'E_FRESH' else chain.addr(oracle, 'slp()'))
         core.update(reporter=reporter, treasury=chain.addr(oracle, 'commissionAccount()'),
                     commissionPpm=chain.uint(oracle, 'commissionRatePpm()'),
                     maxUpdateAmount=str(chain.uint(oracle, 'maxUpdateAmount()')), interval=chain.uint(oracle, 'updateInterval()'))
@@ -270,14 +275,22 @@ def build(chain, topo, p0, actors, *, case='A', recovery=None, release_id=None):
         # a migrated testnet SlpDistributor keeps its SLP list; on real state that list is the observed one, carried
         # as a conditional diagnostic input (OWNER_DECISION_PENDING), never an approval
         'addresses': a, 'implementations': impl, 'factories': cfg_factories, 'legacy': legacy,
-        'destinations': list(m.get('destinations', [])) if m.get('evidenceClass') == 'E_FRESH' and not mainnet else [],
+        'destinations': (list(inputs['destinations']) if inputs else
+                         list(m.get('destinations', [])) if m.get('evidenceClass') == 'E_FRESH' and not mainnet else []),
         'policy': {'minDelay': 172800 if mainnet else 300, 'expectedGrossAprPpm': 250000, 'maxAprPpm': 500000,
                    'maxUpdateAmount': '100000000000000000000', 'updateInterval': 3600, 'approvedPerformanceFeeBps': 0,
-                   **({'commissionRatePpm': 100000} if mainnet else {})},
+                   **({'commissionRatePpm': 100000} if mainnet else {}),
+                   **({k: inputs['policy'][k] for k in ('expectedGrossAprPpm', 'maxAprPpm', 'maxUpdateAmount', 'updateInterval')}
+                      if inputs else {})},
         'observed': observed,
-        'simulationLabels': {'policy': 'SYNTHETIC: APR, absolute cap and destinations are D5 owner inputs, not supplied',
-                             'actors': 'SYNTHETIC labelled actors except E1/E2 (FR-D5/FR-D6)',
-                             'state': 'SYNTHETIC loopback state on recorded legacy runtimes'},
+        'simulationLabels': ({'inputs': 'APPROVED_RECORD: actors, destinations and policy from the approved E2E release record, '
+                                        'checked against the node before T-0 (CLI simulation mode)',
+                              'state': 'real-state Fork' if m.get('evidenceClass') == 'E_FRESH' else
+                                       'SYNTHETIC loopback state on recorded legacy runtimes (fixture standing in for approval)'}
+                             if inputs else
+                             {'policy': 'SYNTHETIC: APR, absolute cap and destinations are D5 owner inputs, not supplied',
+                              'actors': 'SYNTHETIC labelled actors except E1/E2 (FR-D5/FR-D6)',
+                              'state': 'SYNTHETIC loopback state on recorded legacy runtimes'}),
     }
     if mainnet:
         config['p1Case'] = case

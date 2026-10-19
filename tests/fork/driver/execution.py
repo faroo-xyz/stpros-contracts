@@ -38,6 +38,8 @@ from models import row, truth  # noqa: E402
 import oracles  # noqa: E402
 import release_config as rc  # noqa: E402
 import safe_exec  # noqa: E402
+import safe_governance as sg  # noqa: E402
+import approved_inputs as ai  # noqa: E402
 import scenarios  # noqa: E402
 import xf_witness  # noqa: E402
 import authority_gate  # noqa: E402
@@ -86,6 +88,11 @@ class Run:
             self.chain.load(self.topo['state'])
         self.checks, self.stages, self.bundles, self.shapes = [], [], {}, {}
         self.dir = OUT / name
+        self.start_anchor = self._head()
+
+    def _head(self):
+        head = self.chain.block()
+        return {'block': int(head['number'], 16), 'hash': head['hash']}
 
     def close(self):
         self.chain.close()
@@ -152,7 +159,9 @@ class Run:
                      'labelled synthetic actors. Not real-state, Safe-identity or gas-gate evidence.')
         return {'schema': SCHEMA, 'run': self.name, 'topology': self.topo['name'], 'chainId': self.m['chainId'],
                 'evidenceClass': self.evidence_class(), 'statement': statement,
-                'binding': self.topo.get('binding'),
+                'binding': self.topo.get('binding'), 'startAnchor': self.start_anchor,
+                'governanceRoute': {k: v for k, v in (getattr(self, 'gov_route', None) or {}).items() if k != 'inputs'} or None,
+                'releaseInputs': getattr(self, 'release_inputs', None),
                 'stages': self.stages, 'bundles': self.bundles, 'shapes': self.shapes, 'checks': self.checks,
                 'transcript': self.chain.transcript, **extra}
 
@@ -307,6 +316,8 @@ def _real_failure(run, error, ids, finish):
 
 
 def _post_hook(run, p0, actors, guarded):
+    head = run.chain.block()
+    run.s_post = {'block': int(head['number'], 16), 'hash': head['hash']}     # the state the E2E hook must start from
     then = getattr(run, 'then', None)
     run.extra_ids = then(run, {'p0': p0, 'actors': actors, 'guarded': guarded}) if then else []
 
@@ -1128,15 +1139,26 @@ def gas_rows(run, prefix):
             out.append(truth(f'FS-6.{prefix}.{r["label"]}.receipt<=2.2M', r['gasUsed'] <= GAS_CAP, f'gasUsed {r["gasUsed"]}'))
         out.append(truth(f'FS-6.{prefix}.{r["label"]}.1.5xEstimateLimitSucceeded', gasgate.trial_ok(r),
                          f'estimate {r["estimate"]}, limit {r["gasLimit"]} ({r["gasLimitRule"]})'))
-    if prefix in ('T', 'U_t'):
+    gas = (getattr(run, 'approved', None) or {}).get('gas')
+    if prefix in ('T', 'U_t') and run.real and gas and gas.get('confirmedGasCap'):
+        cap = int(gas['confirmedGasCap'])
+        out += [truth(f'FS-6.{prefix}.{r["label"]}.receipt<=approvedCap', r['gasUsed'] <= cap, f'gasUsed {r["gasUsed"]}, approved cap {cap}')
+                for r in run.chain.transcript if r['expectSuccess'] and any(r['label'].startswith(p) for p in GAS_LABELS[prefix])]
+    elif prefix in ('T', 'U_t'):
         out.append({'id': f'FS-6.{prefix}.testnetCapResponse', 'verdict': 'BLOCKED', 'expected': '0', 'actual': '0',
-                    'detail': 'FR-D3 testnet U_t response above 2.2M undecided (FR-A2)'})
+                    'detail': 'FR-D3 testnet U_t response above 2.2M undecided (FR-A2)' + (
+                        '' if not gas else '; an approved cap counts only on real-state Fork gas')})
     if prefix == 'P-0':
         out.append({'id': 'FS-6.P-0.deploymentGasGate', 'verdict': 'BLOCKED', 'expected': '0', 'actual': '0',
                     'detail': 'FR-D4 P-0 gas gate undecided; measured ' + ', '.join(measured)})
-    out.append({'id': f'FS-6.{prefix}.bindingEstimator', 'verdict': 'BLOCKED', 'expected': '0', 'actual': '0',
-                'detail': 'FR-D2 estimator undecided; local loopback gas, synthetic Safe, no calibration k (>= 3 '
-                          'historical receipts)'})
+    if run.real and gas and gas.get('estimator') == 'a':
+        out.append(truth(f'FS-6.{prefix}.bindingEstimator.approvedA', all(gasgate.trial_ok(r) for r in run.chain.transcript
+                                                                           if r['expectSuccess'] and any(r['label'].startswith(p) for p in GAS_LABELS[prefix])),
+                         'FR-D2 = (a): every 1.5 x estimate trial must succeed'))
+    else:
+        out.append({'id': f'FS-6.{prefix}.bindingEstimator', 'verdict': 'BLOCKED', 'expected': '0', 'actual': '0',
+                    'detail': 'FR-D2 estimator undecided; local loopback gas, synthetic Safe, no calibration k (>= 3 '
+                              'historical receipts)'})
     return out
 
 
@@ -1173,20 +1195,184 @@ DEBUG_SETTERS = ('setPhase(uint8)', 'setRoundCap(uint256)', 'setMaxLossBps(uint2
 TESTNET_CASES = ('normal', 'a', 'b', 'c', 'd', 'e', 'f', 'g')
 
 
-def testnet(case='normal', *, waiting=True, name=None, then=None, node=None, topology='execution-testnet-v3'):
-    """FS-2 normal path or recovery case (a) ... (g) of the matrix; ``then`` as for ``mainnet``."""
+def testnet(case='normal', *, waiting=True, name=None, then=None, node=None, topology='execution-testnet-v3',
+            governance=None, prepare=None):
+    """FS-2 normal path or recovery case (a) ... (g) of the matrix; ``then`` as for ``mainnet``.
+
+    ``governance`` selects the GOV_t / CAN_t route:
+    - None: the legacy synthetic GOV_t / CAN_t EOAs. SYNTHETIC, kept for the existing tests; never a release-gate input.
+    - ``{'source': 'SYNTHETIC_MODEL'}``: local Safe models (GOV_t 3/5, CAN_t 3/5, disjoint signers) deployed on the
+      node. T-0 makes them the Timelock proposer/executor and canceller; T-5 and U_t go through the GOV_t Safe
+      approved-hash route. SYNTHETIC: it proves the route, not a Safe.
+    - ``{'source': 'APPROVED_RECORD', 'record': (path, sha256)}``: the GOV_t / CAN_t Safes of an approved E2E release
+      record (``e2e_identity.load_record``: pinned, and its Safe manifests pinned), verified against the node before
+      T-0. Without an approved record the run stops BLOCKED before T-0. In this mode every role (GOV, CAN, GRD, OPS,
+      Treasury, Deployer, Reporter, Keeper), the ordered SLP destinations and the APR / reporting policy come from
+      that record and are checked against the node before T-0 (``approved_inputs``); the commission and gas-cap gates
+      stay BLOCKED until approved. The same record is the E2E hook's record.
+
+    ``prepare(run)`` is a test seam for synthetic fixtures only (for example local Safe models standing in for the
+    approved Safes). It runs before the start anchor is taken and is refused on real state."""
     if case not in TESTNET_CASES:
         raise ValueError(case)
     run = Run(topology, name or f'testnet-{case}', node)
     run.then = then
+    run.governance = governance
+    if prepare is not None:
+        if run.real:
+            run.close()
+            raise ExecutionError('a synthetic fixture preparation never runs on real state')
+        prepare(run)
+        run.stage('fixturePrepared', note='SYNTHETIC fixture preparation before the start anchor (test seam)')
+        run.start_anchor = run._head()
     try:
         return _testnet(run, case, waiting)
+    except RouteStopped:
+        return _finish_t(run, case, {})
     except Exception as error:      # noqa: BLE001 - real state: the failure is evidence, never a silent stop
         if not run.real:
             raise
         return _real_failure(run, error, REAL_FAILURE_IDS['testnet'], lambda: _finish_t(run, case, {}))
     finally:
         run.close()
+
+
+class RouteStopped(Exception):
+    """The GOV_t / CAN_t Safe route refused or failed a step (identity, policy, nonce, signers, or an inner execution
+    that did not succeed): the run stops there, its rows say why, and no later step or post-upgrade hook runs."""
+
+
+def _testnet_route(run, actors):
+    """Sets ``run.gov_route`` and, for a Safe route, replaces the GOV_t / CAN_t actors by the verified Safes."""
+    chain, m, g = run.chain, run.m, getattr(run, 'governance', None)
+    if g is None:
+        run.gov_route = {'mode': 'EOA', 'class': 'SYNTHETIC', 'gov': actors['gov'], 'can': actors['can'],
+                         'releaseGate': 'NOT ELIGIBLE: synthetic GOV_t / CAN_t EOAs (legacy test path)'}
+        run.stage('governanceRoute', **run.gov_route)
+        if run.real:
+            run.add({'id': 'FS-2.real.governanceRoute.syntheticEOA', 'verdict': 'BLOCKED', 'expected': '0', 'actual': '0',
+                     'detail': 'U_t through a synthetic GOV_t EOA is never release evidence: use the GOV_t Safe route'})
+        return None
+    source = g.get('source')
+    if source == 'SYNTHETIC_MODEL':
+        safes = sg.deploy_model(chain, 'testnet', ('gov', 'can'))
+        manifests = []
+    elif source == 'APPROVED_RECORD':
+        approved = run.approved                       # loaded and checked against the node by _approved_inputs
+        safes = {r: approved['inputs']['safes'][r] for r in ('gov', 'can')}
+        manifests = [safes[r].get('safeManifestSha256') for r in ('gov', 'can')]
+    else:
+        raise ValueError(f'unknown governance source {source}')
+    for role in ('gov', 'can'):
+        problems = sg.safe_problems(chain, role, safes[role], check_nonce=True)
+        run.add(truth(f'SAFE.{role}.identity==approved', not problems, '; '.join(problems)[:300]))
+    reporter = chain.addr(m['oracle'], 'slp()')
+    policy = sg.policy_problems(safes, deployer=actors['deployer'], keeper=actors['keeper'], reporter=reporter)
+    run.add(truth('SAFE.policy.signerIsolation', not policy, '; '.join(policy)[:300]))
+    if any(c['verdict'] != 'PASS' for c in run.checks if c['id'].startswith('SAFE.')):
+        run.add({'id': 'SAFE.route.notUsable', 'verdict': 'BLOCKED', 'expected': '1', 'actual': '0',
+                 'detail': 'Safe identity or signer policy differs from the approved values: nothing was executed (no T-0)'})
+        raise RouteStopped()
+    actors['gov'], actors['can'] = safes['gov']['address'], safes['can']['address']
+    run.gov_route = {'mode': 'SAFE', 'source': source, 'class': 'SYNTHETIC' if source == 'SYNTHETIC_MODEL' else 'APPROVED_RECORD',
+                     'gov': safes['gov'], 'can': safes['can'], 'manifests': manifests,
+                     'record': [str(g['record'][0]), g['record'][1]] if source == 'APPROVED_RECORD' else None,
+                     'nextNonce': {'gov': safes['gov']['nonce'], 'can': safes['can']['nonce']},
+                     'releaseGate': ('NOT ELIGIBLE: local Safe model (SYNTHETIC)' if source == 'SYNTHETIC_MODEL'
+                                     else 'Safe identities from the approved record, verified on the node')}
+    run.stage('governanceRoute', **{k: v for k, v in run.gov_route.items() if k != 'nextNonce'})
+    return run.gov_route
+
+
+TL_CALL_SCHEDULED = keccak256(b'CallScheduled(bytes32,uint256,address,uint256,bytes,bytes32,uint256)')
+TL_CALL_EXECUTED = keccak256(b'CallExecuted(bytes32,uint256,address,uint256,bytes)')
+
+
+def _tl_events(tl, topic, op_id, count, done_check=None):
+    """Inner-effect check of a Safe transaction into the Timelock: exactly ``count`` events of ``topic`` for ``op_id``."""
+    def check(receipt):
+        hits = [l for l in receipt['logs'] if l['address'].lower() == tl.lower() and l['topics']
+                and l['topics'][0].lower() == topic and l['topics'][1].lower() == op_id.lower()]
+        ok = len(hits) == count and (done_check is None or done_check())
+        return ok, f'{len(hits)} Timelock events for the operation, expected {count}'
+    return check
+
+
+def _gov_send(run, label, who, to, data, *, expect=True, inner_check=None, safe_tx_gas=0):
+    """A GOV_t / CAN_t transaction: through the Safe approved-hash route when ``who`` is a route Safe, otherwise the
+    legacy direct transaction. Returns the receipt (None when the Safe route refused to send)."""
+    route = getattr(run, 'gov_route', None)
+    role = None
+    if route and route['mode'] == 'SAFE':
+        role = next((r for r in ('gov', 'can') if route[r]['address'] == who.lower()), None)
+    if role is None:
+        receipt, _ = run.tx(label, who, to, data, expect=expect)
+        return receipt
+    receipt, rows, facts = sg.checked_execute(run.chain, label, route[role], to, data, expect=expect,
+                                              expected_nonce=route['nextNonce'][role], inner_check=inner_check,
+                                              safe_tx_gas=safe_tx_gas)
+    run.add(*rows)
+    if facts:
+        run.stage(f'{label}.safe', role=role, **facts)
+        route['nextNonce'][role] = facts['nonceAfter']
+    if receipt is None or any(r['verdict'] != 'PASS' for r in rows):
+        run.stage('governanceRoute.stopped', at=label, reason='Safe step refused or its execution differs from the requirement')
+        raise RouteStopped()
+    return receipt
+
+
+def _approved_inputs(run):
+    """APPROVED_RECORD mode: load the record, check bindings, Safes and every build input against the node before T-0.
+    Returns ``run.approved`` or None (synthetic modes). An unusable record stops the run before T-0."""
+    g = getattr(run, 'governance', None)
+    if not g or g.get('source') != 'APPROVED_RECORD':
+        run.release_inputs = {'source': 'SYNTHETIC', 'label': ai.SYNTHETIC_LABEL}
+        run.stage('releaseInputs', **run.release_inputs)
+        return None
+    record, rows = ai.load(run, g['record'])
+    run.add(*rows)
+    inputs = None
+    if record is not None:
+        inputs, rows = ai.check_build_inputs(run, record)
+        run.add(*rows)
+    if inputs is None or any(c['verdict'] != 'PASS' for c in run.checks if c['id'].startswith('INPUT.')):
+        run.add({'id': 'INPUT.notUsable', 'verdict': 'BLOCKED', 'expected': '1', 'actual': '0',
+                 'detail': 'the approved record is missing, unapproved, unbound or differs from the node: nothing was executed (no T-0)'})
+        run.release_inputs = {'source': 'APPROVED_RECORD', 'recordSha256': g['record'][1], 'usable': False}
+        raise RouteStopped()
+    run.add(*ai.check_gate_inputs(run, record))
+    run.approved = {'record': record, 'recordSha256': g['record'][1], 'inputs': inputs, 'gas': ai.approved_gas(record),
+                    'pre': {'commissionAccount': run.chain.addr(run.m['oracle'], 'commissionAccount()'),
+                            'commissionRatePpm': run.chain.uint(run.m['oracle'], 'commissionRatePpm()')}}
+    run.release_inputs = {'source': 'APPROVED_RECORD', 'recordSha256': g['record'][1], 'usable': True,
+                          'policy': inputs['policy'], 'destinations': inputs['destinations'],
+                          'actors': inputs['actors'], 'gates': [c['id'] for c in run.checks if c['id'].startswith('INPUT.')
+                                                                and c['verdict'] != 'PASS']}
+    run.stage('releaseInputs', **run.release_inputs)
+    return run.approved
+
+
+def _approved_post(run, approved, p0, e2_out):
+    """After U_t: the upgraded state carries exactly the approved inputs."""
+    chain, m, tl = run.chain, run.m, p0['timelock']
+    act, pol = approved['inputs']['actors'], approved['inputs']['policy']
+    has = lambda target, role, who: chain.boolean(target, 'hasRole(bytes32,address)', role, who)
+    rows = [row('INPUT.post.maxAprPpm', pol['maxAprPpm'], chain.uint(m['oracle'], 'maxAprPpm()')),
+            row('INPUT.post.maxUpdateAmount', int(pol['maxUpdateAmount']), chain.uint(m['oracle'], 'maxUpdateAmount()')),
+            row('INPUT.post.updateInterval', pol['updateInterval'], chain.uint(m['oracle'], 'updateInterval()')),
+            truth('INPUT.post.keeper', chain.addr(m['distributor'], 'keeper()') == act['keeper']),
+            truth('INPUT.post.reporter', chain.addr(m['oracle'], 'slp()') == act['reporter']),
+            truth('INPUT.post.destinations.ordered', ai.destinations_now(chain, m['distributor'])[0] == approved['inputs']['destinations']),
+            truth('INPUT.post.commissionUnchanged', chain.addr(m['oracle'], 'commissionAccount()') == approved['pre']['commissionAccount']
+                  and chain.uint(m['oracle'], 'commissionRatePpm()') == approved['pre']['commissionRatePpm'],
+                  'the upgrade must not change the commission recipient or rate'),
+            truth('INPUT.post.timelock.GOV', has(tl, ROLES['proposer'], act['gov']) and has(tl, ROLES['executor'], act['gov'])),
+            truth('INPUT.post.timelock.CAN', has(tl, ROLES['canceller'], act['can']))]
+    for key in ('oracle', 'stpros', 'bridge', 'distributor', 'factory'):
+        rows.append(truth(f'INPUT.post.guardian.{key}', chain.addr(m[key], 'guardian()') == act['guardian']))
+    if not e2_out:
+        rows.append(truth('INPUT.post.ops.governedVault', has(m['vaults'][14], ROLES['operator'], act['ops'])))
+    run.add(*rows)
 
 
 def _recovery(case):
@@ -1198,11 +1384,26 @@ def _testnet(run, case, waiting):
     chain, m = run.chain, run.m
     recovery = _recovery(case)
     e2_out = bool(recovery and recovery['e2Unavailable'])
-    actors = {**rc.actor_set('testnet'), 'gov': '0x' + keccak256(b'faroo-execution testnet synthetic gov').lower()[-40:]}
-    # the existing SlpDistributor is migrated, not replaced: its keeper is the observed one (D5 input unchanged). On
-    # real state that keeper is OWNER_DECISION_PENDING: the run is diagnostic and U_t acceptance stays BLOCKED.
-    actors['keeper'] = m['keeper'] if run.real else chain.addr(m['distributor'], 'keeper()')
-    if run.real:
+    approved = _approved_inputs(run)
+    if approved:
+        # every role comes from the approved record; nothing falls back to a labelled synthetic actor
+        actors = dict(approved['inputs']['actors'])
+    else:
+        actors = {**rc.actor_set('testnet'), 'gov': '0x' + keccak256(b'faroo-execution testnet synthetic gov').lower()[-40:]}
+        # the existing SlpDistributor is migrated, not replaced: its keeper is the observed one (D5 input unchanged). On
+        # real state that keeper is OWNER_DECISION_PENDING: the run is diagnostic and U_t acceptance stays BLOCKED.
+        actors['keeper'] = m['keeper'] if run.real else chain.addr(m['distributor'], 'keeper()')
+    if run.real and approved:
+        run.add(truth('FS-2.real.keeper.approved==fork', chain.addr(m['distributor'], 'keeper()') == actors['keeper']),
+                truth('FS-2.real.reporter.approved==fork', chain.addr(m['oracle'], 'slp()') == actors['reporter']),
+                truth('FS-2.real.sink.forkGetter==SlpDistributor', chain.addr(m['stpros'], 'slp()') == m['distributor']),
+                truth('FS-2.real.destinations.approved==fork',
+                      ai.destinations_now(chain, m['distributor'])[0] == approved['inputs']['destinations']),
+                truth('FS-6.U_t.ownerInputs.approved',
+                      all(c['verdict'] == 'PASS' for c in run.checks if c['id'].startswith('INPUT.')
+                          and not c['id'].startswith(('INPUT.commission', 'INPUT.gasCap'))),
+                      'build inputs approved and equal to the Fork (INPUT rows)'))
+    elif run.real:
         run.add(truth('FS-2.real.keeper.observedAtFork==topology', chain.addr(m['distributor'], 'keeper()') == m['keeper']),
                 {'id': 'FS-2.real.keeper.ownerDecision', 'verdict': 'BLOCKED', 'expected': '0', 'actual': '0',
                  'detail': f'keeper {m["keeper"]} is {m["keeperStanding"]}: U_t acceptance BLOCKED until the owner decides'},
@@ -1213,14 +1414,24 @@ def _testnet(run, case, waiting):
                            'conditional diagnostic only, U_t acceptance BLOCKED until the owner supplies them (D5)'},
                 {'id': 'FS-6.U_t.ownerInputsPending', 'verdict': 'BLOCKED', 'expected': '0', 'actual': '0',
                  'detail': 'keeper and SLP destinations are OWNER_DECISION_PENDING: U_t gas is diagnostic only'})
+    route = _testnet_route(run, actors)
     gov = actors['gov']
-    run.stage('loaded', note='recorded V3 runtimes, synthetic state; GOV_t/CAN_t/GRD_t/OPS_t labelled synthetic EOAs (FR-D6)')
+    run.stage('loaded', note='recorded V3 runtimes, synthetic state; GRD_t/OPS_t labelled synthetic EOAs (FR-D6); GOV_t/CAN_t '
+                             + ('synthetic EOAs' if route is None else f'{route["class"]} Safes'))
     p0, identity, _ = lc.deploy_p0(chain, network='testnet', actors=actors, proxy_admin=m['proxyAdmin'], stpros=m['stpros'],
                                    destinations=[])
     for r in identity:
         run.add(truth(r['id'], r['verdict'] == 'PASS', r.get('detail', '')))
     tl = p0['timelock']
     check_roles(run, 'P-0.timelock', tl, models.timelock_roles(tl, gov, actors['can'], ROLES))
+    if route:
+        has = lambda role, who: chain.boolean(tl, 'hasRole(bytes32,address)', ROLES[role], who)
+        run.add(truth('SAFE.T-0.GOV_t.proposer&executor', has('proposer', gov) and has('executor', gov)),
+                truth('SAFE.T-0.CAN_t.canceller', has('canceller', actors['can'])),
+                truth('SAFE.T-0.CAN_t.notProposerNorExecutor', not has('proposer', actors['can']) and not has('executor', actors['can'])),
+                truth('SAFE.T-0.noEOAProposer', not any(has('proposer', who) or has('executor', who)
+                                                         for who in (*route['gov']['owners'], *route['can']['owners'],
+                                                                     actors['deployer'], m['e1'], m['e2']))))
     ok, why = gc03(run, tl, [])
     run.add(truth('GC-03.preSchedule.empty', ok, why))
     if case == 'g':
@@ -1228,7 +1439,12 @@ def _testnet(run, case, waiting):
         run.tx('pre.T-2', m['e2'], m['factory'], abi.calldata('transferOwnership(address)', tl))
         for target in (m['stpros'], m['oracle'], m['bridge'], m['distributor']):
             run.tx(f'pre.T-3.{target[:10]}', m['e1'], target, abi.calldata('transferOwnership(address)', tl))
-    config, inv = rc.build(chain, run.topo, p0, actors, recovery=recovery)
+    config, inv = rc.build(chain, run.topo, p0, actors, recovery=recovery, inputs=approved and approved['inputs'])
+    if approved:
+        problems = ai.config_problems(config, approved['inputs'])
+        run.add(truth('INPUT.config==record', not problems, '; '.join(problems)[:300]))
+        if problems:
+            raise RouteStopped()
     pre = run.cli('pre-t', 'preflight', config, inv, 'testnet')
     run.add(truth('cli.preflight.PASS', pre.get('status') == 'PASS' and pre.get('simulationOnly') is True))
     plan = run.cli('pre-t', 'testnet-handoff', config, inv, 'testnet')
@@ -1243,7 +1459,7 @@ def _testnet(run, case, waiting):
         done = [t for t in first if t['to'] in m['vaults'][:7]]
         for i, t in enumerate(done):
             run.tx(f'T-1.partial.{i}', m['e2'], t['to'], t['data'])
-        config, inv = rc.build(chain, run.topo, p0, actors, recovery=recovery)
+        config, inv = rc.build(chain, run.topo, p0, actors, recovery=recovery, inputs=approved and approved['inputs'])
         plan = run.cli('resume-t', 'testnet-handoff', config, inv, 'testnet')
         stages = {s['stage']: s for s in plan['stages']}
         resumed = stages['T-1']['transactions']
@@ -1257,7 +1473,10 @@ def _testnet(run, case, waiting):
         for i, t in enumerate(stages[stage]['transactions']):
             run.tx(f'{stage}.{i}', stages[stage]['actor'], t['to'], t['data'])
     sched = stages['T-5']['transactions'][0]
-    run.tx('T-5.scheduleBatch', gov, sched['to'], sched['data'])
+    op = u['operation']['id']
+    _gov_send(run, 'T-5.scheduleBatch', gov, sched['to'], sched['data'],
+              inner_check=_tl_events(tl, TL_CALL_SCHEDULED, op, len(u['transactions']),
+                                     lambda: chain.boolean(tl, 'isOperationPending(bytes32)', op)))
     assertion = stages['T-5']['assertion']
     handoff_ok = not chain.reverts(assertion['to'], assertion['data'], gov)
     run.add(truth('T-5.handoffAssertion', handoff_ok if case != 'e' else not handoff_ok,
@@ -1269,19 +1488,43 @@ def _testnet(run, case, waiting):
     run.reject('U_t.beforeDelay.byGOV', tl, u['execute']['data'], gov)
     run.reject('U_t.byCAN', tl, u['execute']['data'], actors['can'])
     run.reject('U_t.byE1', tl, u['execute']['data'], m['e1'])
+    if route:
+        # the whole Safe route refuses U_t before the delay: the outer transaction reverts and the nonce stays
+        snap = chain.snapshot()
+        _, rows, _ = sg.checked_execute(chain, 'SAFE.U_t.beforeDelay', route['gov'], tl, u['execute']['data'], expect=False,
+                                        expected_nonce=route['nextNonce']['gov'])
+        run.add(*rows)
+        chain.revert(snap)
+        for owner in route['gov']['owners']:
+            run.reject(f'SAFE.U_t.byGOVSigner.{owner[:10]}', tl, u['execute']['data'], owner)
     chain.warp(301)
     if case == 'e':
-        receipt, rec = run.tx('U_t.withoutPA', gov, tl, u['execute']['data'], expect=False)
+        _gov_send(run, 'U_t.withoutPA', gov, tl, u['execute']['data'], expect=False)
         run.add(truth('FS-2.e.allOrNothing', implementation(chain, m['stpros']) == m['stprosImpl']))
         return _finish_t(run, case, {})
     if case == 'f':
         _testnet_revert_cancel(run, u, stages, gov, actors['can'])
     before = _testnet_pre(run)
-    receipt, _ = run.tx('U_t.executeBatch', gov, tl, u['execute']['data'])
+    label = 'U_t' if route else 'U_t.executeBatch'
+    receipt = _gov_send(run, label, gov, tl, u['execute']['data'],
+                        inner_check=_tl_events(tl, TL_CALL_EXECUTED, op, len(u['transactions']),
+                                               lambda: chain.boolean(tl, 'isOperationDone(bytes32)', op)))
     items = xf_witness.batch_items(run.chain, receipt['transactionHash'], tl)
     run.add(row('U_t.gasBreakdown.items==bundle', len(u['transactions']), len(items)))
-    run.stage('U_t.gasBreakdown', receiptGas=int(receipt['gasUsed'], 16), items=items)
+    outer = int(receipt['gasUsed'], 16)
+    if route:
+        facts = next(s for s in reversed(run.stages) if s['stage'] == 'U_t.safe')
+        run.add(truth('U_t.gas.innerItemsWithinOuterReceipt', sum(i['gasUsed'] for i in items) <= outer,
+                      f'inner items {sum(i["gasUsed"] for i in items)}, outer receipt {outer}'),
+                row('SAFE.gov.nonce.afterU_t', route['gov']['nonce'] + (3 if case == 'f' else 2), chain.uint(gov, 'nonce()'),
+                    'GOV_t Safe nonce: T-5 and U_t (case f: plus the reschedule; a reverted U_t does not count)'))
+        run.stage('U_t.gasBreakdown', receiptGas=outer, frame='SAFE_OUTER_RECEIPT (execTransaction; binding for the cap)',
+                  approvalGas=facts['approvalGas'], innerFrame='Timelock executeBatch items (call frames, non-binding)', items=items)
+    else:
+        run.stage('U_t.gasBreakdown', receiptGas=outer, items=items)
     _testnet_post(run, case, p0, u, before, actors, e2_out, inv)
+    if approved:
+        _approved_post(run, approved, p0, e2_out)
     _post_hook(run, p0, actors, [('oracle', m['oracle']), ('stpros', m['stpros']), ('bridge', m['bridge']),
                                  ('distributor', m['distributor']), ('factory', m['factory'])])
     return _finish_t(run, case, before.get('summary', {}))
@@ -1337,13 +1580,13 @@ def _testnet_revert_cancel(run, u, stages, gov, can):
     chain.rpc('anvil_setStorageAt', [v, slot, '0x' + format(int(original, 16) + 1, '064x')])
     run.stage('FS-2.f.disclosedWrite', slot=slot, note='vault[14] roundCap + 1')
     before = implementation(chain, m['stpros'])
-    run.tx('FS-2.f.U_t.reverts', gov, tl, u['execute']['data'], expect=False)
+    _gov_send(run, 'FS-2.f.U_t.reverts', gov, tl, u['execute']['data'], expect=False)
     run.add(truth('FS-2.f.atomicRollback', implementation(chain, m['stpros']) == before))
     chain.rpc('anvil_setStorageAt', [v, slot, original])
-    run.tx('FS-2.f.cancelByCAN', can, tl, u['cancel']['data'])
+    _gov_send(run, 'FS-2.f.cancelByCAN', can, tl, u['cancel']['data'])
     run.add(truth('FS-2.f.operationUnset', not chain.boolean(tl, 'isOperation(bytes32)', u['operation']['id'])))
     sched = stages['T-5']['transactions'][0]
-    run.tx('FS-2.f.reschedule', gov, sched['to'], sched['data'])
+    _gov_send(run, 'FS-2.f.reschedule', gov, sched['to'], sched['data'])
     run.reject('FS-2.f.beforeFullDelay', tl, u['execute']['data'], gov)
     chain.warp(301)
 
@@ -1490,7 +1733,7 @@ def _partial_claims(run):
 def _finish_t(run, case, summary):
     scenario = f'FS-2.{case}'
     ledgers = {scenario: run.ledger(scenario, ['P-0.', 'T-', 'U_t', 'GC-03', 'POST-', 'shape.', 'tx.', 'reject.', 'wait.',
-                                               'cli.', 'FS-2', 'S-012', 'pre.'])}
+                                               'cli.', 'FS-2', 'S-012', 'pre.', 'SAFE.', 'INPUT.'])}
     if case in ('normal', 'b', 'c', 'd'):
         run.add(*gas_rows(run, 'T'), *gas_rows(run, 'U_t'))
         key = 'normal' if case == 'normal' else case

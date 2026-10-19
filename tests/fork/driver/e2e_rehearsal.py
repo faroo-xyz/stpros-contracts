@@ -29,8 +29,9 @@ from tools.lib import abi  # noqa: E402
 from tools.lib.keccak import keccak256  # noqa: E402
 from e2e import E2EError, _lower  # noqa: E402
 import e2e_identity as ident  # noqa: E402
+import safe_governance as sg  # noqa: E402
 
-SAFE_OUT = ROOT / 'out' / 'SyntheticSafe.sol'
+SAFE_OUT = sg.SAFE_OUT
 # Raw SHA-256 of the recorded deployment files (vETH-3.0-contract, deployments/pharos_atlantic_testnet).
 RUNTIMES = {
     'SlpPharosRewardsVault_Implementation.json': '43e5770274eb82656df50f201d72c2855e963c6b92dbbf8468d49c9165c8c53e',
@@ -44,10 +45,6 @@ CORE = ('stpros', 'oracle', 'bridge', 'distributor', 'factory')
 def address_of(chain_id, label):
     """Deterministic rehearsal address (tests can predict it before the run)."""
     return '0x' + keccak256(f'faroo e2e rehearsal {chain_id} {label}'.encode())[-40:]
-
-
-def safe_owners(chain_id, role, count=3):
-    return sorted((address_of(chain_id, f'{role}.owner{i}') for i in range(count)), key=lambda a: int(a, 16))
 
 
 def runtimes_dir():
@@ -64,13 +61,6 @@ def fn(signature, *values):
 
 def _step(h, what):
     h.ctx.setdefault('rehearsal', []).append(what)
-
-
-def _artifact(name):
-    path = SAFE_OUT / f'{name}.json'
-    if not path.is_file():
-        raise E2EError(f'forge output {path} missing: build the export first (forge build)')
-    return json.loads(path.read_text())
 
 
 def _send(h, label, sender, to, data):
@@ -96,26 +86,14 @@ def timelock_batch(h, label, calls):
 
 
 # ------------------------------------------------------------------------------------------------ Safes
-def deploy_safe(h, role, owners, threshold):
-    cid = h.ctx['chainId']
-    singleton = getattr(h, 'rehearsal_singleton', None)
-    deployer = address_of(cid, 'deployer')
-    if singleton is None:
-        singleton, _ = h.chain.create('E2E.rehearsal.safeSingleton', deployer, _artifact('SyntheticSafeSingleton')['bytecode']['object'])
-        h.rehearsal_singleton = singleton
-        _step(h, f'create SyntheticSafeSingleton {singleton}')
-    initcode = _artifact('SyntheticSafeProxy')['bytecode']['object'] + abi.enc_word(singleton)
-    safe, _ = h.chain.create(f'E2E.rehearsal.safe.{role}', deployer, initcode)
-    _send(h, f'safe.{role}.setup', owners[0], safe, fn('setup(address[],uint256)', owners, threshold))
-    _step(h, f'create {role} Safe {safe} ({threshold} of {len(owners)})')
-    return _lower(safe)
-
-
-def setup_safes(h, run, roles=ident.SAFE_ROLES, threshold=2):
-    """Moves GOV/CAN/GRD/OPS/Treasury to Safes through one Timelock batch; the old holders lose their roles."""
+def setup_safes(h, run, roles=ident.SAFE_ROLES):
+    """Moves GOV/CAN/GRD/OPS/Treasury to local Safe models (release-mode profile ``safe_governance.PROFILE``: GOV 3/5,
+    CAN 3/5, disjoint signers) through one Timelock batch; the old holders lose their roles."""
     a, cid, tl = h.a, h.ctx['chainId'], h.a['timelock']
     old = dict(h.actors)
-    safes = {role: deploy_safe(h, role, safe_owners(cid, role), threshold) for role in roles}
+    specs = sg.deploy_model(h.chain, f'e2e-rehearsal-{cid}', roles)
+    safes = {role: spec['address'] for role, spec in specs.items()}
+    _step(h, f'create local Safe models {sorted(safes)}')
     calls = []
     role_call = lambda target, fn, role, who: (target, abi.calldata(f'{fn}(bytes32,address)', role, who))
     if 'gov' in safes:
@@ -153,8 +131,11 @@ def setup_safes(h, run, roles=ident.SAFE_ROLES, threshold=2):
 
 
 def safe_entries(safes, states, manifest_sha='0x' + '00' * 32):
-    """The record's ``safes`` section for the rehearsal Safes, as an approved record would carry it."""
+    """The record's ``safes`` section for the rehearsal Safes, as an approved record would carry it (the release
+    tool's ``review.safes`` identity fields)."""
     return {role: {'address': s, 'owners': states[role]['owners'], 'threshold': states[role]['threshold'],
+                   'runtimeHash': states[role]['runtimeHash'], 'singleton': states[role]['singleton'],
+                   'singletonHash': states[role]['singletonHash'], 'modules': [], 'guard': '0x' + '00' * 20,
                    'safeManifestSha256': manifest_sha} for role, s in safes.items()}
 
 
@@ -170,26 +151,55 @@ def load_runtimes(directory):
     return out
 
 
+def create_address(sender, nonce):
+    """CREATE address of ``sender`` at ``nonce`` (RLP of [sender, nonce]; nonce < 128)."""
+    raw = bytes([0xd6, 0x94]) + bytes.fromhex(sender[2:]) + (bytes([nonce]) if nonce else b'\x80')
+    return '0x' + keccak256(raw)[-40:]
+
+
+def _transparent_proxy(h, label, deployer, implementation, owner, init):
+    """The canonical (V4 build) OZ 5 TransparentUpgradeableProxy over ``implementation``. Its constructor creates the
+    ProxyAdmin at CREATE nonce 1 of the proxy: the expected admin is derived from that rule, not read back."""
+    from localchain import canonical
+    art = canonical('TransparentUpgradeableProxy')
+    if art.get('creationLinks'):
+        raise E2EError('TransparentUpgradeableProxy creation bytecode has unresolved links')
+    ctor = next(i for i in art['abi'] if i['type'] == 'constructor')
+    args = abi.encode_parameters(ctor['inputs'], [implementation, owner, init])
+    proxy, _ = h.chain.create(f'E2E.rehearsal.{label}', deployer, art['creationBytecode'] + args[2:])
+    return _lower(proxy), create_address(_lower(proxy), 1)
+
+
 def setup_integrations(h, run, directory, *, proxy_target=None):
-    """RewardsVault + Proxy0 + channel proxy from the recorded runtimes; RewardsVault becomes the Oracle reporter and
-    both proxies are whitelisted in the SlpDistributor (one Timelock batch). ``proxy_target`` overrides the
-    RewardsVault forwarding pointer (negative control)."""
+    """RewardsVault + Proxy0 + channel proxy: the recorded runtimes as implementations behind EIP-1967 transparent
+    proxies, initialized locally. The RewardsVault becomes the Oracle reporter and both proxies are whitelisted in
+    the SlpDistributor (one Timelock batch). ``proxy_target`` overrides the RewardsVault forwarding pointer (negative
+    control). The deployment evidence (implementation, admin, implementation runtime hash) is derived independently
+    and handed to C04 as ``proxyDeployments``."""
     a, cid = h.a, h.ctx['chainId']
     code = load_runtimes(directory)
-    rv, p0, p1 = (address_of(cid, k) for k in ('rewardsVault', 'proxy0', 'proxyChannel'))
-    admin, caller, operator = (address_of(cid, k) for k in ('integrationAdmin', 'rewardsCaller', 'proxyOperator'))
+    impl_rv, impl_p = address_of(cid, 'rewardsVaultImpl'), address_of(cid, 'slpProxyImpl')
+    admin, caller, operator, deployer = (address_of(cid, k) for k in ('integrationAdmin', 'rewardsCaller', 'proxyOperator',
+                                                                      'integrationDeployer'))
     init = 'initialize(address,address[],address,address)'
-    h.chain.rpc('anvil_setCode', [rv, code['SlpPharosRewardsVault']])
-    _send(h, 'rv.initialize', admin, rv, fn(init, admin, [caller], a['wpros'], a['oracle']))
-    for p in (p0, p1):
-        h.chain.rpc('anvil_setCode', [p, code['SlpPharosProxy']])
-        _send(h, f'proxy.{p[:10]}.initialize', admin, p, fn(init, admin, [operator], a['bridge'], rv))
+    h.chain.rpc('anvil_setCode', [impl_rv, code['SlpPharosRewardsVault']])
+    h.chain.rpc('anvil_setCode', [impl_p, code['SlpPharosProxy']])
+    rv, _ = _transparent_proxy(h, 'rewardsVault', deployer, impl_rv, admin, fn(init, admin, [caller], a['wpros'], a['oracle']))
+    deployments = {}
+    proxies = []
+    for label in ('proxy0', 'proxyChannel'):
+        # initialized in the constructor (this OZ 5 ERC1967Proxy refuses empty data: ERC1967ProxyUninitialized)
+        p, proxy_admin = _transparent_proxy(h, label, deployer, impl_p, admin, fn(init, admin, [operator], a['bridge'], rv))
+        proxies.append(p)
+        deployments[p] = {'implementation': _lower(impl_p), 'admin': proxy_admin,
+                          'implementationRuntimeHash': keccak256(bytes.fromhex(code['SlpPharosProxy'][2:]))}
+    p0, p1 = proxies
     _send(h, 'rv.setSlpPharosProxy', admin, rv, abi.calldata('setSlpPharosProxy(address)', proxy_target or p0))
-    _step(h, f'setCode recorded RewardsVault {rv} and proxies {p0}, {p1}; initialized')
+    _step(h, f'setCode recorded runtimes at {impl_rv}, {impl_p}; transparent proxies {rv}, {p0}, {p1}; initialized')
     timelock_batch(h, 'integrations', [(a['oracle'], abi.calldata('setSlp(address)', rv)),
                                        (a['distributor'], fn('setSlps(address[],bool)', [p0, p1], True))])
     h.ctx['actors']['reporter'] = h.chain.addr(a['oracle'], 'slp()')
     h.ctx['integrations'] = {'rewardsVault': _lower(rv), 'rewardsCaller': _lower(caller), 'rewardsTarget': _lower(p0),
-                             'stakingProxies': [_lower(p0), _lower(p1)],
-                             'proxyOperators': {_lower(p0): _lower(operator), _lower(p1): _lower(operator)}, 'approved': False}
+                             'stakingProxies': [p0, p1], 'proxyOperators': {p0: _lower(operator), p1: _lower(operator)},
+                             'proxyDeployments': deployments, 'approved': False}
     return h.ctx['integrations']

@@ -66,7 +66,24 @@ class Governance:
                                                       self.m['safeThreshold'], safe_exec.safe_tx(self.tl, data, 0), expect=expect)
             self.run.add(*[truth(c['id'], c['ok']) for c in checks])
             return receipt
+        route = getattr(self.run, 'gov_route', None)
+        if route and route.get('mode') == 'SAFE':      # testnet GOV_t Safe route (execution.testnet governance=...)
+            return self.safe_send(label, 'gov', self.tl, data, expect)
         receipt, _ = self.run.tx(label, self.gov, self.tl, data, expect=expect)
+        return receipt
+
+    def can_send(self, label, data, expect=True):
+        """CAN_t to the Timelock: through the CAN_t Safe when the run uses the testnet Safe route."""
+        route = getattr(self.run, 'gov_route', None)
+        if not self.mainnet and route and route.get('mode') == 'SAFE':
+            return self.safe_send(label, 'can', self.tl, data, expect)
+        receipt, _ = self.run.tx(label, self.actors['can'], self.tl, data, expect=expect)
+        return receipt
+
+    def safe_send(self, label, role, to, data, expect):
+        import safe_governance
+        receipt, rows, _ = safe_governance.checked_execute(self.chain, label, self.run.gov_route[role], to, data, expect=expect)
+        self.run.add(*rows)
         return receipt
 
     def act(self, label, calls, *, expect=True):
@@ -113,7 +130,7 @@ class Governance:
         self.probe(f'{p}.1.cancel.byGOV', self.tl, cancel, sender, True)
         for name in ('GRD', 'OPS', 'EOA'):
             self.probe(f'{p}.1.cancel.by{name}', self.tl, cancel, others[name])
-        self.run.tx(f'{p}.1.cancelByCAN', self.actors['can'], self.tl, cancel)
+        self.can_send(f'{p}.1.cancelByCAN', cancel)
         self.run.add(truth(f'{p}.1.cancelled', not self.chain.boolean(self.tl, 'isOperation(bytes32)', op)))
 
     def guardian_scopes(self, p):
@@ -234,7 +251,7 @@ class Governance:
         salt = keccak256(b'faroo FS-3.7 replace CAN')
         self.gov_send(f'{p}.7.scheduleReplacement', self.encode('schedule', calls, salt))
         op = self.operation_id(calls, salt)
-        self.run.tx(f'{p}.7.hostileCANCancels', self.actors['can'], self.tl, abi.calldata('cancel(bytes32)', op))
+        self.can_send(f'{p}.7.hostileCANCancels', abi.calldata('cancel(bytes32)', op))
         self.run.add(truth(f'{p}.7.residualR7Observed', not self.chain.boolean(self.tl, 'isOperation(bytes32)', op),
                            'documented residual: CAN can veto its own replacement'))
 
@@ -255,7 +272,7 @@ class Governance:
         salt = keccak256(b'faroo FS-4 R1 malicious')
         self.gov_send(f'{p}.R1.scheduleMalicious', self.encode('schedule', calls, salt))
         op = self.operation_id(calls, salt)
-        self.run.tx(f'{p}.R1.cancelByCAN', self.actors['can'], self.tl, abi.calldata('cancel(bytes32)', op))
+        self.can_send(f'{p}.R1.cancelByCAN', abi.calldata('cancel(bytes32)', op))
         self.chain.warp(self.delay + 1)
         self.probe(f'{p}.R1.cancelledCannotExecute', self.tl, self.encode('execute', calls, salt), self.gov)
 

@@ -1183,7 +1183,17 @@ def staking_proxies(h):
                 continue
             admin = '0x' + h.chain.slot(p, EIP1967_ADMIN)[-40:]
             impl = '0x' + h.chain.slot(p, EIP1967_IMPL)[-40:]
-            h.check_row(f'C04.{p[:10]}.proxyAdmin', True, '', value={'admin': admin, 'implementation': impl})
+            runtime = keccak256(bytes.fromhex(h.chain.code(impl)[2:])) if h.chain.code(impl) not in ('0x', '0x0') else None
+            observed = {'implementation': impl, 'admin': admin, 'implementationRuntimeHash': runtime}
+            dep = (integ.get('proxyDeployments') or {}).get(p)
+            if dep is None:
+                ok &= h.check_row(f'C04.{p[:10]}.deployment==approved', False,
+                                  'no approved deployment evidence (implementation, admin, implementation runtime hash) for this proxy',
+                                  value=observed)
+            else:
+                for key in ('implementation', 'admin', 'implementationRuntimeHash'):
+                    ok &= h.check_row(f'C04.{p[:10]}.{key}==approved', _lower(dep.get(key)) == _lower(observed[key]),
+                                      f'{key} {observed[key]} differs from the approved deployment evidence {dep.get(key)}', value=observed[key])
             ok &= h.check_row(f'C04.{p[:10]}.bridgeVault', _call_addr(h, p, 'getBridgeVault()') == _lower(a['bridge']),
                               f'transferBack target {_call_addr(h, p, "getBridgeVault()")} is not the V4 BridgeVault')
             rv = integ.get('rewardsVault')

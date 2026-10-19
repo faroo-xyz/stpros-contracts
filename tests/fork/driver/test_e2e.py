@@ -138,6 +138,7 @@ class LogicTest(unittest.TestCase):
                'governance': {'mode': 'EOA', 'delay': 300},
                'formal': {'readAuthorization': True, 'ownerInputsApproved': True, 'safeManifestApproved': True},
                'integrations': {'approved': True}, 'record': {'schema': ident.RECORD_SCHEMA},
+               'releaseInputs': {'source': 'APPROVED_RECORD'},
                'upgradeRoute': {'mode': 'SAFE', 'safe': a, 'approved': True}}
         ctx.update(over)
         return ctx
@@ -163,6 +164,9 @@ class LogicTest(unittest.TestCase):
         self.assertTrue(any('rehearsal' in b for b in e2e.formal_blockers(self._ctx(rehearsal=['setCode']))))
         self.assertTrue(any('stale' in b for b in e2e.formal_blockers(self._ctx(governanceProblems=['stale signer set']))))
         self.assertTrue(any('postcheck MISSING' in p for p in e2e.context_problems(self._ctx(postcheck={'verdict': 'MISSING'}))))
+        self.assertTrue(any('release inputs SYNTHETIC' in b for b in e2e.formal_blockers(self._ctx(releaseInputs={'source': 'SYNTHETIC'}))))
+        self.assertTrue(any('drove the upgrade' in p for p in
+                            e2e.context_problems(self._ctx(recordMismatch='E2E record a is not the record b that drove the upgrade'))))
 
 
     def test_report_name_guard(self):
@@ -483,7 +487,7 @@ class NegativeControlTest(unittest.TestCase):
         problems = doc['problems']
         self.assertTrue(any('GOV is not the Timelock proposer' in p for p in problems))
         self.assertTrue(any('guardian() is not the approved GRD' in p for p in problems))
-        self.assertTrue(any('Safe has no code' in p for p in problems))
+        self.assertTrue(any('Safe' in p and 'has no code' in p for p in problems))
         self.assertTrue(any('manifest is not approved' in p for p in problems) or any('no code' in p for p in problems))
         self.assertEqual(set(doc['context']['actorClasses'].values()), {e2e.SYNTHETIC})
         self.assertFalse(doc['context']['formal']['safeManifestApproved'])
@@ -552,7 +556,7 @@ class NegativeControlTest(unittest.TestCase):
             entries['ops'] = {**entries['ops'], 'owners': entries['ops']['owners'][1:] + ['0x' + '44' * 20]}
             return entries
         doc = self._with_record('safeowners', {'A01'}, setup=setup, safes=safes, manifests={'m1'})
-        self.assertTrue(any('ops Safe owners on the Fork differ' in p for p in doc['problems']))
+        self.assertTrue(any('ops Safe owners on the node differ' in p for p in doc['problems']))
         self.assertEqual(set(doc['context']['actorClasses'].values()), {e2e.SYNTHETIC})
         self.assertEqual(doc['verdicts']['formal'], 'BLOCKED')
 
@@ -613,7 +617,7 @@ class RehearsalTest(unittest.TestCase):
         self.assertEqual(v['execution'], 'PASS', v['failures'])
         self.assertEqual(v['formal'], 'BLOCKED')
         self.assertTrue(any('rehearsal setup applied' in b for b in v['blockers']))
-        self.assertTrue(any('testnet U_t was executed by an EOA' in b for b in v['blockers']))
+        self.assertTrue(any('synthetic GOV_t EOA' in b for b in v['blockers']))
         ctx = doc['context']
         self.assertEqual(ctx['governance']['mode'], 'SAFE')
         self.assertEqual(len(ctx['safes']), len(ident.SAFE_ROLES))
@@ -630,8 +634,12 @@ class RehearsalTest(unittest.TestCase):
 
         def setup(h, run):
             safes, states = reh.setup_safes(h, run)
+            raw = h.chain.call(h.a['distributor'], 'getSlps()')
             _install_record(h, directory, pins, safes=reh.safe_entries(safes, states, 'm1'),
-                            actors={k: h.actors[k] for k in ident.ROLE_KEYS})
+                            actors={k: h.actors[k] for k in ident.ROLE_KEYS},
+                            ownerInputs={'destinations': [x.lower() for x in e2e.abi.decode_parameters([{'type': 'address[]'}], raw)[0]],
+                                         'commission': {'decision': 'K2', 'account': safes['treasury'],
+                                                        'ratePpm': h.u(h.a['oracle'], 'commissionRatePpm()')}})
             state['ok'] = True
         import campaign_input
         with mock.patch.object(ident, 'APPROVED_E2E_RECORDS', pins), \
