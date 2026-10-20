@@ -117,6 +117,7 @@ UINT256_DIGITS = len(str(UINT256_LIMIT - 1))     # 78: no canonical uint256 deci
 _DECIMAL = re.compile(r'0|[1-9][0-9]*')
 _ADDRESS = re.compile(r'0x[0-9a-fA-F]{40}')
 SAFE_REPLAY = 'BLOCKED: Safe event semantics depend on the unapproved singleton version (FR-X8)'
+V4_REPLAY = 'CENSUS ONLY: a V4 contract deployed after the pin; its history is checked by the release tool on the Fork'
 # What a local `overall: PASS` means, and the state it does not cover. Neither list is closed by a flag.
 OVERALL_MEANING = (
     'Local PASS means only that the content-verified, target-closed history and the supplied observation agree '
@@ -151,7 +152,10 @@ def derive(verified, chain):
     """Enumeration at the verified anchor. `verified` is a verify_manifest result (target set
     closed) or a verify_archive result (closure NOT VERIFIED)."""
     reg = h.registry(chain)
-    rows = verified['rows']
+    all_rows = verified['rows']
+    # extra targets (the V4 contracts) are census only here: the legacy enumeration and its state observation cover
+    # the registry targets; the V4 contracts are checked by the release tool and the Fork identity reads
+    rows = [r for r in all_rows if r['address'] not in h.EXTRA_TARGETS[chain]]
     pin = verified['b0Prefix']['end'] if 'b0Prefix' in verified else h.B0_PREFIX[chain]['end']
     stpros, factories = reg['stpros'], reg['factories']
     created = [{'factory': r['address'], 'vault': logscan.abi.topic_addr(r['topics'][1]), **_ref(r)}
@@ -187,11 +191,12 @@ def derive(verified, chain):
             counts[r['topics'][0]] = counts.get(r['topics'][0], 0) + 1
     safe = {}
     for target in h.EXTRA_TARGETS[chain]:
-        own = [r for r in rows if r['address'] == target]
+        own = [r for r in all_rows if r['address'] == target]
         census = {}
         for r in own:
             census[r['topics'][0]] = census.get(r['topics'][0], 0) + 1
-        safe[target] = {'replay': SAFE_REPLAY, 'logCount': len(own), 'topicCensus': dict(sorted(census.items())),
+        replay = V4_REPLAY if target in h.V4_CREATED[chain] else SAFE_REPLAY
+        safe[target] = {'replay': replay, 'logCount': len(own), 'topicCensus': dict(sorted(census.items())),
                         'firstLogBlock': _block(own[0]) if own else None}
     return {
         'schema': SCHEMA, 'chain': chain, 'chainId': h.CHAINS[chain],
@@ -217,16 +222,18 @@ def derive(verified, chain):
         'withdrawRequests': len(withdraws),
         'safe': safe,
         'unclassifiedTopics': dict(sorted(unclassified.items())),
-        'authorityEventsAfterPin': _after_pin(rows, pin, chain, AUTHORITY),
-        'configurationEventsAfterPin': _after_pin(rows, pin, chain, CONFIGURATION),
-        'unclassifiedEventsAfterPin': _after_pin(rows, pin, chain, UNCLASSIFIED),
-        'operationalEventCountsAfterPin': _operational_counts(rows, pin, chain),
+        'authorityEventsAfterPin': _after_pin(all_rows, pin, chain, AUTHORITY),
+        'configurationEventsAfterPin': _after_pin(all_rows, pin, chain, CONFIGURATION),
+        'unclassifiedEventsAfterPin': _after_pin(all_rows, pin, chain, UNCLASSIFIED),
+        'operationalEventCountsAfterPin': _operational_counts(all_rows, pin, chain),
         'pendingOwners': _pending_owners(rows),
     }
 
 
 def classify(row, chain):
     """(name, signature, class). Every GOV Safe log is UNCLASSIFIED: its meaning is BLOCKED (FR-X8)."""
+    if row['address'] in h.V4_CREATED[chain]:
+        return ('V4ContractEvent', None, UNCLASSIFIED)
     if row['address'] in h.EXTRA_TARGETS[chain]:
         return ('SafeEvent', None, UNCLASSIFIED)
     return EVENTS.get(row['topics'][0], ('UnknownEvent', None, UNCLASSIFIED))

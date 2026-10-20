@@ -68,8 +68,33 @@ B0_PREFIX = {
 # owners, threshold, nonce, modules, guard, fallback handler); its event history (about 8.7M pre-pin blocks) is
 # not collected in the streamlined upgrade-readiness scope (owner decision 2026-10-18). WPROS is deliberately
 # not a target either (state reads only; see the research design record).
-EXTRA_TARGETS = {'mainnet': (), 'testnet': ()}
+# V4 mainnet contracts deployed after the B0 pin (owner deployment of 2026-10-20, verified on chain; research
+# `v4-release-readiness/mainnet-predeploy-20261020`, `mainnet-p0-20261020`, `mainnet-releaseassertions-20261020`).
+# Each is CREATE(deployer EOA, nonce): an address that can exist only once. They are campaign log targets of the
+# post-pin segment only. No pre-pin segment is collected for them: a plan records their code as absent at
+# `start - 1`, and with the unique CREATE no log of theirs can exist before (``verify_archive``).
+V4_CREATED = {
+    'mainnet': {
+        '0xc30db0543412c6881a543390d2c21fbbff42805b': {'name': 'TimelockController', 'deployer': '0x8ce84e9fa0101d317d8956d73610ad3e0e219d41', 'nonce': 29},
+        '0xf772b375f93650f798bf724ce7a9a45c9e7a579f': {'name': 'SlpDistributor_Proxy', 'deployer': '0x8ce84e9fa0101d317d8956d73610ad3e0e219d41', 'nonce': 32},
+        '0xf1df1cb080256f48e8702c24149136e4a6dec25e': {'name': 'BridgeVault_Proxy', 'deployer': '0x8ce84e9fa0101d317d8956d73610ad3e0e219d41', 'nonce': 39},
+        '0x10fdbced4a5d5d3cad54b690105f77556263e97c': {'name': 'ReleaseAssertions', 'deployer': '0x8ce84e9fa0101d317d8956d73610ad3e0e219d41', 'nonce': 40},
+    },
+    'testnet': {},
+}
+# Campaign log targets beyond the B0 plan: the V4 contracts above (post-pin only). The mainnet GOV Safe stays observed
+# by state reads only, WPROS too.
+EXTRA_TARGETS = {chain: tuple(sorted(created)) for chain, created in V4_CREATED.items()}
 GOV_SAFE = '0x3658e00f5ddb9fa0c7e9820e8d16c3c17eab73ca'
+
+
+def created_start_ok(chain, target, plan):
+    """A V4-created target may be first covered by a segment starting after ``fromBlock`` when CREATE(deployer, nonce)
+    is the target and the plan records its code as absent at ``start - 1``."""
+    from tools.release.native.distributor_predeploy import create_address
+    entry = V4_CREATED.get(chain, {}).get(target)
+    return (entry is not None and create_address(entry['deployer'], entry['nonce']) == target
+            and target not in plan['addresses_with_code_before_start'])
 
 
 class HistoryRefused(ValueError):
@@ -169,7 +194,7 @@ def verify_archive(manifest, root, chain):
         if end == anchor:
             _require(plan['end_block_hash'] == manifest['blockHash'], 'HISTORY_ANCHOR_MISMATCH', segment['planFile'])
         for target in addresses:
-            coverage[target].append((start, end))
+            coverage[target].append((start, end, created_start_ok(chain, target, plan)))
         chunk_shas, next_block = [], start
         for ref in segment['chunks']:
             _require(isinstance(ref, dict) and set(ref) == CHUNK_REF_KEYS, 'HISTORY_SEGMENT_KEYS')
@@ -199,8 +224,10 @@ def verify_archive(manifest, root, chain):
                       'endTimestamp': plan['end_timestamp'], 'chunkCount': len(chunk_shas),
                       'chunkListSha256': chunk_list_sha256(chunk_shas)})
     for target, ranges in coverage.items():
-        next_block = from_block
-        for start, end in sorted(ranges):
+        ranges = sorted(ranges)
+        # a V4-created target starts with its first segment when that plan proves the code absent before it
+        next_block = ranges[0][0] if ranges and ranges[0][2] else from_block
+        for start, end, _ in ranges:
             _require(start == next_block, 'HISTORY_TARGET_GAP_OR_OVERLAP', target, 'INCOMPLETE' if start > next_block else 'REFUSED')
             next_block = end + 1
         _require(next_block == anchor + 1, 'HISTORY_TARGET_GAP_OR_OVERLAP', target, 'INCOMPLETE')

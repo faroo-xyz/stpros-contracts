@@ -174,7 +174,11 @@ def testnet_case(root, *, new_vault=True, drop_new_vault=False, extra_rows=(), n
     return a, prefix_of(b0, root, FROM, PIN), targets, {'v1': v1, 'v2': v2, 'factory': factory, 'stpros': stpros}
 
 
-def mainnet_case(root, *, safe_segment=True, safe_target=True, safe_from=FROM, safe_code_before=()):
+V4 = sorted(h.V4_CREATED['mainnet'])          # the V4 contracts deployed after the pin: post-pin targets only
+
+
+def mainnet_case(root, *, safe_segment=True, safe_target=True, safe_from=FROM, safe_code_before=(), v4_code_before=(),
+                 v4_logs=()):
     reg = REG['mainnet']
     stpros, safe = reg['stpros'], h.GOV_SAFE
     v1 = '0x' + 'd1' * 20
@@ -188,8 +192,10 @@ def mainnet_case(root, *, safe_segment=True, safe_target=True, safe_from=FROM, s
     if safe_segment and safe_target:
         a.segment('safe', [safe], safe_from, PIN, [log(safe, [safe_setup], 110, 0)], code_before=safe_code_before)
     targets = [*base, safe] if safe_target else base
-    a.segment('incremental', targets, PIN + 1, ANCHOR, [])
-    return a, prefix_of(b0, root, FROM, PIN), sorted(targets)
+    # the post-pin plan records the legacy targets as having code at the pin and the V4 contracts as absent
+    a.segment('incremental', targets + V4, PIN + 1, ANCHOR, list(v4_logs),
+              code_before=[*base, *([safe] if safe_target else []), *v4_code_before])
+    return a, prefix_of(b0, root, FROM, PIN), sorted(targets + V4)
 
 
 class Tmp(unittest.TestCase):
@@ -365,19 +371,66 @@ class ContentVerificationTest(Tmp):
 def with_safe_target():
     """The retained generic extra-target mechanism, exercised with the GOV Safe as an explicit extra target. The
     streamlined scope declares none (``StreamlinedSafeScopeTest``)."""
-    return mock.patch.dict(h.EXTRA_TARGETS, {'mainnet': (h.GOV_SAFE,)})
+    return mock.patch.dict(h.EXTRA_TARGETS, {'mainnet': tuple(sorted({h.GOV_SAFE, *h.V4_CREATED['mainnet']}))})
 
 
 class StreamlinedSafeScopeTest(Tmp):
     def test_no_default_extra_target_and_a_safe_target_is_unexpected(self):
-        self.assertEqual(h.EXTRA_TARGETS, {'mainnet': (), 'testnet': ()})
+        # the only extra targets are the V4 contracts deployed after the pin; never the GOV Safe
+        self.assertEqual(h.EXTRA_TARGETS, {'mainnet': tuple(sorted(h.V4_CREATED['mainnet'])), 'testnet': ()})
+        self.assertNotIn(h.GOV_SAFE, h.EXTRA_TARGETS['mainnet'])
         a, prefix, targets = mainnet_case(self.root, safe_target=False)
         name, digest, _ = a.manifest(FROM, ANCHOR, targets)
         derived = hi.derive(self.auth(a, prefix, name, digest), 'mainnet')
-        self.assertEqual(derived['safe'], {})
+        self.assertEqual(sorted(derived['safe']), V4)                  # census of the V4 contracts only, no Safe
+        self.assertTrue(all(c['replay'] == hi.V4_REPLAY for c in derived['safe'].values()))
         a, prefix, targets = mainnet_case(self.root / 'with-safe')
         name, digest, _ = a.manifest(FROM, ANCHOR, targets)
         self.refused(lambda: self.auth(a, prefix, name, digest), 'HISTORY_TARGET_UNEXPECTED')
+
+
+class V4CreatedCoverageTest(Tmp):
+    """The V4 contracts deployed after the pin are covered from the post-pin segment only: CREATE(deployer EOA, nonce)
+    is the address and the plan records the code as absent at ``start - 1``."""
+
+    def auth(self, a, prefix, name, digest):
+        return h.verify_manifest(json.loads((a.root / name).read_text()), a.root, 'mainnet', prefix)
+
+    def test_post_pin_coverage_and_census_only_enumeration(self):
+        timelock = '0xc30db0543412c6881a543390d2c21fbbff42805b'
+        grant = log(timelock, [T['RoleGranted'], ADMIN, word(ALICE), word(BOB)], PIN + 9, 0)
+        a, prefix, targets = mainnet_case(self.root, safe_target=False, v4_logs=[grant])
+        name, digest, _ = a.manifest(FROM, ANCHOR, targets)
+        result = self.auth(a, prefix, name, digest)
+        self.assertEqual(len([r for r in result['rows'] if r['address'] == timelock]), 1)
+        derived = hi.derive(result, 'mainnet')
+        self.assertNotIn(timelock, derived['roles'])                   # not part of the legacy enumeration
+        self.assertEqual(derived['safe'][timelock]['logCount'], 1)       # but collected and counted
+
+    def test_code_at_the_pin_refuses_post_pin_coverage(self):
+        timelock = '0xc30db0543412c6881a543390d2c21fbbff42805b'
+        a, prefix, targets = mainnet_case(self.root, safe_target=False, v4_code_before=[timelock])
+        name, digest, _ = a.manifest(FROM, ANCHOR, targets)
+        with self.assertRaises(HistoryRefused) as ctx:
+            self.auth(a, prefix, name, digest)
+        self.assertEqual((ctx.exception.code, str(ctx.exception).split(': ')[-1]), ('HISTORY_TARGET_GAP_OR_OVERLAP', timelock))
+
+    def test_a_wrong_creation_nonce_refuses_post_pin_coverage(self):
+        bridge = '0xf1df1cb080256f48e8702c24149136e4a6dec25e'
+        a, prefix, targets = mainnet_case(self.root, safe_target=False)
+        name, digest, _ = a.manifest(FROM, ANCHOR, targets)
+        wrong = {**h.V4_CREATED['mainnet'], bridge: {**h.V4_CREATED['mainnet'][bridge], 'nonce': 38}}
+        with mock.patch.dict(h.V4_CREATED, {'mainnet': wrong}):
+            self.refused(lambda: self.auth(a, prefix, name, digest), 'HISTORY_TARGET_GAP_OR_OVERLAP')
+
+    def test_an_unlisted_post_pin_target_needs_full_coverage(self):
+        stranger = '0x' + 'e7' * 20                            # not a V4-created contract: the frozen rule applies
+        a, prefix, targets = mainnet_case(self.root, safe_target=False)
+        a.segment('more', [stranger], PIN + 1, ANCHOR, [])
+        name, _, doc = a.manifest(FROM, ANCHOR, sorted(targets + [stranger]), name='manifest-stranger.json')
+        with self.assertRaises(HistoryRefused) as ctx:
+            h.verify_archive(doc, a.root, 'mainnet')
+        self.assertEqual(ctx.exception.code, 'HISTORY_TARGET_GAP_OR_OVERLAP')
 
 
 class SafeHistoryTest(Tmp):

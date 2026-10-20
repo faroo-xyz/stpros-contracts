@@ -179,7 +179,9 @@ def spec(chain, *, anchor_block, anchor_hash, b0_plan, b0_plan_sha256, new_vault
         indices = sorted(v['index'] for v in vaults if v['factory'] == factory)
         _require(indices == list(range(counts[factory], counts[factory] + len(indices))), 'SPEC_NEW_VAULT',
                  f'{factory}: new vault indices must follow the B0 vaults without gap')
-    extra = [{'address': a, 'labels': [SAFE_LABEL]} for a in h.EXTRA_TARGETS[chain]]
+    created = h.V4_CREATED[chain]
+    extra = [{'address': a, 'labels': [f'v4:{created[a]["name"]}' if a in created else SAFE_LABEL]}
+             for a in h.EXTRA_TARGETS[chain]]
     _require(not ({e['address'] for e in extra} & {t['address'] for t in targets}), 'SPEC_TARGETS',
              'an extra target is already a B0 target')
     from_block, pin = prefix['start'], prefix['end']
@@ -188,8 +190,10 @@ def spec(chain, *, anchor_block, anchor_hash, b0_plan, b0_plan_sha256, new_vault
     if anchor_block > pin:
         segments.append(_segment('S1', 'post-pin', pin + 1, anchor_block, targets + extra, [],
                                  'B0 pin + 1; B0 targets and campaign extra targets'))
-    if extra:
-        segments.append(_segment('S2', 'extra-pre-pin', from_block, pin, extra, [],
+    # V4-created targets did not exist at the pin (their plan proves it): no pre-pin rescan for them
+    pre_pin = [e for e in extra if e['address'] not in created]
+    if pre_pin:
+        segments.append(_segment('S2', 'extra-pre-pin', from_block, pin, pre_pin, [],
                                  'common fromBlock (B0 start); campaign extra targets'))
     if vaults:
         segments.append(_segment('S3', 'new-vaults-pre-pin', from_block, pin, vault_entries, vaults,

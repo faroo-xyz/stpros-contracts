@@ -121,6 +121,7 @@ class Run:
             # the reused SlpDistributor pre-deployment (plan + five transaction hashes) travels in the bundle
             config = {**config, 'review': {**config.get('review', {}), 'predeployed': self.predeployed}}
         path, sha = rc.write_bundle(self.dir / stage, config, inv, rc.artifacts(network))
+        self.release_policy = dict(config['policy'])          # the reviewed policy the release tool was given
         out = rc.run_cli(action, path, sha)
         self.bundles[f'{stage}:{action}'] = {'configSha256': sha, 'outputSha256': hashlib.sha256(
             json.dumps(out, sort_keys=True).encode()).hexdigest()}

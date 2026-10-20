@@ -6,13 +6,21 @@ from ...lib import release_json as j
 from ._shared import (UNDEFINED, field, optional, coalesce, require, equal, number,
                       bigint, safe_integer, address, unique, hex_number)
 from .views import log_order
+from .distributor_predeploy import create_address
+
+
+def v4_scope(config):
+    from .inputs import v4_mainnet_scope
+    return v4_mainnet_scope(config)
 
 
 def history_targets(config):
     d = config['addresses']
-    result = [
-        d[n] for n in ('oracle', 'stpros', 'bridge', 'distributor', 'proxyAdmin', 'timelock', 'assertions', 'asset')
-    ]
+    # V4 mainnet scope: the asset (WPROS, an external token) is identity-only: no checkpoint reads its logs, its code is
+    # checked by ``physical_identity``. Outside the scope the frozen R4 target set is kept.
+    names = ('oracle', 'stpros', 'bridge', 'distributor', 'proxyAdmin', 'timelock', 'assertions') + \
+        (() if v4_scope(config) else ('asset',))
+    result = [d[n] for n in names]
     for factory in config['factories']:
         result.extend([factory['address'], factory['beacon'], *[v['address'] for v in factory['vaults']]])
     return sorted(address(x) for x in unique(result))
@@ -59,6 +67,34 @@ def validate_rows(rows, addresses, from_block, to_block):
         seen.add(key)
 
 
+def created_targets(config, proof, targets):
+    """V4 mainnet scope: targets created after ``fromBlock`` by a CREATE from an EOA. Their coverage starts at
+    ``coverageStart``: CREATE(deployer, nonce) is unique, so with the code absent at ``coverageStart - 1`` (checked
+    by ``HistorySession.create``) no log of the target can exist before it."""
+    entries = field(proof, 'createdTargets')
+    if entries is UNDEFINED:
+        return {}
+    require(v4_scope(config) and isinstance(entries, list) and len(entries) > 0, 'HISTORY_CREATED_TARGETS')
+    result = {}
+    for entry in entries:
+        require(
+            isinstance(entry, dict) and set(entry) == {'address', 'deployer', 'nonce', 'coverageStart'}
+            and field(entry, 'address') in targets and field(entry, 'address') not in result
+            and isinstance(entry['deployer'], str) and re.fullmatch(r'0x[0-9a-f]{40}', entry['deployer']) is not None
+            and integer(entry['nonce']) and integer(entry['coverageStart'])
+            and proof['fromBlock'] < entry['coverageStart'] <= proof['blockNumber']
+            and create_address(entry['deployer'], int(entry['nonce'])) == entry['address'],
+            'HISTORY_CREATED_TARGETS',
+            string_of(entry)
+        )
+        result[entry['address']] = entry
+    return result
+
+
+def string_of(value):
+    return j.canonical(value) if isinstance(value, (dict, list)) else str(value)
+
+
 def authenticate_history(config, inventory):
     require(
         j.truthy(field(config, 'historyFile'))
@@ -82,6 +118,7 @@ def authenticate_history(config, inventory):
         and len(proof['segments']) > 0,
         'HISTORY_TARGETS'
     )
+    created = created_targets(config, proof, targets)
     for segment in proof['segments']:
         require(raw_hash(field(segment, 'planSha256')), 'HISTORY_PLAN_HASH_REQUIRED')
         plan = j.checked_json(segment['planFile'], segment['planSha256'])
@@ -146,14 +183,17 @@ def authenticate_history(config, inventory):
             rows.extend(row for row in chunk['logs'] if row['address'] in targets)
             next_block = chunk['to'] + 1
         require(next_block == plan['end'] + 1, 'HISTORY_CHUNK_GAP')
-    for ranges in coverage.values():
-        next_block = proof['fromBlock']
+    for target, ranges in coverage.items():
+        next_block = created[target]['coverageStart'] if target in created else proof['fromBlock']
         for start, end in sorted(ranges, key=lambda x: x[0]):
             require(start == next_block, 'HISTORY_TARGET_GAP_OR_OVERLAP')
             next_block = end + 1
         require(next_block == proof['blockNumber'] + 1, 'HISTORY_TARGET_GAP_OR_OVERLAP')
     validate_rows(rows, targets, proof['fromBlock'], proof['blockNumber'])
-    return {'proof': proof, 'targets': targets, 'rows': sorted(rows, key=log_order), 'anchors': anchors}
+    result = {'proof': proof, 'targets': targets, 'rows': sorted(rows, key=log_order), 'anchors': anchors}
+    if created:                                    # V4 mainnet scope only; the frozen result shape is unchanged
+        result['created'] = created
+    return result
 
 
 class HistorySession:
@@ -162,6 +202,7 @@ class HistorySession:
         self.config, self.raw_rpc = config, raw_rpc
         self.proof, self.targets = authenticated['proof'], authenticated['targets']
         self.rows = authenticated['rows']
+        self.created = authenticated.get('created', {})
         self.pins = {a['number']: a['hash'] for a in authenticated['anchors']}
         self.cache, self.tip = {}, None
         self.through, self.log_requests = self.proof['blockNumber'], 0
@@ -171,11 +212,20 @@ class HistorySession:
         session = cls(config, authenticate_history(config, inventory), raw_rpc)
         await session.check_pins()
         for target in session.targets:
+            entry = session.created.get(target)
+            start = entry['coverageStart'] if entry else session.proof['fromBlock']
             require(
-                await raw_rpc('eth_getCode', [target, hex_number(session.proof['fromBlock'] - 1)]) == '0x',
+                await raw_rpc('eth_getCode', [target, hex_number(start - 1)]) == '0x',
                 'INVENTORY_START_HAS_CODE',
                 target
             )
+            if entry:
+                # the deployer is an EOA at the reviewed block: its nonce never repeats, so the CREATE is unique
+                require(
+                    await raw_rpc('eth_getCode', [entry['deployer'], hex_number(session.proof['blockNumber'])]) == '0x',
+                    'HISTORY_CREATED_TARGETS',
+                    'deployer is not an EOA: ' + entry['deployer']
+                )
         return session
 
     async def __call__(self, method, params):
@@ -187,6 +237,7 @@ class HistorySession:
         return await self.raw_rpc(method, params)
 
     def history_logs(self, target, from_block, to_block, topics):
+        # a created target has no log before its coverage start (proved at create), so the whole range is covered
         require(
             target in self.targets
             and from_block >= self.proof['fromBlock']

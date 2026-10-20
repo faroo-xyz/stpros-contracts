@@ -37,10 +37,17 @@ import transport as tp  # noqa: E402
 from transport import CollectionStop  # noqa: E402
 from tools.lib.rpc import PUBLIC_RPC  # noqa: E402
 from tools.release.native import rpc as native_rpc  # noqa: E402
+from tools.lib.keccak import keccak256  # noqa: E402
 
 ROOT = h.ROOT
 COLLECTION_SCHEMA = 'faroo-fork-collection-authorization-v2'
 FORK_SCHEMA = 'faroo-fork-execution-authorization-v2'
+# v3 = v2 plus ``scope.historicalReads``: an exact list of public reads *outside* the fork block that the release
+# checkpoints need on a Fork of the deployed V4 topology (pre-deployment transactions, the B0 pin header, code
+# absence before an archive start). Nothing else changes; v2 records keep their meaning.
+FORK_SCHEMA_V3 = 'faroo-fork-execution-authorization-v3'
+TX_METHOD = 'eth_getTransactionByHash'
+MAX_HISTORICAL_READS = 64
 RECONCILIATION_SCHEMA = 'faroo-fork-s1-s2-reconciliation-v1'
 COLLECTION_STAGES = ('S1', 'S2')
 # Owner FR-D1 decision of 2026-10-18: one budget per stage and chain, at most 3 restarts. A record above these is
@@ -71,6 +78,7 @@ FORK_KEYS = frozenset({'schema', 'authorizationId', 'mode', 'stage', 'chain', 'e
                        'forkBlockHash', 'maxHttpPosts', 'maxRestarts', 'pacingMs', 'retention', 'statement', 'scope'})
 FORK_SCOPE_KEYS = frozenset({'chainId', 'endpoint', 'transport', 'paramPolicy', 'forkAnchor', 'validity', 'owner',
                              'prerequisites', 'sourceBinding'})
+FORK_SCOPE_KEYS_V3 = FORK_SCOPE_KEYS | {'historicalReads'}
 RECONCILIATION_KEYS = frozenset({'schema', 'chain', 'chainId', 'anchorBlock', 'anchorHash', 'specSha256',
                                  's1AuthorizationSha256', 's2AuthorizationSha256', 's1ManifestSha256',
                                  's2ManifestSha256', 'comparisonSha256', 'verdict', 'reviewer', 'statement'})
@@ -154,7 +162,7 @@ def expected_b0(chain):
 
 
 def expected_extra_segment(chain):
-    extra = list(h.EXTRA_TARGETS[chain])
+    extra = [a for a in h.EXTRA_TARGETS[chain] if a not in h.V4_CREATED[chain]]    # V4-created: post-pin only
     if not extra:
         return None
     p = h.B0_PREFIX[chain]
@@ -198,7 +206,18 @@ def collection_record(stage, chain, *, mode, ident, ceiling, restarts, b0_target
 
 
 def fork_record(chain, *, mode, ident, upstream, ceiling, restarts, s1_sha256, s2_sha256, validity, retention, owner,
-                prerequisites, statement, bases):
+                prerequisites, statement, bases, historical_reads=None):
+    doc = _fork_record_v2(chain, mode=mode, ident=ident, upstream=upstream, ceiling=ceiling, restarts=restarts,
+                          s1_sha256=s1_sha256, s2_sha256=s2_sha256, validity=validity, retention=retention, owner=owner,
+                          prerequisites=prerequisites, statement=statement, bases=bases)
+    if historical_reads is not None:
+        doc['schema'], doc['methods'] = FORK_SCHEMA_V3, list(FORK_STATE_METHODS) + [TX_METHOD]
+        doc['scope']['historicalReads'] = historical_reads
+    return doc
+
+
+def _fork_record_v2(chain, *, mode, ident, upstream, ceiling, restarts, s1_sha256, s2_sha256, validity, retention, owner,
+                    prerequisites, statement, bases):
     return {'schema': FORK_SCHEMA, 'authorizationId': ident, 'mode': mode, 'stage': 'S3', 'chain': chain,
             'endpoint': upstream, 'methods': list(FORK_STATE_METHODS), 'forkBlock': None, 'forkBlockHash': None,
             'maxHttpPosts': ceiling, 'maxRestarts': restarts, 'pacingMs': tp.PACING_MS, 'retention': retention,
@@ -306,12 +325,17 @@ def check_collection_authorization(doc, *, bind_sources=True):
 
 
 def check_fork_authorization(doc):
-    _require(isinstance(doc, dict) and set(doc) == FORK_KEYS and doc['schema'] == FORK_SCHEMA and doc['stage'] == 'S3'
-             and doc['chain'] in h.CHAINS and isinstance(doc['scope'], dict) and set(doc['scope']) == FORK_SCOPE_KEYS
-             and doc['forkBlock'] is None and doc['forkBlockHash'] is None, 'AUTHORIZATION_KEYS', 'v2 fork keys')
+    v3 = isinstance(doc, dict) and doc.get('schema') == FORK_SCHEMA_V3
+    _require(isinstance(doc, dict) and set(doc) == FORK_KEYS and doc['schema'] in (FORK_SCHEMA, FORK_SCHEMA_V3)
+             and doc['stage'] == 'S3' and doc['chain'] in h.CHAINS and isinstance(doc['scope'], dict)
+             and set(doc['scope']) == (FORK_SCOPE_KEYS_V3 if v3 else FORK_SCOPE_KEYS)
+             and doc['forkBlock'] is None and doc['forkBlockHash'] is None, 'AUTHORIZATION_KEYS', 'v2/v3 fork keys')
     chain, s = doc['chain'], doc['scope']
     _common(doc, 'S3', chain, doc['maxHttpPosts'], doc['maxRestarts'])
-    _require(doc['methods'] == list(FORK_STATE_METHODS), 'AUTHORIZATION_METHODS', 'the measured anvil reads exactly')
+    _require(doc['methods'] == list(FORK_STATE_METHODS) + ([TX_METHOD] if v3 else []), 'AUTHORIZATION_METHODS',
+             'the measured anvil reads exactly (v3: plus the listed historical transaction reads)')
+    if v3:
+        check_historical_reads(s['historicalReads'])
     _require(s['chainId'] == h.CHAINS[chain], 'AUTHORIZATION_CHAIN', str(s['chainId']))
     if doc['mode'] == 'SIMULATION':
         _require(native_rpc._endpoint(doc['endpoint'], True, True)[1] == doc['endpoint'] == s['endpoint'],
@@ -334,6 +358,54 @@ def check_fork_authorization(doc):
              'AUTHORIZATION_KEYS', 'prerequisites')
     _require(_texts(doc['retention']), 'AUTHORIZATION_KEYS', 'retention')
     _source_binding(s)
+
+
+def check_historical_reads(reads):
+    """v3 ``scope.historicalReads``: each entry is one exact request a forked anvil forwards (measured forms) and the
+    answer it must get. Only absence of code, a header hash and a transaction's identity can be named."""
+    _require(isinstance(reads, list) and 0 < len(reads) <= MAX_HISTORICAL_READS, 'AUTHORIZATION_HISTORICAL_READS',
+             'between 1 and 64 entries')
+    seen = set()
+    for r in reads:
+        _require(isinstance(r, dict) and set(r) == {'method', 'params', 'expect', 'purpose'}
+                 and isinstance(r['purpose'], str) and r['purpose'].strip() and isinstance(r['params'], list),
+                 'AUTHORIZATION_HISTORICAL_READS', 'entry keys')
+        m, p, e = r['method'], r['params'], r['expect']
+        if m == 'eth_getBlockByNumber':
+            ok = (len(p) == 2 and _hex_block(p[0]) and p[1] is True and isinstance(e, dict) and set(e) == {'hash'}
+                  and isinstance(e['hash'], str) and _HASH.fullmatch(e['hash']) is not None)
+        elif m == 'eth_getCode':
+            ok = (len(p) == 2 and isinstance(p[0], str) and _ADDRESS.fullmatch(p[0]) is not None and _hex_block(p[1])
+                  and e == {'code': '0x'})
+        elif m == TX_METHOD:
+            ok = (len(p) == 1 and isinstance(p[0], str) and _HASH.fullmatch(p[0]) is not None and isinstance(e, dict)
+                  and set(e) == {'from', 'nonce', 'to', 'inputKeccak'}
+                  and isinstance(e['from'], str) and _ADDRESS.fullmatch(e['from']) is not None
+                  and type(e['nonce']) is int and e['nonce'] >= 0
+                  and (e['to'] is None or (isinstance(e['to'], str) and _ADDRESS.fullmatch(e['to']) is not None))
+                  and isinstance(e['inputKeccak'], str) and _HASH.fullmatch(e['inputKeccak']) is not None)
+        else:
+            ok = False
+        _require(ok, 'AUTHORIZATION_HISTORICAL_READS', f'{m} {json.dumps(p)[:120]}')
+        key = _read_key(m, p)
+        _require(key not in seen, 'AUTHORIZATION_HISTORICAL_READS', 'duplicate entry')
+        seen.add(key)
+
+
+def _hex_block(value):
+    return isinstance(value, str) and re.fullmatch(r'0x[1-9a-f][0-9a-f]*', value) is not None
+
+
+def _read_key(method, params):
+    return json.dumps([method, params], sort_keys=True, separators=(',', ':'))
+
+
+def historical_read(item, reads):
+    """The ``historicalReads`` entry that ``item`` is exactly, or None."""
+    if not reads:
+        return None
+    key = _read_key(item.get('method'), item.get('params', []))
+    return next((r for r in reads if _read_key(r['method'], r['params']) == key), None)
 
 
 def check_validity(auth, now_utc):
@@ -583,8 +655,11 @@ def _block_ok(tag, block, block_hash):
     return False
 
 
-def check_fork_request(item, block, block_hash):
-    """The parameter rule of a scoped S3 proxy: every state read is at the bound fork block."""
+def check_fork_request(item, block, block_hash, reads=None):
+    """The parameter rule of a scoped S3 proxy: every state read is at the bound fork block, except an exact
+    ``historicalReads`` entry of a v3 record."""
+    if historical_read(item, reads) is not None:
+        return
     method, params = item['method'], item.get('params', [])
     _require(isinstance(params, list), 'FORK_PARAMS', method)
     address = lambda v: isinstance(v, str) and _ADDRESS.fullmatch(v.lower()) is not None  # noqa: E731
@@ -602,15 +677,22 @@ def check_fork_request(item, block, block_hash):
     _require(ok, 'FORK_PARAMS', f'{method} {json.dumps(params)[:160]} is not a read at fork block {block}')
 
 
-def check_fork_response(items, body, chain_id, block_hash):
-    """Raises on a chain id or fork-header answer that contradicts the bound anchor (the proxy then stops)."""
+def check_fork_response(items, body, chain_id, block_hash, reads=None, block=None):
+    """Raises on a chain id or fork-header answer that contradicts the bound anchor, or on a historical read whose
+    answer is not the recorded one (the proxy then stops)."""
     try:
         out = json.loads(body)
     except ValueError:
+        _require(not any(historical_read(i, reads) for i in items), 'FORK_HISTORICAL_READ_MISMATCH',
+                 'unparseable answer', 'STOP')
         return
     answers = {a.get('id'): a for a in (out if isinstance(out, list) else [out]) if isinstance(a, dict)}
     for item in items:
         result = answers.get(item.get('id'), {}).get('result')
+        entry = historical_read(item, reads)
+        if entry is not None:
+            _check_historical_answer(entry, result, block)
+            continue
         if result is None:
             continue
         if item['method'] == 'eth_chainId':
@@ -618,3 +700,19 @@ def check_fork_response(items, body, chain_id, block_hash):
         elif item['method'] == 'eth_getBlockByNumber':
             _require(isinstance(result, dict) and result.get('hash') == block_hash, 'FORK_ANCHOR_MISMATCH',
                      f'upstream header {result.get("hash") if isinstance(result, dict) else result!r}', 'STOP')
+
+
+def _check_historical_answer(entry, result, block):
+    m, e = entry['method'], entry['expect']
+    if m == 'eth_getBlockByNumber':
+        ok = isinstance(result, dict) and result.get('hash') == e['hash'] and result.get('number') == entry['params'][0]
+    elif m == 'eth_getCode':
+        ok = result == e['code']
+    else:
+        ok = (isinstance(result, dict) and result.get('hash') == entry['params'][0]
+              and isinstance(result.get('blockNumber'), str) and block is not None and int(result['blockNumber'], 16) <= block
+              and str(result.get('from')).lower() == e['from'] and int(str(result.get('nonce')), 16) == e['nonce']
+              and (result.get('to') is None if e['to'] is None else str(result.get('to')).lower() == e['to'])
+              and isinstance(result.get('input'), str)
+              and keccak256(bytes.fromhex(result['input'][2:])) == e['inputKeccak'])
+    _require(ok, 'FORK_HISTORICAL_READ_MISMATCH', f'{m} {json.dumps(entry["params"])[:120]}', 'STOP')

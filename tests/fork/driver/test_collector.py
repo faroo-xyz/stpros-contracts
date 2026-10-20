@@ -814,8 +814,12 @@ class PlanTest(Tmp):
                 labels = {e['address']: e['labels'] for e in s1['addresses']}
                 for entry in w.b0_plan['addresses']:
                     self.assertEqual(labels[entry['address']], sorted(entry['labels']))
-                self.assertEqual(spec['extraTargets'], [])
+                self.assertEqual(spec['extraTargets'], list(h.EXTRA_TARGETS[chain]))
                 self.assertFalse(any(SAFE == e['address'] for seg in spec['segments'] for e in seg['addresses']))
+                for address, entry in h.V4_CREATED[chain].items():                # post-pin only, labelled by contract
+                    self.assertEqual(labels[address], [f'v4:{entry["name"]}'])
+                    self.assertEqual([s['id'] for s in spec['segments'] if address in {e['address'] for e in s['addresses']}],
+                                     ['S1'])
                 factory, index, vault = w.new_vault
                 self.assertEqual(cp.segment(spec, 'S4')['addresses'], [{'address': vault, 'labels': [f'vault:{factory}[1]']}])
                 edited = copy.deepcopy(spec)

@@ -360,7 +360,7 @@ class ScopedCollectionTest(Base):
     def test_the_lower_bound_counts_the_gas_envelope_read(self):
         for chain in ('testnet', 'mainnet'):
             spec = self.world(chain, sub=chain).spec(anchor=SELECTED)
-            self.assertEqual(spec['extraTargets'], [])
+            self.assertEqual(spec['extraTargets'], list(h.EXTRA_TARGETS[chain]))      # V4 contracts: post-pin only
             with_read = scope.required_posts_lower_bound(spec, [])
             with mock.patch.dict(cp.GAS_ENVELOPE, {chain: ()}):
                 self.assertEqual(scope.required_posts_lower_bound(spec, []), with_read - 1)

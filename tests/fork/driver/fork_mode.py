@@ -68,12 +68,15 @@ def _stop(code, detail='', status='REFUSED'):
 # --------------------------------------------------------------------------------------------- authorization
 def load_authorization(path, sha256, approved=APPROVED_FORK_AUTHORIZATIONS):
     _, doc = scope.read_record(path, sha256, 'AUTHORIZATION_HASH')
-    v2 = isinstance(doc, dict) and doc.get('schema') == scope.FORK_SCHEMA
+    v2 = isinstance(doc, dict) and doc.get('schema') in (scope.FORK_SCHEMA, scope.FORK_SCHEMA_V3)
+    # v3 alone may name the historical transaction read, and only for its exact ``historicalReads`` entries
+    methods = set(FORK_METHODS) | ({scope.TX_METHOD} if isinstance(doc, dict) and doc.get('schema') == scope.FORK_SCHEMA_V3
+                                   else set())
     ok = (isinstance(doc, dict) and set(doc) == (scope.FORK_KEYS if v2 else KEYS)
-          and doc['schema'] in (SCHEMA, scope.FORK_SCHEMA) and doc['mode'] in MODES
+          and doc['schema'] in (SCHEMA, scope.FORK_SCHEMA, scope.FORK_SCHEMA_V3) and doc['mode'] in MODES
           and isinstance(doc['authorizationId'], str) and _ID.fullmatch(doc['authorizationId']) is not None
           and doc['chain'] in CHAIN_IDS and isinstance(doc['methods'], list) and doc['methods']
-          and set(doc['methods']) <= set(FORK_METHODS)
+          and set(doc['methods']) <= methods
           and (v2 or (type(doc['forkBlock']) is int and doc['forkBlock'] > 0
                       and isinstance(doc['forkBlockHash'], str) and _HASH.fullmatch(doc['forkBlockHash']) is not None))
           and type(doc['maxHttpPosts']) is int and doc['maxHttpPosts'] > 0
@@ -144,6 +147,7 @@ class ForkBudgetProxy:
         if auth['mode'] != 'SIMULATION' and 'scope' not in auth:
             raise _stop('FORK_SCOPE_REQUIRED', 'a public upstream needs a v2 authorization with a bound fork anchor')
         self.scoped = 'scope' in auth
+        self.reads = auth['scope'].get('historicalReads') if self.scoped else None
         if self.scoped and not (auth.get('anchorBinding') and type(auth.get('forkBlock')) is int
                                 and isinstance(auth.get('forkBlockHash'), str)):
             raise _stop('FORK_ANCHOR_NOT_BOUND', 'bind the fork block to the S1/S2 evidence first (bind_fork_anchor)',
@@ -196,7 +200,7 @@ class ForkBudgetProxy:
                         and item.get('method') in self.auth['methods']):
                     raise _stop('FORK_METHOD', repr(item.get('method') if isinstance(item, dict) else item))
                 if self.scoped:
-                    scope.check_fork_request(item, self.auth['forkBlock'], self.auth['forkBlockHash'])
+                    scope.check_fork_request(item, self.auth['forkBlock'], self.auth['forkBlockHash'], self.reads)
                 self.methods_seen[item['method']] = self.methods_seen.get(item['method'], 0) + 1
             if self.stopped:
                 raise self.stopped
@@ -210,7 +214,8 @@ class ForkBudgetProxy:
             self.forwarded += 1
             if self.scoped:
                 try:
-                    scope.check_fork_response(items, out, self.auth['scope']['chainId'], self.auth['forkBlockHash'])
+                    scope.check_fork_response(items, out, self.auth['scope']['chainId'], self.auth['forkBlockHash'],
+                                              self.reads, self.auth['forkBlock'])
                 except CollectionStop as stop:
                     self.stopped = stop                 # the upstream contradicts the bound anchor: final
                     raise

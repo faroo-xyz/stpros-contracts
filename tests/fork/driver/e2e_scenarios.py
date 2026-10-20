@@ -901,7 +901,11 @@ def c02_c03(h):
     with h.case('C03.catchUp', 'Oracle limits after the upgrade; allowance capped at 7 days of catch-up', 'C03', CONSTRUCTED) as c:
         if c is None:
             return
-        checks = [('C03.updateInterval', 'Oracle.updateInterval()', lambda v: (abi.dec_uint(v) == 3600, abi.dec_uint(v))),
+        # the reviewed release policy the upgrade was built from (rev 2 mainnet: 72,000 s), never a literal
+        policy = getattr(getattr(h, 'run', None), 'release_policy', None) or (h.ctx.get('releaseInputs') or {}).get('policy') or {}
+        interval = policy.get('updateInterval')
+        checks = [('C03.updateInterval', 'Oracle.updateInterval()',
+                   lambda v: (interval is not None and abi.dec_uint(v) == int(interval), (abi.dec_uint(v), interval))),
                   ('C03.lastUpdateAt==upgrade', 'Oracle.lastUpdateAt(address)',
                    lambda v: (abi.dec_uint(v) == h.ctx['postcheck'].get('upgradeTime'), abi.dec_uint(v))),
                   ('C03.maxAprPpm<=ceiling', 'Oracle.maxAprPpm()', lambda v: (abi.dec_uint(v) <= 500_000, abi.dec_uint(v)))]
