@@ -227,6 +227,10 @@ class DelayPolicyProfileTests(unittest.TestCase):
     def run_with(self, profile, delay):
         if profile is not None:
             self.plan['timelockDelayPolicy'] = profile
+            if profile == 'V4-CONFIG-600':
+                # one role-valid V4 topology: the vault operator is GOV, the Guardian is CAN
+                self.plan['operator'], self.plan['guardian'] = self.plan['gov'], self.plan['can']
+                self.state['guardian'] = self.plan['guardian']
         self.plan['minDelay'] = str(delay); self.state['minDelay'] = str(delay)
         return loss.build_loss_contingency(self.plan, self.state, self.clock)
 

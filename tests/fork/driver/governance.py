@@ -116,20 +116,25 @@ class Governance:
         if self.mainnet:
             others['SafeOwner'] = self.m['safeOwners'][0]
         sender = self.gov
+        # Expectations follow the address, not the label: under the approved mainnet governance OPS is the GOV Safe
+        # and GRD is the CAN Safe, so they hold exactly those Safes' rights and nothing more.
+        if self.mainnet:
+            self.run.add(truth(f'{p}.1.alias.OPS==GOV', self.actors['ops'] == self.gov),
+                         truth(f'{p}.1.alias.GRD==CAN', self.actors['guardian'] == self.actors['can']))
         self.probe(f'{p}.1.schedule.byGOV', self.tl, schedule, sender, True)
         for name, who in others.items():
-            self.probe(f'{p}.1.schedule.by{name}', self.tl, schedule, who)
+            self.probe(f'{p}.1.schedule.by{name}', self.tl, schedule, who, who == self.gov)
         self.gov_send(f'{p}.1.schedule', schedule)
         self.chain.warp(self.delay + 1)
         for name, who in others.items():
-            self.probe(f'{p}.1.execute.by{name}', self.tl, execute, who)
+            self.probe(f'{p}.1.execute.by{name}', self.tl, execute, who, who == self.gov)
         self.probe(f'{p}.1.execute.byGOV', self.tl, execute, sender, True)
         op = self.operation_id(calls, salt)
         cancel = abi.calldata('cancel(bytes32)', op)
         self.probe(f'{p}.1.cancel.byCAN', self.tl, cancel, self.actors['can'], True)
         self.probe(f'{p}.1.cancel.byGOV', self.tl, cancel, sender, True)
         for name in ('GRD', 'OPS', 'EOA'):
-            self.probe(f'{p}.1.cancel.by{name}', self.tl, cancel, others[name])
+            self.probe(f'{p}.1.cancel.by{name}', self.tl, cancel, others[name], others[name] in (self.gov, self.actors['can']))
         self.can_send(f'{p}.1.cancelByCAN', cancel)
         self.run.add(truth(f'{p}.1.cancelled', not self.chain.boolean(self.tl, 'isOperation(bytes32)', op)))
 
@@ -182,7 +187,7 @@ class Governance:
         self.chain.warp(self.delay + 3 * 86400)                      # long past Ready
         execute = self.encode('execute', calls, salt)
         for name in ('can', 'guardian', 'ops'):
-            self.probe(f'{p}.4.staleExecute.by{name}', self.tl, execute, self.actors[name])
+            self.probe(f'{p}.4.staleExecute.by{name}', self.tl, execute, self.actors[name], self.actors[name] == self.gov)
         self.gov_send(f'{p}.4.execute', execute)
         self.run.add(row(f'{p}.4.applied.updateInterval', 7200, self.chain.uint(oracle, 'updateInterval()')))
 

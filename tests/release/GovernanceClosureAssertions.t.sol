@@ -25,11 +25,12 @@ contract GovernanceClosureAssertionsTest is ReleaseClosureTest {
         vm.expectRevert(abi.encodeWithSelector(ReleaseAssertions.ReleaseCheckFailed.selector,bytes32("ACTOR_SEPARATION"),address(tl)));
         LocalAtomicBatch(gov).run(targets,data);assertEq(ILegacyProxyAdminV4(legacy.proxyAdmin).owner(),gov);assertFalse(tl.isOperation(id));
     }
-    function test_gc_opsGovAtomicHRejected() public {_ops(gov);}
+    // Approved governance: GOV is also OPS; the CAN / Guardian Safe never operates vaults.
+    function test_gc_opsGuardianAtomicHRejected() public {_ops(grd);}
     function test_gc_opsCanAtomicHRejected() public {_ops(can);}
     function test_gc_opsTimelockAtomicHRejected() public {_ops(address(tl));}
-    function test_gc_opsGuardianAliasSettledHAndUSucceeds() public {
-        _beforeH();ops=grd;(address[] memory u,uint256[] memory values,bytes[] memory payloads)=_u(false);
+    function test_gc_opsGovSettledHAndUSucceeds() public {
+        _beforeH();ops=gov;(address[] memory u,uint256[] memory values,bytes[] memory payloads)=_u(false);
         bytes32 id=tl.hashOperationBatch(u,values,payloads,0,0);(address[] memory targets,bytes[] memory data)=_h(u,values,payloads,_common(false),id);
         LocalAtomicBatch(gov).run(targets,data);vm.warp(block.timestamp+600);vm.prank(gov);tl.executeBatch(u,values,payloads,0,0);assertTrue(tl.isOperationDone(id));checks.assertR4(_common(true),_core());
     }
@@ -52,7 +53,7 @@ contract GovernanceClosureAssertionsTest is ReleaseClosureTest {
         vm.prank(gov);tl.executeBatch(u,values,payloads,0,0);
         assertEq(_initializedVersion(address(st)),1);assertEq(_initializedVersion(address(oracle)),1);assertTrue(tl.isOperationPending(id));
     }
-    function test_gc_opsGovFinalUAtomicRollback() public {_badFinalOps(gov);}
+    function test_gc_opsGuardianFinalUAtomicRollback() public {_badFinalOps(grd);}
     function test_gc_opsCanFinalUAtomicRollback() public {_badFinalOps(can);}
     function test_gc_opsTimelockFinalUAtomicRollback() public {_badFinalOps(address(tl));}
 

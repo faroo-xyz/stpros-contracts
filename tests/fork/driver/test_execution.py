@@ -73,7 +73,7 @@ def loopback_ready():
 RECOVERY_IDS = ('{g}.8.native.A.id==independent', '{g}.8.native.refuses.amountAboveCap', '{g}.8.native.refuses.alreadyScheduled',
                 '{g}.8.A.notConsumedBeforeMaturity', '{g}.8.A.reconcile.detectsUnusedPending', '{g}.8.A.reconciled',
                 '{g}.8.B.reconciled', '{g}.8.B.guardianReplaced', '{g}.8.cutoff.exactAccepted', '{g}.8.cutoff.pastNotConsumed',
-                '{g}.8.opsIsGrd.reconciled', '{g}.8.A.final.tma', '{g}.8.residual.unusedBReplacedGuardian',
+                '{g}.8.{preempt}.reconciled', '{g}.8.A.final.tma', '{g}.8.residual.unusedBReplacedGuardian',
                 '{g}.4.staleLoss.residual.newDepositorBearsStaleLoss', '{g}.4.staleLoss.control.reconciled',
                 '{d}.R4.F.preserved', '{d}.R4.fundedClaimsPreserved', '{d}.R4.recordsUnchanged',
                 '{d}.R4.gate.reviewedBundleAccepted', '{d}.R4.gate.identitiesAccepted', '{d}.R4.gate.canonicalPassed',
@@ -114,7 +114,8 @@ def _stages(result):
 def _require_ids(testcase, result, ids, gov, drill):
     """Each named check exists exactly once and is PASS (a drill that silently stops early fails here)."""
     for template in ids:
-        sid = template.format(g=gov, d=drill)
+        # OPS pre-emption drill: testnet with OPS == GRD; mainnet (GOV = OPS, CAN = GRD) with the CAN Safe pausing
+        sid = template.format(g=gov, d=drill, preempt='opsPreemptGrdPause' if gov.endswith('m') else 'opsIsGrd')
         got = [c['verdict'] for c in result['checks'] if c['id'] == sid]
         testcase.assertEqual(got, ['PASS'], sid)
 

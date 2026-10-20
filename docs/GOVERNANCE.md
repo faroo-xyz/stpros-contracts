@@ -4,16 +4,16 @@ The research repository's frozen audit roadmap and R1-final + A1 amendments are 
 
 | Authority | Approved responsibility |
 |---|---|
-| GOV | Sole Timelock proposer and executor; mainnet Safe 3/5 after signer rotation |
-| CAN | Independent Safe, threshold at least 3; canceller, never proposer/executor |
-| GRD | Independent fast-response guardian Safe; pause only, cannot unpause or upgrade |
-| OPS | Vault operating role; may share the same reviewed GRD Safe; never GOV, CAN, Timelock or counterparty/fee recipient |
+| GOV | Sole Timelock proposer and executor, also canceller. Mainnet: `0x3658e00f5DDb9Fa0c7e9820e8d16C3C17eaB73CA` |
+| CAN | Timelock canceller only; never proposer/executor, ProxyAdmin or vault authority; never GOV. Mainnet: `0xB3c8A7F291E128e5D1fF3E2aA09fe8A9B38FCe76` |
+| GRD | The configured `guardian()` of the guarded contracts: emergency pause within its authorized scope only; cannot unpause, upgrade, propose, execute, operate vaults or move assets; no Timelock role unless it is also CAN. Mainnet: `0xa046988889871c6c7aBc69e63ccCf9AdB3E57ef5` (separate from CAN; CAN = GRD is also allowed) |
+| OPS | Governed YieldVault OPERATOR_ROLE: round operations and PROFIT settlement, never LOSS (Timelock only). Mainnet: the GOV address (GOV != OPS is also allowed). Never CAN, GRD, the Timelock or counterparty/fee recipient |
 | Timelock | Owns shared recorded OZ v4 ProxyAdmin and all core/Factory proxies; LOSS authority |
 | Factory | Owns its existing beacon; only Timelock can upgrade it |
 | Treasury | Reviewed Safe receiving mainnet future-yield commission |
 | Deployer | No retained Timelock role or Safe signer authority after setup |
 
-Mainnet delay is exactly 172,800 seconds; testnet is exactly 300 seconds. Timelock is its own sole default admin, GOV has proposer/executor/canceller, CAN has canceller, and there is no open executor. GOV/CAN/GRD signer sets must be disjoint. OPS must be address- and signer-control-independent of GOV/CAN; OPS==GRD is allowed only with the same reviewed Safe configuration. Distinct Safe addresses do not establish independent controllers. Contract/delegated signers with unproven control evidence fail with `INCOMPLETE_SAFE_SIGNER_CONTROL`; the current verifier does not guess their controlling keys. The release config supplies actual Safe identities, singleton hashes, owners, thresholds, nonce, empty module lists and zero guard; read-only preflight checks them. Testnet designated multisig alternatives require a separate reviewed adapter; this implementation deliberately supports the stricter Safe profile for release output. Simulations may use labelled synthetic actors.
+Mainnet delay is 600 seconds through H -> U and the configuration phase; the later 86,400 seconds is a separately authorized Timelock self-call (`docs/SPEC.md`). Testnet is exactly 300 seconds. Timelock is its own sole default admin, GOV has proposer/executor/canceller, CAN has canceller, and there is no open executor. Mainnet governance (owner, 2026-10-20): addresses in `tools/release/mainnet-governance.json` (deployer `0x8Ce84E9Fa0101D317D8956D73610ad3e0E219d41`), changeable by the owner. GOV = OPS and CAN = GRD are each allowed but not required; GOV != CAN, GRD != GOV, OPS is neither CAN nor GRD, and no role is the Timelock. DEFAULT_ADMIN_ROLE of the governed vault stays with the Timelock, and LOSS runs only through the Timelock. The release tooling checks roles and permissions only (hasRole, owner, guardian, static calls). Safe internals (code, singleton, owners, threshold, modules, guard, nonce, signer sets, signer evidence) are the owner's own management and are not checked for V4 configs; the frozen R4 corpus configs keep the recorded R4 Safe checks for conformance replay only. (Frozen R4 replay only: the R4 engine required Safe identities, singleton hashes, owners, thresholds, nonce, empty module lists, zero guard and EOA signer control, `INCOMPLETE_SAFE_SIGNER_CONTROL`.) Simulations may use labelled synthetic actors.
 
 `ReleaseAssertions` has no storage, privileged function, delegatecall, external state-changing call or administrator. Every function is view/pure. It checks reviewed expectations by STATICCALL. Proxy admin/implementation checks go through the **recorded OZ v4 ProxyAdmin** public `getProxyAdmin`/`getProxyImplementation` wrappers. It never pretends its own SLOAD can inspect another contract. Initializer versions are checked with pinned RPC storage reads at the OZ namespaced initializer slot.
 
@@ -162,7 +162,7 @@ The JSON schema is `faroo-loss-contingency-v1`:
 |---|---|
 | `mode`, `chainId` | `simulation` or `release`; integer chain ID (release: 1672/688689) |
 | `vault`, `factory`, `timelock`, `asset`, `beacon`, `factoryImplementation`, `vaultImplementation`, `proxyAdmin` | Exact lowercase nonzero approved contract identities |
-| `guardian`, `replacementGuardian`, `gov`, `can`, `operator`, `counterparty`, `feeRecipient` | Exact reviewed actors; replacement differs from current GRD and excluded authorities/recipients |
+| `guardian`, `replacementGuardian`, `gov`, `can`, `operator`, `counterparty`, `feeRecipient` | Exact reviewed actors; replacement differs from current GRD and excluded authorities/recipients. A mainnet plan under `timelockDelayPolicy: V4-CONFIG-600` requires `operator = gov` and `guardian = can` |
 | `runtimeHashes` | Map keyed by the eight contract identity names above, full runtime Keccak-256 for each |
 | `round` | Exact decimal-string `roundIndex`, `openedAt`, `openWindow`, `openDeadline`, `lockDuration`, `settleTimelockWindow`, `roundCap`, `perAddressCap`, `minSubscription`, `performanceFeeBps`, `maxLossBps` |
 | `approvedLossAmount`, `minDelay` | Nonnegative decimal strings in raw asset units / seconds; observed delay must match |

@@ -225,7 +225,9 @@ class LossPlan:
             'runtimeHashes': hashes, 'round': {k: str(v) for k, v in terms.items()},
             'approvedLossAmount': str(amount), 'minDelay': str(self.delay), 'reviewedAt': str(now), 'expiresAt': str(now + 3600),
             'reviewReference': SYNTHETIC, 'marginSeconds': str(MARGIN), 'marginReviewReference': SYNTHETIC,
-            'predecessor': ZERO32, 'saltA': self.salts['A'], 'saltB': self.salts['B']}
+            'predecessor': ZERO32, 'saltA': self.salts['A'], 'saltB': self.salts['B'],
+            # mainnet runs the approved governance (operator = GOV, Guardian = CAN) under the V4 policy
+            **({'timelockDelayPolicy': 'V4-CONFIG-600'} if g.mainnet else {})}
         self.loss = abi.calldata('proposeSettlement(uint8,uint256,address)', LOSS, amount, ZERO)
         self.calls = {'A': [(d.vault, self.loss)],
                       'B': [(d.factory, abi.calldata('setGuardian(address)', self.replacement)),
@@ -358,8 +360,10 @@ def paired_loss(g, p):
         plan.execute('B', 'B.unpausedRollsBack', expect=False)          # unpause() reverts when not paused
         run.add(truth(f'{s}.B.unpaused.notConsumed', op_state(c, tl, plan.ids['B']) == 'ready'),
                 truth(f'{s}.B.unpaused.guardianUnchanged', c.addr(d.factory, 'guardian()') == plan.guardian))
+        # expectations follow the address: under the approved mainnet governance OPS is the GOV Safe (executor) and
+        # GRD is the CAN Safe (canceller); a direct LOSS stays refused for everyone, OPS included (Timelock only)
         for name, who in (('CAN', d.can), ('GRD', d.grd), ('OPS', d.ops), ('EOA', labelled('eoa'))):
-            g.probe(f'{s}.A.executeBy{name}', tl, plan.native['paths']['A']['execute']['data'], who)
+            g.probe(f'{s}.A.executeBy{name}', tl, plan.native['paths']['A']['execute']['data'], who, who == d.gov)
             g.probe(f'{s}.directLossBy{name}', d.vault, plan.loss, who)
         g.probe(f'{s}.directLossByGOV', d.vault, plan.loss, d.gov)
         plan.execute('A', 'A.execute')
@@ -374,7 +378,7 @@ def paired_loss(g, p):
                       'documented risk: an uncancelled unused ID remains executable'))
         c.revert(snap)
         for name, who in (('GRD', d.grd), ('OPS', d.ops), ('EOA', labelled('eoa'))):
-            g.probe(f'{s}.cancelBy{name}', tl, plan.native['paths']['B']['cancel']['data'], who)
+            g.probe(f'{s}.cancelBy{name}', tl, plan.native['paths']['B']['cancel']['data'], who, who in (d.gov, d.can))
         plan.cancel('B', 'A.cancelUnusedB')
         problems = reconcile(c, tl, plan.ids, 'A')
         run.add(truth(f'{s}.A.reconciled', not problems, str(problems)))
@@ -388,7 +392,7 @@ def paired_loss(g, p):
         plan.execute('A', 'A.pausedFails', expect=False)               # FactoryPaused
         run.add(truth(f'{s}.A.paused.notConsumed', op_state(c, tl, plan.ids['A']) == 'ready'))
         for name, who in (('CAN', d.can), ('GRD', d.grd), ('OPS', d.ops)):
-            g.probe(f'{s}.B.executeBy{name}', tl, plan.native['paths']['B']['execute']['data'], who)
+            g.probe(f'{s}.B.executeBy{name}', tl, plan.native['paths']['B']['execute']['data'], who, who == d.gov)
         plan.execute('B', 'B.execute')
         run.add(truth(f'{s}.B.guardianReplaced', c.addr(d.factory, 'guardian()') == plan.replacement),
                 truth(f'{s}.B.factoryUnpaused', not c.boolean(d.factory, 'paused()')),
@@ -436,21 +440,25 @@ def paired_loss(g, p):
         run.tx(f'{s}.unreviewed.cancel', d.can, tl, abi.calldata('cancel(bytes32)', wid))
         c.revert(base)
         base = c.snapshot()
-        # ---- OPS == GRD: OPS pre-empts with a zero PROFIT, then pauses as Guardian; only B can recover
-        setup = _loss_setup(g, f'{s}.opsIsGrd', tag='opsIsGrd', guardian_is_ops=True)
+        # ---- OPS pre-empts with a zero PROFIT, then the Guardian pauses; only B can recover. Testnet: OPS == GRD (the
+        # allowed alias there). Mainnet: the approved governance forbids Guardian == OPS (OPS is the GOV Safe), so the
+        # Guardian is the CAN Safe and pauses on its own.
+        alias = not g.mainnet
+        tag = 'opsIsGrd' if alias else 'opsPreemptGrdPause'
+        setup = _loss_setup(g, f'{s}.{tag}', tag=tag, guardian_is_ops=alias)
         if setup is None:
             return
         d, plan, before, holders = setup
-        q = f'{s}.opsIsGrd'
+        q = f'{s}.{tag}'
         run.tx(f'{q}.preemptZeroProfit', d.ops, d.vault, abi.calldata('proposeSettlement(uint8,uint256,address)', PROFIT, 0, ZERO))
-        run.tx(f'{q}.pauseAsGuardian', d.ops, d.factory, abi.calldata('pause()'))
+        run.tx(f'{q}.pauseAsGuardian', d.ops if alias else plan.guardian, d.factory, abi.calldata('pause()'))
         c.warp(TERMS['settleTimelockWindow'] + 1)
         g.probe(f'{q}.finalizeBlockedWhilePaused', d.vault, abi.calldata('finalize()'), labelled('anyone'))
         plan.execute('A', 'A.pausedFails', expect=False)
         plan.execute('B', 'B.execute')
         run.add(row(f'{q}.lossReplacesPreemption.mode', LOSS, c.uint(d.vault, 'settleMode()')),
                 row(f'{q}.lossReplacesPreemption.amount', plan.amount, c.uint(d.vault, 'settleAmount()')),
-                truth(f'{q}.opsNoLongerGuardian', c.addr(d.factory, 'guardian()') == plan.replacement))
+                truth(f'{q}.guardianReplaced', c.addr(d.factory, 'guardian()') == plan.replacement))
         plan.cancel('A', 'cancelUnusedA')
         run.add(truth(f'{q}.reconciled', reconcile(c, tl, plan.ids, 'B') == []))
         _finalize(d, q, before, plan.amount, holders)
@@ -481,7 +489,8 @@ def stale_loss(g, p):
         terms, holders = d.open_round(f'{s}.roundN1', [(newcomer, 10 ** 20)])
         c.warp(TERMS['openWindow'] + TERMS['lockDuration'] + 1)
         for name, who in (('CAN', d.can), ('OPS', d.ops), ('EOA', newcomer)):
-            g.probe(f'{s}.staleExecuteBy{name}', tl, plan.native['paths']['A']['execute']['data'], who)
+            # OPS is the GOV Safe under the approved mainnet governance: it holds GOV's executor right
+            g.probe(f'{s}.staleExecuteBy{name}', tl, plan.native['paths']['A']['execute']['data'], who, who == d.gov)
         before = d.snapshot_accounts()
         cap_ok = plan.amount <= before['tma'] * TERMS['maxLossBps'] // 10000
         run.add(truth(f'{s}.amountWithinRoundN1Cap', cap_ok))

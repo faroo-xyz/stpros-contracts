@@ -1,0 +1,12 @@
+{
+  "schema": "faroo-mainnet-governance-inputs-v1",
+  "chainId": 1672,
+  "statement": "Owner-supplied mainnet governance addresses (2026-10-20). Deployment and release inputs, not deployment records; the owner may change them. GOV may equal OPS and CAN may equal the Guardian, or not. Safe internals are the owner's own management and are not checked.",
+  "gov": "0x3658e00f5DDb9Fa0c7e9820e8d16C3C17eaB73CA",
+  "ops": "0x3658e00f5DDb9Fa0c7e9820e8d16C3C17eaB73CA",
+  "can": "0xB3c8A7F291E128e5D1fF3E2aA09fe8A9B38FCe76",
+  "guardian": "0xa046988889871c6c7aBc69e63ccCf9AdB3E57ef5",
+  "deployer": "0x8Ce84E9Fa0101D317D8956D73610ad3e0E219d41",
+  "deployerNonce": null,
+  "deployerNonceStanding": "OWNER_INPUT_REQUIRED: read and confirmed by the owner immediately before signing; never invented"
+}

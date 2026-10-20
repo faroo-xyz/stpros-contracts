@@ -193,6 +193,13 @@ def actor_set(network):
     return {name: '0x' + keccak256(f'faroo-execution {network} synthetic {name}'.encode())[-40:] for name in labels}
 
 
+def mainnet_actors(meta):
+    """Mainnet actors under the approved governance (owner, 2026-10-20): GOV is the topology's GOV Safe and is also
+    OPS; CAN is one Safe that is also the Guardian. The other actors are the labelled synthetic ones."""
+    actors = actor_set('mainnet')
+    return {**actors, 'gov': meta['safe'], 'ops': meta['safe'], 'guardian': actors['can']}
+
+
 def build(chain, topo, p0, actors, *, case='A', recovery=None, release_id=None, inputs=None):
     """The simulation release config (``tools/release/native/inputs.py`` contract) and its inventory.
 

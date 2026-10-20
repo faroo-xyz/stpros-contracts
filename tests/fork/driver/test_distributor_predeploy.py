@@ -66,25 +66,41 @@ class PlanTest(unittest.TestCase):
     def test_registry_bound_plan_and_refusals(self):
         arts = predeploy_artifacts()
         a = lambda c: '0x' + c * 20
-        base = {'chainId': 1672, 'deployer': a('11'), 'deployerNonce': 0, 'govSafe': REGISTRY_GOV, 'canSafe': a('33'),
-                'guardian': a('44'), 'keeper': '0x' + '00' * 20, 'destinations': [], 'proxyAdmin': REGISTRY_PA}
+        real = dp.governance_inputs()
+        self.assertIsNone(real['deployerNonce'])            # the owner supplies it before signing; never invented
+        # the owner's mainnet addresses; the nonce 0 below is a TEST-ONLY placeholder, never a deployment input
+        base = {'chainId': 1672, 'deployer': real['deployer'], 'deployerNonce': 0, 'govSafe': real['gov'],
+                'canSafe': real['can'], 'guardian': real['guardian'], 'keeper': '0x' + '00' * 20, 'destinations': [],
+                'proxyAdmin': REGISTRY_PA}
+        self.assertEqual(real['gov'], REGISTRY_GOV)
         p = dp.plan(base, arts)
         self.assertTrue(p['status'].startswith('UNSIGNED') and 'PREDICTED' in p['status'] and p['deployable'] is False)
         self.assertEqual(p['recordedIdentities']['class'], 'RECORDED MAINNET')
         self.assertEqual(p['expected']['proxyAdminOwner'], REGISTRY_GOV)
         self.assertIn('receive() is open', p['funds'])
-        # no reviewed Safe identity evidence: every Safe is a deployment blocker
-        self.assertEqual([b.split(':')[0] for b in p['deploymentBlockers']],
-                         ['GOV_SAFE_IDENTITY_UNREVIEWED', 'CAN_SAFE_IDENTITY_UNREVIEWED', 'GUARDIAN_SAFE_IDENTITY_UNREVIEWED'])
-        evidence = {r: {'manifestSha256': 'ab' * 32, 'approvalReference': f'owner approval {r}'} for r in dp.SAFE_ROLES}
-        self.assertEqual(dp.plan({**base, 'safeEvidence': evidence}, arts)['deploymentBlockers'], [])
+        self.assertNotIn('deploymentBlockers', p)                           # no Safe evidence is required
+        # the five transactions: order, kinds, sender, consecutive nonces, predicted CREATE addresses, full bytes
+        txs = p['transactions']
+        self.assertEqual([(t['step'], t['kind'], t['from'], t['nonce']) for t in txs],
+                         [(n, k, real['deployer'], n - 1) for n, k in ((1, 'CREATE'), (2, 'CREATE'), (3, 'CALL'), (4, 'CALL'), (5, 'CREATE'))])
+        self.assertEqual(p['predicted'], {'implementation': dp.create_address(real['deployer'], 0),
+                                          'timelock': dp.create_address(real['deployer'], 1),
+                                          'proxy': dp.create_address(real['deployer'], 4)})
+        self.assertEqual(dp.transaction_problems(p, p['inputs'], p['predicted']), [])
+        self.assertTrue(txs[1]['data'].endswith(dp.timelock_args(real['gov'], real['deployer'])))
+        self.assertTrue(txs[4]['data'].endswith(dp.proxy_args(p['predicted']['implementation'], REGISTRY_PA, p['predicted']['timelock'],
+                                                              '0x' + '00' * 20, [], real['guardian'])))     # keeper 0, no SLPs
+        self.assertEqual((txs[2]['to'], txs[3]['to']), (p['predicted']['timelock'],) * 2)
+        # CAN and the Guardian may be one address or two
+        self.assertEqual(dp.plan({**base, 'guardian': real['can']}, arts)['inputs']['guardian'], real['can'])
         for name, key in (('SlpDistributor', 'creationBytecode'), ('TimelockController', 'creationBytecode'), ('tupV4', 'creationCode')):
             altered = {k: dict(v) for k, v in arts.items()}
             altered[name][key] = altered[name][key][:-2] + ('00' if altered[name][key][-2:] != '00' else '01')
             refused(self, 'PREDEPLOY_ARTIFACT', dp.plan, base, altered)
         for bad, code in (({'proxyAdmin': a('55')}, 'PREDEPLOY_PROXY_ADMIN'), ({'govSafe': a('22')}, 'PREDEPLOY_GOV_SAFE'),
                           ({'chainId': 688689}, 'PREDEPLOY_CHAIN'), ({'canSafe': REGISTRY_GOV}, 'PREDEPLOY_ACTOR_SEPARATION'),
-                          ({'keeper': REGISTRY_GOV}, 'PREDEPLOY_ACTOR_SEPARATION'), ({'deployerNonce': -1}, 'PREDEPLOY_INPUT')):
+                          ({'guardian': REGISTRY_GOV}, 'PREDEPLOY_ACTOR_SEPARATION'),
+                          ({'keeper': real['guardian']}, 'PREDEPLOY_ACTOR_SEPARATION'), ({'deployerNonce': -1}, 'PREDEPLOY_INPUT')):
             refused(self, code, dp.plan, {**base, **bad}, arts)
 
 
@@ -143,6 +159,8 @@ class PredeployThenUpgradeTest(unittest.TestCase):
                               'canCanceller': has('canceller', actors['can']), 'deployerAdmin': has('admin', actors['deployer']),
                               'deployerProposer': has('proposer', actors['deployer']), 'timelockSelfAdmin': has('admin', tl)},
                     'distributeByAnyoneReverts': keeper_probe}
+        # the Guardian's Timelock roles, read from the chain (CAN / Guardian may be one address or two)
+        observed['guardianRoles'] = {r: has(r, actors['guardian']) for r in ('proposer', 'executor', 'canceller')}
         cls.facts.update(plan=p, observed=observed, failures=dp.verify(observed, p))
         # a wrong ProxyAdmin owner is caught from the chain read, not from the inputs
         cls.facts['wrongPaOwner'] = dp.verify({**observed, 'proxyAdminOwner': actors['deployer']}, p)
@@ -199,6 +217,11 @@ class PredeployThenUpgradeTest(unittest.TestCase):
     # -- the pre-deployment itself ------------------------------------------------------------------
     def test_predeploy_verified(self):
         self.assertEqual(self.facts['failures'], [])
+        # a Guardian that also held a Timelock role it does not hold as CAN is refused
+        guardian_is_can = self.facts['plan']['inputs']['guardian'] == self.facts['plan']['inputs']['canSafe']
+        for extra in ({'proposer': True}, {'executor': True}, {'canceller': not guardian_is_can}):
+            bad = {**self.facts['observed'], 'guardianRoles': {**self.facts['observed']['guardianRoles'], **extra}}
+            self.assertIn('guardianTimelockRoles', dp.verify(bad, self.facts['plan']))
         o = self.facts['observed']
         self.assertEqual(o['minDelay'], 600)
         self.assertTrue(o['distributeByAnyoneReverts'])

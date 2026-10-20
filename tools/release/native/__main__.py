@@ -12,7 +12,7 @@ import sys
 from ...lib import release_json as j
 from . import inputs, plans, checkpoint as observations, timelock, loss
 from .rpc import ReleaseRpc
-from ._shared import UNDEFINED, field, require, pretty_json, string
+from ._shared import UNDEFINED, field, optional, require, pretty_json, string
 
 RELEASE_ACTIONS = ('preflight', 'authority', 'p1-runbook', 'build-handoff', 'build-u',
                    'estimate-gas', 'testnet-handoff', 'postcheck')
@@ -83,7 +83,8 @@ async def run_release(action, *, release_config='', review_hash='', rpc_url='', 
     if live is not None:
         anchor = {key: live[key] for key in ('reviewedBlock', 'reviewedHash', 'currentBlock', 'currentHash')}
         if j.truthy(field(result, 'meta')):
-            result['meta']['description'] += ' Verified block '+string(anchor['currentBlock'])+' ('+anchor['currentHash']+'); reviewed GOV nonce '+string(config['review']['safes']['gov']['nonce'])+'. Recheck before signing.'
+            nonce = optional(config, 'review', 'safes', 'gov', 'nonce')      # frozen R4 configs only
+            result['meta']['description'] += ' Verified block '+string(anchor['currentBlock'])+' ('+anchor['currentHash']+')' + ('' if nonce is UNDEFINED else '; reviewed GOV nonce '+string(nonce)) + '. Recheck before signing.'
         else:
             result = {**result, 'verification': anchor}
     return result

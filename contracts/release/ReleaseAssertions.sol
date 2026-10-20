@@ -192,9 +192,11 @@ contract ReleaseAssertions {
             "ZERO_ACTOR",
             address(0)
         );
+        // Approved governance: GOV may also be OPS (one Safe), and CAN may also be the Guardian (one Safe). GOV and
+        // CAN stay distinct, and the CAN / Guardian Safe never operates vaults.
         _require(
-            e.gov != e.can && e.gov != e.guardian && e.can != e.guardian && e.ops != e.timelock && e.ops != e.gov && e.ops != e.can
-                && e.guardian != e.timelock,
+            e.gov != e.can && e.gov != e.guardian && e.ops != e.timelock && e.ops != e.can && e.ops != e.guardian
+                && e.can != e.timelock && e.guardian != e.timelock,
             "ACTOR_SEPARATION",
             e.timelock
         );
@@ -217,6 +219,10 @@ contract ReleaseAssertions {
         _role(e.timelock, EXECUTOR, address(0), false);
         _role(e.timelock, PROPOSER, e.can, false);
         _role(e.timelock, EXECUTOR, e.can, false);
+        _role(e.timelock, PROPOSER, e.guardian, false);
+        _role(e.timelock, EXECUTOR, e.guardian, false);
+        // the Guardian cancels only when it is also CAN
+        _role(e.timelock, CANCELLER, e.guardian, e.guardian == e.can);
         _require(_addr(e.proxyAdmin, abi.encodeWithSignature("owner()")) == e.timelock, "PA_OWNER", e.proxyAdmin);
     }
 
@@ -295,6 +301,14 @@ contract ReleaseAssertions {
             VaultCheck calldata v = e.vaults[i];
             if (v.governed) _role(v.vault, ADMIN, e.timelock, true);
             if (v.governed) _role(v.vault, OPERATOR, e.ops, v.hardened);
+            if (v.governed) {
+                // vault administration stays with the Timelock; CAN / Guardian holds no vault authority
+                if (v.hardened) _role(v.vault, ADMIN, e.gov, false);
+                _role(v.vault, ADMIN, e.can, false);
+                _role(v.vault, OPERATOR, e.can, false);
+                _role(v.vault, ADMIN, e.guardian, false);
+                _role(v.vault, OPERATOR, e.guardian, false);
+            }
             _require(
                 _bool(v.factory, abi.encodeWithSignature("isFactoryVault(address)", v.vault)), "VAULT_REGISTRY", v.vault
             );

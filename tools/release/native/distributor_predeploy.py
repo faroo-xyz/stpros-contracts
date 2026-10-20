@@ -14,10 +14,11 @@ What the definitions do, from the deployer EOA, in this order:
 5. Deploy the OZ v4 TransparentUpgradeableProxy: the recorded creation code, the **shared mainnet ProxyAdmin** as
    admin, and ``initialize(owner = Timelock, keeper, destinations, guardian)`` in its constructor.
 
-Identity binding: the ProxyAdmin and the GOV Safe are the recorded mainnet identities of
-``tools/release/registry.json``. Any other ProxyAdmin or GOV Safe is refused. The verification reads the
-ProxyAdmin's runtime and owner from the chain and compares them with the recorded values, not with the inputs. A
-Safe without reviewed identity evidence (manifest, threshold, signer independence) is a deployment blocker.
+Identity binding: the ProxyAdmin and the GOV address are the recorded mainnet identities of
+``tools/release/registry.json``; any other ProxyAdmin or GOV is refused, and the verification reads the
+ProxyAdmin's runtime and owner from the chain. Safe internals (code, owners, threshold, signer evidence) are the
+owner's own management and are not checked (owner decision, 2026-10-20). CAN and the Guardian may be one address or
+two; the Guardian never receives a Timelock role it is not given as CAN.
 
 Initial safety state, recommended and checked:
 - keeper = 0 and an empty whitelist, so ``distribute`` reverts for everyone (``NotKeeper``) and no SLP can be paid;
@@ -67,7 +68,6 @@ def reviewed_creation(name, code):
         return keccak256(bytes.fromhex(code[2:])) == TUP_V4_CREATION_KECCAK
     pinned = json.loads(REFERENCE.read_text())['contracts'][name]['fieldSha256']['creationBytecode']
     return hashlib.sha256((json.dumps(code, indent=2, sort_keys=True, ensure_ascii=False) + '\n').encode()).hexdigest() == pinned
-SAFE_ROLES = ('gov', 'can', 'guardian')
 
 
 def recorded_mainnet():
@@ -77,6 +77,17 @@ def recorded_mainnet():
     require(len(gov) == 1, 'PREDEPLOY_REGISTRY', 'exactly one recorded GOV Safe')
     return {'source': 'tools/release/registry.json (mainnet)', 'proxyAdmin': registry['proxy_admin'], 'govSafe': gov[0],
             'proxyAdminRuntimeKeccak': PROXY_ADMIN_RUNTIME, 'proxyRuntimeKeccak': TUP_V4_RUNTIME}
+
+
+def governance_inputs():
+    """The owner-supplied mainnet governance addresses (``tools/release/mainnet-governance.json``), lowercased.
+    ``deployerNonce`` stays None until the owner supplies it; nothing here invents it."""
+    doc = json.loads((Path(__file__).resolve().parents[1] / 'mainnet-governance.json').read_text())
+    require(doc.get('schema') == 'faroo-mainnet-governance-inputs-v1' and doc.get('chainId') == MAINNET, 'GOVERNANCE_INPUTS')
+    out = {'chainId': MAINNET, 'deployerNonce': doc.get('deployerNonce')}
+    for role in ('gov', 'ops', 'can', 'guardian', 'deployer'):
+        out[role] = _addr(doc.get(role), role)
+    return out
 
 
 def _addr(value, what, zero_ok=False):
@@ -115,26 +126,9 @@ def proxy_args(impl, proxy_admin, timelock, keeper, destinations, guardian):
     return _args(('address', 'address', 'bytes'), [impl, proxy_admin, init])
 
 
-def _safe_evidence(inputs):
-    """Reviewed Safe identity evidence by reference ({manifestSha256, approvalReference}); a role without it is a
-    deployment blocker. This module never reads signers, keys or wallets."""
-    evidence, blockers = {}, []
-    given = inputs.get('safeEvidence') or {}
-    for role in SAFE_ROLES:
-        e = given.get(role)
-        ok = (isinstance(e, dict) and isinstance(e.get('manifestSha256'), str) and len(e['manifestSha256']) == 64
-              and isinstance(e.get('approvalReference'), str) and e['approvalReference'])
-        if ok:
-            evidence[role] = {'manifestSha256': e['manifestSha256'].lower(), 'approvalReference': e['approvalReference']}
-        else:
-            blockers.append(f'{role.upper()}_SAFE_IDENTITY_UNREVIEWED: no reviewed Safe manifest (identity, threshold, '
-                            'signer independence)')
-    return evidence, blockers
-
-
 def plan(inputs, artifacts, recorded=None):
     """``inputs``: chainId, deployer, deployerNonce, govSafe, canSafe, guardian, keeper, destinations, proxyAdmin,
-    optional safeEvidence. ``artifacts``: SlpDistributor and TimelockController canonical artifacts; tupV4
+    ``artifacts``: SlpDistributor and TimelockController canonical artifacts; tupV4
     {creationCode, runtimeKeccak}. ``recorded`` defaults to the registry's mainnet identities; a test that passes its
     own topology gets a plan labelled SYNTHETIC."""
     synthetic = recorded is not None
@@ -148,7 +142,8 @@ def plan(inputs, artifacts, recorded=None):
     dests = [_addr(d, 'destination') for d in inputs.get('destinations', [])]
     nonce = inputs['deployerNonce']
     require(isinstance(nonce, int) and nonce >= 0, 'PREDEPLOY_INPUT', 'deployerNonce')
-    require(len({dep, gov, can, grd, pa}) == 5 and keeper not in (gov, can, pa), 'PREDEPLOY_ACTOR_SEPARATION')
+    require(len({dep, gov, can, pa}) == 4 and grd not in (dep, gov, pa) and keeper not in (gov, can, grd, pa),
+            'PREDEPLOY_ACTOR_SEPARATION')
     for name in ('SlpDistributor', 'TimelockController'):
         require(not artifacts[name].get('creationLinks') and not artifacts[name].get('immutableReferences'),
                 'PREDEPLOY_ARTIFACT', f'{name} links or immutables need review')
@@ -157,7 +152,6 @@ def plan(inputs, artifacts, recorded=None):
                        ('TimelockController', artifacts['TimelockController']['creationBytecode']),
                        ('tupV4', artifacts['tupV4']['creationCode'])):
         require(reviewed_creation(name, code), 'PREDEPLOY_ARTIFACT', f'{name} creation code is not the reviewed one')
-    evidence, blockers = _safe_evidence(inputs)
     impl, tl = create_address(dep, nonce), create_address(dep, nonce + 1)
     proxy = create_address(dep, nonce + 4)
     txs = [
@@ -178,7 +172,6 @@ def plan(inputs, artifacts, recorded=None):
         'status': ('SYNTHETIC TOPOLOGY — ' if synthetic else '') + status,
         'deployable': False, 'chainId': MAINNET,
         'recordedIdentities': {**recorded, 'class': 'SYNTHETIC (test topology)' if synthetic else 'RECORDED MAINNET'},
-        'deploymentBlockers': blockers, 'safeEvidence': evidence,
         'predicted': {'implementation': impl, 'timelock': tl, 'proxy': proxy},
         'inputs': {'deployer': dep, 'deployerNonce': nonce, 'govSafe': gov, 'canSafe': can, 'guardian': grd, 'keeper': keeper,
                    'destinations': dests, 'proxyAdmin': pa},
@@ -198,7 +191,7 @@ def plan(inputs, artifacts, recorded=None):
 def verify(observed, p):
     """Read-only acceptance of an executed pre-deployment. ``observed`` comes from chain reads, never from the plan.
     The ProxyAdmin runtime and owner are compared with the recorded identities. Returns the failed checks (empty =
-    accepted); the plan's deployment blockers are reported separately and never cleared here."""
+    accepted)."""
     out, e, i = [], p['expected'], p['inputs']
     a = observed.get('addresses', {})
     for key in ('implementation', 'timelock', 'proxy'):
@@ -222,6 +215,9 @@ def verify(observed, p):
         ('timelockRoles', observed.get('roles') == {'govProposer': True, 'govExecutor': True, 'canCanceller': True,
                                                     'deployerAdmin': False, 'deployerProposer': False, 'timelockSelfAdmin': True}),
         ('notPaused', observed.get('paused') is False),
+        # the Guardian holds only what it holds as CAN (if it is CAN): never proposer or executor, canceller only as CAN
+        ('guardianTimelockRoles', observed.get('guardianRoles') == {'proposer': False, 'executor': False,
+                                                                     'canceller': i['guardian'] == i['canSafe']}),
     ]
     out += [name for name, ok in checks if not ok]
     if i['keeper'] == ZERO and observed.get('distributeByAnyoneReverts') is not True:

@@ -330,7 +330,7 @@ def _post_hook(run, p0, actors, guarded):
 def _mainnet(run, case, waiting, donation, variant):
     chain, m = run.chain, run.m
     safe, owners, threshold = m['safe'], m['safeOwners'], m['safeThreshold']
-    actors = {**rc.actor_set('mainnet'), 'gov': safe}
+    actors = rc.mainnet_actors(m)
     expected = scenarios.mainnet_case(case)
     run.stage('loaded', note='recorded V1 runtimes, synthetic state, synthetic Safe GOV')
 
@@ -557,7 +557,7 @@ def _check_operation_binding(run, h_transactions, u, delay):
 
 def _after_h(run, case, p0, u):
     chain, m, tl = run.chain, run.m, p0['timelock']
-    actors = rc.actor_set('mainnet')
+    actors = rc.mainnet_actors(m)
     run.add(truth('H.proxyAdmin.owner==TL', chain.addr(m['proxyAdmin'], 'owner()') == tl))
     for name in ('stpros', 'oracle', 'factory'):
         run.add(truth(f'H.{name}.owner==TL', chain.addr(m[name], 'owner()') == tl))
@@ -749,7 +749,7 @@ def _execute_u(run, u, p0):
 
 def _post_u(run, case, p0, u, residual):
     chain, m, tl = run.chain, run.m, p0['timelock']
-    actors = rc.actor_set('mainnet')
+    actors = rc.mainnet_actors(m)
     for proxy, impl in ((m['oracle'], p0['oracle']), (m['stpros'], p0['stpros']), (m['factory'], p0['factory']),
                         (m['factoryTest'], p0['factory'])):
         run.add(truth(f'POST-1.{proxy[:10]}.implementation==R4', implementation(chain, proxy) == impl),
@@ -870,7 +870,7 @@ def _wrong_u(run, case, u, p0, variant):
     chain, m, tl = run.chain, run.m, p0['timelock']
     txs = copy.deepcopy(u['transactions'])
     if variant == 'ii':
-        actors = rc.actor_set('mainnet')
+        actors = rc.mainnet_actors(m)
         # StPROS V1 -> migrateFromV2 and Oracle V1 -> migrateFromV3 (the paths for other legacy versions)
         st_call = abi.calldata('migrateFromV2(address,address)', actors['guardian'], tl)
         or_call = abi.calldata('migrateFromV3(address,uint256,address,address)', m['wpros'], 500000, actors['guardian'], tl)

@@ -52,11 +52,20 @@ def validate_plan(plan, now):
                  'operator', 'counterparty', 'feeRecipient'):
         address(field(plan, name), name)
     check(len({plan[n] for n in IDENTITIES}) == len(IDENTITIES), 'IDENTITY_ALIAS')
-    check(len({plan[n] for n in ('gov', 'can', 'timelock', 'guardian')}) == 4, 'AUTHORITY_ALIAS')
-    check(
-        plan['operator'] not in [plan[n] for n in ('gov', 'can', 'timelock', 'counterparty', 'feeRecipient')],
-        'OPERATOR_ALIAS'
-    )
+    if field(plan, 'timelockDelayPolicy') == 'V4-CONFIG-600':
+        # V4 governance: the operator may be GOV and the Guardian may be CAN (neither is required). GOV, CAN and the
+        # Timelock stay distinct, the Guardian is never GOV or the Timelock, and the operator is never CAN, the
+        # Guardian, the Timelock or a recipient. LOSS still runs only through the Timelock.
+        check(len({plan[n] for n in ('gov', 'can', 'timelock')}) == 3
+              and plan['guardian'] not in (plan['gov'], plan['timelock']), 'AUTHORITY_ALIAS')
+        check(plan['operator'] not in [plan[n] for n in ('can', 'guardian', 'timelock', 'counterparty', 'feeRecipient')],
+              'OPERATOR_ALIAS')
+    else:
+        check(len({plan[n] for n in ('gov', 'can', 'timelock', 'guardian')}) == 4, 'AUTHORITY_ALIAS')
+        check(
+            plan['operator'] not in [plan[n] for n in ('gov', 'can', 'timelock', 'counterparty', 'feeRecipient')],
+            'OPERATOR_ALIAS'
+        )
     check(
         plan['replacementGuardian'] not in [plan[n] for n in ('guardian', 'gov', 'can', 'timelock', 'counterparty', 'feeRecipient', *IDENTITIES)],
         'REPLACEMENT_GUARDIAN'

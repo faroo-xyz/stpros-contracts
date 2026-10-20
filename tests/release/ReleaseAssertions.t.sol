@@ -165,6 +165,31 @@ contract ReleaseAssertionsTest is ProtocolCoreTest {
             vm.revertToState(snap);
         }
     }
+    /// Approved mainnet governance: GOV is also OPS (one Safe) and CAN is also the Guardian (one Safe). GOV = CAN stays
+    /// refused, and the CAN / Guardian Safe gets no proposer, executor or vault role.
+    function test_release_approvedGovernanceAliases() public {
+        _prepareRelease();(address[] memory t,uint256[] memory v,bytes[] memory d)=_u(false);_handoff();
+        vm.prank(gov);tl.scheduleBatch(t,v,d,0,0,600);bytes32 id=tl.hashOperationBatch(t,v,d,0,0);
+        bytes32 canceller=tl.CANCELLER_ROLE();
+        ReleaseAssertions.Common memory e=_common(false);
+        checks.assertHandoff(e,id);                                                    // CAN != Guardian: Guardian holds no canceller
+        vm.prank(address(tl));tl.grantRole(canceller,grd);                            // the CAN / Guardian Safe cancels
+        e=_common(false);_reject(e,id,"ROLE",address(tl));                            // CAN != Guardian with a Guardian canceller: refused
+        e=_common(false);
+        e.ops=gov;e.can=grd;checks.assertHandoff(e,id);                              // GOV = OPS and CAN = Guardian pass
+        e=_common(false);e.can=gov;_reject(e,id,"ACTOR_SEPARATION",address(tl));     // GOV = CAN refused
+        e=_common(false);e.guardian=gov;_reject(e,id,"ACTOR_SEPARATION",address(tl));
+        e=_common(false);e.can=grd;e.ops=grd;_reject(e,id,"ACTOR_SEPARATION",address(tl)); // CAN / Guardian never OPS
+        e=_common(false);e.ops=can;_reject(e,id,"ACTOR_SEPARATION",address(tl));
+        e=_common(false);e.can=address(tl);_reject(e,id,"ACTOR_SEPARATION",address(tl));
+        uint256 snap=vm.snapshotState();
+        bytes32 proposer=tl.PROPOSER_ROLE();
+        vm.prank(address(tl));tl.grantRole(proposer,grd);
+        e=_common(false);e.ops=gov;e.can=grd;_reject(e,id,"ROLE",address(tl));       // no proposer right for CAN / Guardian
+        vm.revertToState(snap);
+        vm.prank(address(tl));mainVault.grantRole(OP,grd);
+        e=_common(false);e.ops=gov;e.can=grd;_reject(e,id,"ROLE",address(mainVault)); // no vault operation for CAN / Guardian
+    }
     function _reject(ReleaseAssertions.Common memory e,bytes32 id,bytes32 code,address target) internal {
         vm.expectRevert(abi.encodeWithSelector(ReleaseAssertions.ReleaseCheckFailed.selector,code,target));checks.assertHandoff(e,id);
     }

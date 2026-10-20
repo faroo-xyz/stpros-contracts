@@ -21,6 +21,17 @@ from tools.release.native import inputs, plans  # noqa: E402
 CODE = 'POLICY_DELAY_PROFILE'
 
 
+def approved_governance(config):
+    """One role-valid V4 topology (GOV = OPS, CAN = Guardian). V4 accepts any role-valid topology and never reads
+    Safe internals; the Safe records set here are inert."""
+    a, safes = config['actors'], config.get('review', {}).get('safes')
+    a['ops'], a['guardian'] = a['gov'], a['can']
+    if safes:
+        safes['can'] = {**safes['can'], 'threshold': 2, 'owners': ['0x' + format(0xc000 + i, '040x') for i in range(5)]}
+        safes['ops'], safes['guardian'] = copy.deepcopy(safes['gov']), copy.deepcopy(safes['can'])
+    return config
+
+
 def corpus():
     _, declared = gate.deviations()
     rows = list(gate.records())
@@ -49,6 +60,8 @@ class V4MainnetReleasePolicyTest(unittest.TestCase):
         config['policy'].pop('timelockDelayPolicy', None)
         if profile is not None:
             config['policy']['timelockDelayPolicy'] = profile
+            if profile == 'V4-CONFIG-600':
+                approved_governance(config)      # a role-valid V4 topology
         config['policy']['minDelay'] = delay
         return config
 

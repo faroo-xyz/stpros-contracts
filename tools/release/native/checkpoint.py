@@ -59,7 +59,9 @@ async def scan_roles(config, inventory, rpc, block):
 
 
 async def check_safes(config, rpc, block, check_nonce):
-    if config['mode'] != 'release':
+    # Safe internals are the owner's own management under the V4 policy (2026-10-20): only the frozen R4 engine
+    # checked them, so they are read only for frozen R4 configs (conformance replay)
+    if config['mode'] != 'release' or inputs.v4_config(config):
         return
     call = Reader(rpc, block)
     by_address = {safe['address']: (role, safe) for role, safe in config['review']['safes'].items()}
@@ -711,7 +713,7 @@ async def verify_checkpoint(context, rpc, stage='R4', options=UNDEFINED, *, cloc
                 and evidence['uGas'] <= coalesce(field(config['releaseGates'], 'confirmedGasCap'), 2200000),
                 'EXECUTION_GAS_GATE'
             )
-            for role in ('gov', 'can'):
+            for role in (() if inputs.v4_config(config) else ('gov', 'can')):      # Safe nonces: frozen R4 only
                 require(
                     optional(evidence, 'nonces', role) is not UNDEFINED
                     and await call(config['review']['safes'][role]['address'], 'nonce') == bigint(evidence['nonces'][role]),

@@ -130,6 +130,13 @@ def validate_inventory(config, inventory, approved_sha256):
 #   (``governance_delay``), never part of U, and is never a release-config delay.
 DELAY_POLICIES = {None: {1672: 172800, 688689: 300}, 'V4-CONFIG-600': {1672: 600, 688689: 300}}
 V4_MAINNET_RELEASE_POLICY = 'V4-CONFIG-600'
+def v4_config(config):
+    """A config under the V4 policy. Its governance is checked on roles and permissions only (owner decision,
+    2026-10-20): GOV may equal OPS and CAN may equal the Guardian or not, and Safe internals (code, singleton,
+    owners, threshold, modules, guard, nonce, signer evidence) are the owner's own management, never checked.
+    Configs without the profile are the frozen R4 corpus; they keep the R4 rules so the conformance replay is exact."""
+    return optional(config, 'policy', 'timelockDelayPolicy') == V4_MAINNET_RELEASE_POLICY
+
 
 def require_v4_mainnet_release_policy(config):
     """A mainnet release config is deployable only under 'V4-CONFIG-600' (600 s)."""
@@ -185,13 +192,24 @@ def validate_config(config):
         actors['deployer'] not in [actors[x] for x in ('gov', 'can', 'guardian', 'ops')] + [addresses['timelock']],
         'DEPLOYER_AUTHORITY'
     )
-    require(
-        actors['gov'] != actors['can']
-        and actors['gov'] != actors['guardian']
-        and actors['can'] != actors['guardian']
-        and actors['ops'] not in (addresses['timelock'], actors['gov'], actors['can']),
-        'ACTOR_SEPARATION'
-    )
+    if v4_config(config):
+        # the ReleaseAssertions ACTOR_SEPARATION rule: GOV = OPS and CAN = Guardian are allowed, GOV != CAN, the
+        # Guardian is never GOV, OPS is never CAN / Guardian, and no role is the Timelock
+        tl = addresses['timelock']
+        require(
+            actors['gov'] != actors['can'] and actors['gov'] != actors['guardian']
+            and actors['ops'] not in (tl, actors['can'], actors['guardian'])
+            and tl not in (actors['gov'], actors['can'], actors['guardian']),
+            'ACTOR_SEPARATION'
+        )
+    else:
+        require(
+            actors['gov'] != actors['can']
+            and actors['gov'] != actors['guardian']
+            and actors['can'] != actors['guardian']
+            and actors['ops'] not in (addresses['timelock'], actors['gov'], actors['can']),
+            'ACTOR_SEPARATION'
+        )
     reporter = address(
         actors['reporter'] if chain == 1672 else optional(config, 'observed', 'core', 'reporter'),
         'effective reporter'
@@ -294,6 +312,8 @@ def validate_config(config):
             and field(gates, 'dappReady') is True,
             'EXTERNAL_GATES_INCOMPLETE'
         )
+    if config['mode'] == 'release' and not v4_config(config):
+        # frozen R4 engine only: Safe identity, owners, threshold and signer rules (never applied to V4 configs)
         by_address = {}
         for role in ('gov', 'can', 'guardian', 'ops', 'treasury'):
             safe = optional(review, 'safes', role)
