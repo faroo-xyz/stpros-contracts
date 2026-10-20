@@ -110,6 +110,11 @@ def wrong_rule(family):
 class NativeReleaseTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        # These wrong-rule controls replay frozen R4 cases, several of them mainnet release configs without the V4
+        # delay profile. They run under the gate's R4 conformance (the V4 mainnet release rule removed, test-only),
+        # so each control still reaches the rule it tests; the V4 rule itself is covered by the gate's production
+        # pass and test_v4_delay_policy.
+        r4 = gate.r4_conformance(); r4.start(); cls.addClassCleanup(r4.stop)
         wanted = set(CONTROL_CASES.values()) | {'reference-cli.mjs:0001'}
         cls.cases = {rec['id']: rec for rec in gate.records() if rec['id'] in wanted}
         if set(cls.cases) != wanted:

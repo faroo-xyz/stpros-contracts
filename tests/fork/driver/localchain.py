@@ -228,12 +228,18 @@ def encode(name, function, values):
 
 
 # ---------------------------------------------------------------------------------------------- P-0
-def deploy_p0(chain, *, network, actors, proxy_admin, stpros, destinations):
+def deploy_p0(chain, *, network, actors, proxy_admin, stpros, destinations, existing=None):
     """Executes the P-0 definitions locally. ``network`` is 'mainnet' or 'testnet'; ``actors`` holds gov, can,
-    guardian, deployer and keeper. Returns (addresses, identity checks, gas records)."""
+    guardian, deployer and keeper. Returns (addresses, identity checks, gas records).
+
+    ``existing`` (mainnet): an already deployed ``timelock``, ``distributor`` implementation and ``distributorProxy``
+    (the SlpDistributor pre-deployment, ``tools.release.native.distributor_predeploy``). They are reused, not
+    redeployed, and go through the same identity verification."""
     deployer = actors['deployer']
-    min_delay = 172800 if network == 'mainnet' else 300
-    out, gas = {}, []
+    min_delay = 600 if network == 'mainnet' else 300           # upgrade and configuration phase
+    out, gas = dict(existing or {}), []
+    _require(not existing or (network == 'mainnet' and set(existing) == {'timelock', 'distributor', 'distributorProxy'}),
+             'existing P-0 addresses: mainnet timelock, distributor and distributorProxy only')
 
     def make(key, label, code):
         out[key], row = chain.create(label, deployer, code)
@@ -244,26 +250,28 @@ def deploy_p0(chain, *, network, actors, proxy_admin, stpros, destinations):
     make('oracle', 'P-0 Oracle implementation', initcode('Oracle'))
     make('stpros', 'P-0 StPROS implementation', initcode('StPROS'))
     make('bridge', 'P-0 BridgeVault implementation', initcode('BridgeVault'))
-    make('distributor', 'P-0 SlpDistributor implementation', initcode('SlpDistributor'))
-    make('timelock', 'P-0 TimelockController',
-         initcode('TimelockController', ['uint256', 'address[]', 'address[]', 'address'],
-                  [min_delay, [actors['gov']], [actors['gov']], deployer]))
-    for label, data in (('P-0 TL grantRole(CANCELLER, CAN)', encode('TimelockController', 'grantRole',
-                                                                   [ROLES['canceller'], actors['can']])),
-                        ('P-0 TL renounceRole(ADMIN, deployer)', encode('TimelockController', 'renounceRole',
-                                                                       [ROLES['admin'], deployer]))):
-        receipt, row = chain.send(label, deployer, out['timelock'], data)
-        _require(row['status'] == 1, f'{label} failed')
-        gas.append(row)
+    if not existing:
+        make('distributor', 'P-0 SlpDistributor implementation', initcode('SlpDistributor'))
+        make('timelock', 'P-0 TimelockController',
+             initcode('TimelockController', ['uint256', 'address[]', 'address[]', 'address'],
+                      [min_delay, [actors['gov']], [actors['gov']], deployer]))
+        for label, data in (('P-0 TL grantRole(CANCELLER, CAN)', encode('TimelockController', 'grantRole',
+                                                                       [ROLES['canceller'], actors['can']])),
+                            ('P-0 TL renounceRole(ADMIN, deployer)', encode('TimelockController', 'renounceRole',
+                                                                           [ROLES['admin'], deployer]))):
+            receipt, row = chain.send(label, deployer, out['timelock'], data)
+            _require(row['status'] == 1, f'{label} failed')
+            gas.append(row)
     make('assertions', 'P-0 ReleaseAssertions', initcode('ReleaseAssertions'))
     if network == 'mainnet':
         tup = legacy_fixture('mainnet', 'TransparentUpgradeableProxy_V4')['creationCode']
         bridge_init = encode('BridgeVault', 'initialize', [out['timelock'], stpros, True, actors['guardian']])
         dist_init = encode('SlpDistributor', 'initialize', [out['timelock'], actors['keeper'], destinations,
                                                             actors['guardian']])
-        for key, impl, data, label in (('bridgeProxy', out['bridge'], bridge_init, 'P-0 BridgeVault proxy (v4 TUP)'),
-                                       ('distributorProxy', out['distributor'], dist_init,
-                                        'P-0 SlpDistributor proxy (v4 TUP)')):
+        proxies = [('bridgeProxy', out['bridge'], bridge_init, 'P-0 BridgeVault proxy (v4 TUP)')]
+        if not existing:
+            proxies.append(('distributorProxy', out['distributor'], dist_init, 'P-0 SlpDistributor proxy (v4 TUP)'))
+        for key, impl, data, label in proxies:
             code = tup + abi.encode_parameters([{'type': 'address'}, {'type': 'address'}, {'type': 'bytes'}],
                                                [impl, proxy_admin, data])[2:]
             make(key, label, code)

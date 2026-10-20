@@ -200,9 +200,11 @@ contract ReleaseAssertions {
         );
         _code(e.timelock, e.timelockHash);
         _code(e.proxyAdmin, e.proxyAdminHash);
+        // Upgrade and configuration phase: mainnet 600 s, testnet 300 s. The later switch to the long-term mainnet
+        // delay (86,400 s) is a separate GOV Safe -> Timelock self-call, verified outside these release assertions.
         _require(
             _uint(e.timelock, abi.encodeWithSignature("getMinDelay()")) == e.minDelay
-                && e.minDelay == (e.chainId == 1672 ? 48 hours : 300),
+                && e.minDelay == (e.chainId == 1672 ? 600 : 300),
             "DELAY",
             e.timelock
         );

@@ -330,6 +330,7 @@ def require_p1_complete(config, inventory):
 
 def build_handoff(context):
     config, inventory, artifacts = context.config, context.inventory, context.artifacts
+    inputs.require_delay_policy(config)
     require_p1_complete(config, inventory)
     require(config['observed']['proxyAdminOwner'] == config['actors']['legacyCoreOwner'], 'H_ALREADY_OR_PARTIALLY_DONE')
     for proxy in [config['addresses']['oracle'], config['addresses']['stpros'], config['factories'][0]['address']]:
@@ -521,7 +522,8 @@ def safe_builder(config, transactions, name, actor):
 
 def deployment_definitions(config, artifacts):
     inputs.validate_config(config); actors, addresses = config['actors'], config['addresses']
-    return {'simulationOnly': config['mode'] == 'simulation', 'execute': False, 'definitions': [
+    inputs.validate_predeployed(config, artifacts)
+    result = {'simulationOnly': config['mode'] == 'simulation', 'execute': False, 'definitions': [
         {
             'contract': 'TimelockController',
             'args': [config['policy']['minDelay'], [actors['gov']], [actors['gov']], actors['deployer']],
@@ -557,3 +559,18 @@ def deployment_definitions(config, artifacts):
         },
         {'contract': 'ReleaseAssertions', 'args': [], 'authority': 'none'},
     ]}
+    if optional(config, 'review', 'predeployed') is UNDEFINED:
+        return result
+    # A verified SlpDistributor pre-deployment is reused: no second Timelock or SlpDistributor definition is emitted.
+    record = config['review']['predeployed']
+    reused = {'TimelockController': {'address': addresses['timelock'], 'step': 2},
+              'SlpDistributor': {'address': config['implementations']['distributor'], 'proxy': addresses['distributor'], 'step': 1}}
+    result['definitions'] = [d for d in result['definitions'] if d['contract'] not in reused]
+    result['reused'] = {
+        'planSha256': record['planSha256'],
+        'contracts': reused,
+        'transactions': [t['hash'] for t in record['transactions']],
+        'mustVerify': 'Every release output rechecks the five pre-deployment transactions (sender, nonce, target, '
+                      'data) and the code, proxy slots, owner, guardian, 600 s delay and roles of the reused contracts'
+    }
+    return result

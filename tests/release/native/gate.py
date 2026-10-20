@@ -1,4 +1,12 @@
-"""Frozen original-engine Release conformance; never updates expected outputs."""
+"""Frozen original-engine Release conformance; never updates expected outputs.
+
+Two replays of every frozen case:
+- R4 conformance: the original engine had no V4 mainnet release delay rule, so that one rule
+  (``inputs.require_v4_mainnet_release_policy``) is removed by a test-only patch and every case must match exactly;
+- production: the unpatched tooling must match every case exactly, except the cases listed in the pinned,
+  reviewed ``v4-policy-deviations.json``. Each of those must be refused with exactly its declared error, and every
+  listed case must occur. The corpus and its lock are never changed.
+"""
 import argparse
 import asyncio
 from collections import deque
@@ -23,6 +31,7 @@ from tools.release.native.rpc import ReleaseRpc, TransportError
 from tools.release.native._shared import pretty_json
 
 LOCK_SHA256 = '27c18849a19c33e6769eedf4d88ee898baa28852f48d5539e08a45923a01e7fe'
+DEVIATIONS_SHA256 = '188ff55f354caa0b1662ebc8e014b2c9a93cc470419f5854b48d9e6cabd6810b'
 INPUT_ROOT = Path('/private/tmp/faroo-native-release/inputs')
 OWNER = 'FAROO NATIVE RELEASE SYNTHETIC INPUTS; reference-lock-bound replay only\n'
 REFERENCE_ROOT = '/private/tmp/faroo-native-release/reference'
@@ -81,6 +90,23 @@ def verify_corpus():
     return lock, index
 
 
+def deviations():
+    raw = (HERE/'v4-policy-deviations.json').read_bytes()
+    if sha(raw) != DEVIATIONS_SHA256:
+        raise ValueError('V4 policy deviation manifest changed')
+    doc = json.loads(raw)
+    return doc['requiredError'], {c['id']: c for c in doc['cases']}
+
+
+def r4_conformance():
+    """Replay under the original engine's rules: the V4 mainnet release delay rule did not exist there."""
+    return patch.object(inputs, 'require_v4_mainnet_release_policy', lambda config: None)
+
+
+def identity(rec):
+    return sha(json.dumps(rec, sort_keys=True, separators=(',', ':'), ensure_ascii=True).encode())
+
+
 def records():
     lock, index = verify_corpus()
     expected = {x['id']: x for x in index}; observed = set()
@@ -89,8 +115,7 @@ def records():
             continue
         rows = json.loads(gzip.decompress((HERE/name).read_bytes()))['records']
         for rec in rows:
-            identity = sha(json.dumps(rec, sort_keys=True, separators=(',', ':'), ensure_ascii=True).encode())
-            if rec['id'] in observed or rec['id'] not in expected or expected[rec['id']]['sha256'] != identity:
+            if rec['id'] in observed or rec['id'] not in expected or expected[rec['id']]['sha256'] != identity(rec):
                 raise ValueError('Frozen case identity changed')
             observed.add(rec['id']); yield rec
     if observed != set(expected):
@@ -362,12 +387,23 @@ async def run_case(rec):
             'transcriptError': transcript_error, 'actual': actual, **({} if io_match else {'actualIo': tape.io, 'expectedIo': expected_io})}
 
 
-async def compare(filter_text=None):
+async def compare(filter_text=None, production=False):
+    """``production=False``: R4 conformance (exact). ``production=True``: exact, or the declared V4 refusal."""
+    required, declared = deviations() if production else (None, {})
     result = []
     for rec in records():
         if filter_text and filter_text not in rec['id']:
             continue
-        row = await run_case(rec); result.append(row)
+        if production:
+            row = await run_case(rec)
+        else:
+            with r4_conformance():
+                row = await run_case(rec)
+        if rec['id'] in declared:
+            row['declaredRefusal'] = True
+            row['pass'] = (declared[rec['id']]['recordSha256'] == identity(rec)
+                           and row['actual'] == {'outcome': 'throw', 'error': required})
+        result.append(row)
         if not row['pass']:
             print(json.dumps({k: row[k] for k in ('id', 'function', 'outcomeMatch', 'ioMatch', 'argumentMutationMatch', 'transcriptError')}), flush=True)
         if len(result) % 25 == 0:
@@ -378,9 +414,15 @@ async def compare(filter_text=None):
 def main():
     if not (ROOT/'EXPORT-MANIFEST.txt').is_file():
         raise ValueError('Approved export required')
-    results = asyncio.run(compare())
-    print(json.dumps({'cases': len(results), 'matches': sum(r['pass'] for r in results)}))
-    return 0 if all(r['pass'] for r in results) else 1
+    r4 = asyncio.run(compare())
+    print(json.dumps({'cases': len(r4), 'matches': sum(r['pass'] for r in r4)}))
+    production = asyncio.run(compare(production=True))
+    _, declared = deviations()
+    refused = {r['id'] for r in production if r.get('declaredRefusal') and r['pass']}
+    exact = sum(r['pass'] and not r.get('declaredRefusal') for r in production)
+    print(json.dumps({'production': {'cases': len(production), 'exact': exact, 'declaredRefusals': len(refused),
+                                     'declared': len(declared)}}))
+    return 0 if all(r['pass'] for r in r4) and all(r['pass'] for r in production) and refused == set(declared) else 1
 
 
 if __name__ == '__main__':

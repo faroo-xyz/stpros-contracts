@@ -49,6 +49,7 @@ from tools.release.native._shared import ROLES, SLOTS  # noqa: E402
 
 OUT = rc.EXEC / 'runs'
 GAS_CAP = 2_200_000
+MAINNET_DELAY = 600                 # mainnet Timelock delay during the V4 upgrade and configuration phase
 SCHEMA = 'faroo-fork-execution-run-v1'
 FINAL_REASON = ('SYNTHETIC (class C) evidence cannot close an FS row; final FS acceptance gate not implemented '
                 '(fail-closed)')
@@ -116,6 +117,9 @@ class Run:
         self.add(truth(f'reject.{label}', self.chain.reverts(to, data, sender), 'required rejection succeeded'))
 
     def cli(self, stage, action, config, inv, network):
+        if getattr(self, 'predeployed', None):
+            # the reused SlpDistributor pre-deployment (plan + five transaction hashes) travels in the bundle
+            config = {**config, 'review': {**config.get('review', {}), 'predeployed': self.predeployed}}
         path, sha = rc.write_bundle(self.dir / stage, config, inv, rc.artifacts(network))
         out = rc.run_cli(action, path, sha)
         self.bundles[f'{stage}:{action}'] = {'configSha256': sha, 'outputSha256': hashlib.sha256(
@@ -273,13 +277,14 @@ def lever_sweep(run, label, accounts, targets):
 
 # ------------------------------------------------------------------------------------------------ mainnet
 def mainnet(case='A', *, waiting=True, donation=False, variant=None, name=None, then=None, node=None,
-            topology='execution-mainnet-v1'):
+            topology='execution-mainnet-v1', predeploy=None):
     """FS-1 case ``case``. ``variant`` names an FS-1a adverse branch (see ``VARIANTS``); ``then(run, ctx)``
     runs on the post-U state (``governance.drills``) and returns the scenario ids it covered."""
     if case not in 'ABCD' or len(case) != 1:
         raise ValueError(case)
     run = Run(topology, name or f'mainnet-{case}' + (f'-{variant}' if variant else ''), node)
     run.then = then
+    run.predeploy = predeploy
     try:
         result = _mainnet(run, case, waiting, donation, variant)
         return result
@@ -329,9 +334,15 @@ def _mainnet(run, case, waiting, donation, variant):
     expected = scenarios.mainnet_case(case)
     run.stage('loaded', note='recorded V1 runtimes, synthetic state, synthetic Safe GOV')
 
+    # ---- SlpDistributor pre-deployment (optional; ``predeploy(run, actors)`` returns the reused addresses and the
+    # ``review.predeployed`` record: the plan, its SHA-256 and the five transaction hashes) -----------------------
+    existing = run.predeploy(run, actors) if getattr(run, 'predeploy', None) else None
+    if existing:
+        existing = dict(existing)
+        run.predeployed = existing.pop('record', None)
     # ---- P-0 -------------------------------------------------------------------------------------------
     p0, identity, _ = lc.deploy_p0(chain, network='mainnet', actors=actors, proxy_admin=m['proxyAdmin'],
-                                   stpros=m['stpros'], destinations=[])
+                                   stpros=m['stpros'], destinations=[], existing=existing)
     for r in identity:
         run.add(truth(r['id'], r['verdict'] == 'PASS', r.get('detail', '')))
     tl = p0['timelock']
@@ -351,6 +362,9 @@ def _mainnet(run, case, waiting, donation, variant):
     _fs5_pre(run, inv, config)
     pre = run.cli('pre-p1', 'preflight', config, inv, 'mainnet')
     run.add(truth('cli.preflight.PASS', pre.get('status') == 'PASS' and pre.get('simulationOnly') is True))
+    definitions = pre['deploymentDefinitions']
+    run.stage('P-0.definitions', contracts=[d['contract'] for d in definitions['definitions']],
+              reused=definitions.get('reused'))
     labels = rc.labels(run.topo, config)
     p1 = run.cli('pre-p1', 'p1-runbook', config, inv, 'mainnet')
     run.p1_steps = p1['steps']
@@ -389,7 +403,7 @@ def _mainnet(run, case, waiting, donation, variant):
     u = run.cli('pre-h', 'build-u', config, inv, 'mainnet')
     run.shape(f'H.{case}', expected['h'], h['transactions'], labels)
     run.shape(f'U.{case}', expected['u'], u['transactions'], labels)
-    _check_operation_binding(run, h['transactions'], u, 172800)
+    _check_operation_binding(run, h['transactions'], u, MAINNET_DELAY)
     run.h_transactions = h['transactions']
     residual = set(inv['roles'][m['testVault']]['current']) if case in 'CD' else set()
 
@@ -451,7 +465,7 @@ def _mainnet(run, case, waiting, donation, variant):
         hu = _waiting_period_real(run) if run.real else _waiting_period(run, p0)
     if case in 'CD':
         hu['residualExposure'] = _residual_exposure(run)
-    chain.warp(172800 + 1)
+    chain.warp(MAINNET_DELAY + 1)
     if donation or variant == 'v':
         _donate_before_u(run, p0)
     if variant in ('ii', 'viii', 'iv'):
@@ -870,10 +884,10 @@ def _wrong_u(run, case, u, p0, variant):
     salt = '0x' + keccak256(f'faroo FS-1a {variant} test-only U-prime'.encode())[2:]
     sched = abi.calldata('scheduleBatch(address[],uint256[],bytes[],bytes32,bytes32,uint256)')
     sched = sched[:10] + abi.encode_parameters([{'type': t} for t in ('address[]', 'uint256[]', 'bytes[]', 'bytes32', 'bytes32', 'uint256')],
-                                               [targets, [0] * len(txs), payloads, '0x' + '00' * 32, salt, 172800])[2:]
+                                               [targets, [0] * len(txs), payloads, '0x' + '00' * 32, salt, MAINNET_DELAY])[2:]
     safe_exec.execute(chain, f'FS-1a.{variant}.schedule', m['safe'], m['safeOwners'], m['safeThreshold'],
                       safe_exec.safe_tx(tl, sched, 0))
-    chain.warp(172800 + 1)
+    chain.warp(MAINNET_DELAY + 1)
     execute = abi.calldata('executeBatch(address[],uint256[],bytes[],bytes32,bytes32)')
     execute = execute[:10] + abi.encode_parameters([{'type': t} for t in ('address[]', 'uint256[]', 'bytes[]', 'bytes32', 'bytes32')],
                                                    [targets, [0] * len(txs), payloads, '0x' + '00' * 32, salt])[2:]
@@ -900,9 +914,9 @@ def _schedule_and_execute(run, label, txs, p0):
     batch = [targets, [0] * len(txs), payloads, '0x' + '00' * 32, salt]
     types = [{'type': t} for t in ('address[]', 'uint256[]', 'bytes[]', 'bytes32', 'bytes32')]
     sched = (abi.calldata('scheduleBatch(address[],uint256[],bytes[],bytes32,bytes32,uint256)')[:10]
-             + abi.encode_parameters([*types, {'type': 'uint256'}], [*batch, 172800])[2:])
+             + abi.encode_parameters([*types, {'type': 'uint256'}], [*batch, MAINNET_DELAY])[2:])
     safe_exec.execute(chain, f'{label}.schedule', m['safe'], m['safeOwners'], m['safeThreshold'], safe_exec.safe_tx(tl, sched, 0))
-    chain.warp(172800 + 1)
+    chain.warp(MAINNET_DELAY + 1)
     execute = abi.calldata('executeBatch(address[],uint256[],bytes[],bytes32,bytes32)')[:10] + abi.encode_parameters(types, batch)[2:]
     _, _, receipt, _ = safe_exec.execute(chain, f'{label}.execute', m['safe'], m['safeOwners'], m['safeThreshold'],
                                          safe_exec.safe_tx(tl, execute, 0), expect=True)
@@ -1106,7 +1120,7 @@ def _failing_u(run, case, u, p0, variant, _residual):
         safe_exec.execute(chain, 'FS-1a.x.reschedule', m['safe'], m['safeOwners'], m['safeThreshold'],
                           safe_exec.safe_tx(tl, sched['data'], 0))
         run.reject('FS-1a.x.beforeFullDelay', tl, u['execute']['data'], m['safe'])
-        chain.warp(172800 + 1)
+        chain.warp(MAINNET_DELAY + 1)
         _execute_u(run, u, p0)
         run.add(truth('FS-1a.x.rescheduledUPasses', implementation(chain, st) == p0['stpros']))
     return _finish(run, case, variant, {})

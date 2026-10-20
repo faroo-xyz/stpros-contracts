@@ -27,7 +27,7 @@ contract ReleaseAssertionsTest is ProtocolCoreTest {
         vm.chainId(1672);
         checks = new ReleaseAssertions();
         vm.startPrank(address(tl));
-        tl.updateDelay(48 hours);
+        tl.updateDelay(600);
         tl.grantRole(tl.CANCELLER_ROLE(),can);
         vm.stopPrank();
         mainVaults = _deployMainnetVaultsV1(legacy);
@@ -43,7 +43,7 @@ contract ReleaseAssertionsTest is ProtocolCoreTest {
         oi=address(new Oracle()); si=address(new StPROS()); vi=address(new YieldVault()); fi=address(new YieldVaultFactory(vi));
     }
     function _common(bool post) internal view returns(ReleaseAssertions.Common memory e) {
-        e.chainId=1672;e.timelock=address(tl);e.timelockHash=address(tl).codehash;e.minDelay=48 hours;
+        e.chainId=1672;e.timelock=address(tl);e.timelockHash=address(tl).codehash;e.minDelay=600;
         e.gov=gov;e.can=can;e.guardian=grd;e.ops=ops;e.deployer=address(this);
         e.proxyAdmin=legacy.proxyAdmin;e.proxyAdminHash=legacy.proxyAdmin.codehash;
         e.proxies=new ReleaseAssertions.ProxyCheck[](6);
@@ -107,11 +107,11 @@ contract ReleaseAssertionsTest is ProtocolCoreTest {
         _prepareRelease();
         (address[] memory targets,uint256[] memory values,bytes[] memory data)=_u(false);
         _handoff();bytes32 salt=keccak256("LOCAL SIMULATION ONLY");
-        vm.prank(gov);tl.scheduleBatch(targets,values,data,0,salt,48 hours);
+        vm.prank(gov);tl.scheduleBatch(targets,values,data,0,salt,600);
         bytes32 id=tl.hashOperationBatch(targets,values,data,0,salt);
         checks.assertHandoff(_common(false),id);
         vm.prank(gov);vm.expectRevert();tl.executeBatch(targets,values,data,0,salt);
-        vm.warp(block.timestamp+48 hours);
+        vm.warp(block.timestamp+600);
         uint256 beforeGas=gasleft();vm.prank(gov);tl.executeBatch(targets,values,data,0,salt);
         emit log_named_uint("Local U execute gas (not FS-6)",beforeGas-gasleft());
         assertTrue(tl.isOperationDone(id));checks.assertR4(_common(true),_core());
@@ -121,7 +121,7 @@ contract ReleaseAssertionsTest is ProtocolCoreTest {
     }
     function test_release_failedStMigrationRollsBackOracleAndCanCancel() public {
         _prepareRelease();(address[] memory t,uint256[] memory v,bytes[] memory d)=_u(true);_handoff();
-        vm.prank(gov);tl.scheduleBatch(t,v,d,0,0,48 hours);vm.warp(block.timestamp+48 hours);
+        vm.prank(gov);tl.scheduleBatch(t,v,d,0,0,600);vm.warp(block.timestamp+600);
         vm.prank(gov);vm.expectRevert();tl.executeBatch(t,v,d,0,0);
         assertEq(_initializedVersion(address(oracle)),1);assertEq(_initializedVersion(address(st)),1);
         bytes32 id=tl.hashOperationBatch(t,v,d,0,0);assertTrue(tl.isOperationPending(id));
@@ -129,10 +129,12 @@ contract ReleaseAssertionsTest is ProtocolCoreTest {
     }
     function test_release_wrongStatesHaveExplicitFailures() public {
         _prepareRelease();(address[] memory t,uint256[] memory v,bytes[] memory d)=_u(false);_handoff();
-        vm.prank(gov);tl.scheduleBatch(t,v,d,0,0,48 hours);bytes32 id=tl.hashOperationBatch(t,v,d,0,0);
+        vm.prank(gov);tl.scheduleBatch(t,v,d,0,0,600);bytes32 id=tl.hashOperationBatch(t,v,d,0,0);
         ReleaseAssertions.Common memory e=_common(false);
         e.timelockHash=bytes32(uint256(1));_reject(e,id,"CODEHASH",address(tl));e=_common(false);
         e.minDelay=300;_reject(e,id,"DELAY",address(tl));e=_common(false);
+        e.minDelay=48 hours;_reject(e,id,"DELAY",address(tl));e=_common(false);      // the former R4 policy
+        e.minDelay=24 hours;_reject(e,id,"DELAY",address(tl));e=_common(false);      // the long-term delay is not a U-phase value
         e.proxyAdminHash=bytes32(uint256(1));_reject(e,id,"CODEHASH",legacy.proxyAdmin);e=_common(false);
         e.proxies[0].implementation=si;_reject(e,id,"IMPLEMENTATION",address(oracle));e=_common(false);
         e.beacons[0].implementation=vi;_reject(e,id,"BEACON_IMPLEMENTATION",e.beacons[0].beacon);e=_common(false);
@@ -145,6 +147,23 @@ contract ReleaseAssertionsTest is ProtocolCoreTest {
         e.proxies[1]=e.proxies[0];_reject(e,id,"DUPLICATE_PROXY",address(oracle));e=_common(false);
         vm.chainId(1);_reject(e,id,"CHAIN",address(0));vm.chainId(1672);
         vm.prank(gov);vm.expectRevert();tl.cancel(bytes32(uint256(123)));
+    }
+    /// The V4 upgrade and configuration phase runs at exactly 600 s on mainnet: a Timelock already at 48 h or 24 h (or
+    /// any other value) fails the handoff assertion even when the expectation names that value.
+    function test_release_mainnetDelayIsExactly600DuringUpgrade() public {
+        _prepareRelease();(address[] memory t,uint256[] memory v,bytes[] memory d)=_u(false);_handoff();
+        vm.prank(gov);tl.scheduleBatch(t,v,d,0,0,600);bytes32 id=tl.hashOperationBatch(t,v,d,0,0);
+        ReleaseAssertions.Common memory e=_common(false);
+        assertEq(tl.getMinDelay(),600);
+        checks.assertHandoff(e,id);                                                    // 600 s passes
+        uint256[3] memory others=[uint256(48 hours),uint256(24 hours),uint256(601)];
+        for(uint256 i;i<others.length;++i){
+            uint256 snap=vm.snapshotState();
+            vm.prank(address(tl));tl.updateDelay(others[i]);
+            e=_common(false);e.minDelay=others[i];
+            _reject(e,id,"DELAY",address(tl));
+            vm.revertToState(snap);
+        }
     }
     function _reject(ReleaseAssertions.Common memory e,bytes32 id,bytes32 code,address target) internal {
         vm.expectRevert(abi.encodeWithSelector(ReleaseAssertions.ReleaseCheckFailed.selector,code,target));checks.assertHandoff(e,id);

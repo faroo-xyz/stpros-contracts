@@ -121,6 +121,37 @@ def validate_inventory(config, inventory, approved_sha256):
     return inventory
 
 
+# Timelock delay policy of a release config (``policy.timelockDelayPolicy``):
+# - absent: the frozen R4 policy (mainnet 172,800 s, testnet 300 s). Only simulation configs and testnet release
+#   configs may use it. A mainnet release config without the V4 profile is refused before any definition or
+#   transaction is built (the deployed ReleaseAssertions accepts only 600 s on mainnet).
+# - 'V4-CONFIG-600' (owner policy of 2026-10-20): mainnet 600 s during the V4 upgrade and configuration phase,
+#   testnet 300 s. The long-term mainnet 86,400 s is a later, separately approved Timelock self-call
+#   (``governance_delay``), never part of U, and is never a release-config delay.
+DELAY_POLICIES = {None: {1672: 172800, 688689: 300}, 'V4-CONFIG-600': {1672: 600, 688689: 300}}
+V4_MAINNET_RELEASE_POLICY = 'V4-CONFIG-600'
+
+def require_v4_mainnet_release_policy(config):
+    """A mainnet release config is deployable only under 'V4-CONFIG-600' (600 s)."""
+    profile = optional(config, 'policy', 'timelockDelayPolicy')
+    require(
+        not (field(config, 'mode') == 'release' and equal(field(config, 'chainId'), 1672)) or profile == V4_MAINNET_RELEASE_POLICY,
+        'POLICY_DELAY_PROFILE',
+        'a mainnet release config requires the V4-CONFIG-600 policy (600 s)'
+    )
+
+
+def require_delay_policy(config):
+    """The Timelock delay policy of a config. Run by ``validate_config`` (so by preflight, build-u,
+    deploymentDefinitions and every CLI action) and first of all by build-handoff, so all of them refuse the same
+    configs before producing anything."""
+    profile = optional(config, 'policy', 'timelockDelayPolicy')
+    profile = None if profile is UNDEFINED else profile
+    require(profile in DELAY_POLICIES, 'POLICY_DELAY_PROFILE')
+    require_v4_mainnet_release_policy(config)
+    require(equal(optional(config, 'policy', 'minDelay'), DELAY_POLICIES[profile][config['chainId']]), 'POLICY_DELAY')
+
+
 def validate_config(config):
     require(j.truthy(config) and field(config, 'mode') in ('simulation', 'release'), 'MODE')
     chain = field(config, 'chainId')
@@ -173,7 +204,7 @@ def validate_config(config):
     require(isinstance(field(config, 'destinations'), list), 'DESTINATIONS_REQUIRED')
     for destination in config['destinations']:
         address(destination)
-    require(equal(optional(config, 'policy', 'minDelay'), 172800 if chain == 1672 else 300), 'POLICY_DELAY')
+    require_delay_policy(config)
     policy = config['policy']
     require(
         field(policy, 'expectedGrossAprPpm') is not UNDEFINED
@@ -370,6 +401,39 @@ def validate_recorded_topology(config, registry):
     return UNDEFINED
 
 
+def validate_predeployed(config, artifacts):
+    """``review.predeployed``: a mainnet SlpDistributor pre-deployment (``distributor_predeploy``) that this release
+    reuses instead of deploying its own Timelock, SlpDistributor implementation and proxy.
+
+    Admitted only if the recorded plan hashes to ``planSha256``, binds to this config (addresses, actors, shared
+    ProxyAdmin, 600 s, reviewed runtimes, CREATE addresses and calldata) and lists the five deployment transaction
+    hashes. Missing or partial evidence is BLOCKED, never treated as deployed. The chain side (each transaction
+    mined from the deployer with the planned nonce and data) is ``checkpoint.verify_predeployed`` on every release
+    output; code, proxy slots, owner, guardian, delay and roles are the preflight's own checks."""
+    record = optional(config, 'review', 'predeployed')
+    if record is UNDEFINED:
+        return UNDEFINED
+    from . import distributor_predeploy
+    require(equal(config['chainId'], 1672), 'PREDEPLOY_CHAIN')
+    plan = field(record, 'plan')
+    require(j.truthy(plan) and field(record, 'planSha256') == j.canonical_sha256(plan), 'PREDEPLOY_PLAN_HASH')
+    try:
+        problems = distributor_predeploy.binding_problems(plan, config, artifacts)
+    except (KeyError, TypeError, ValueError, AttributeError) as error:
+        problems = [f'malformed plan: {type(error).__name__}']
+    require(not problems, 'PREDEPLOY_BINDING', '; '.join(problems))
+    receipts = field(record, 'transactions')
+    require(
+        isinstance(receipts, list)
+        and [field(r, 'step') for r in receipts] == [1, 2, 3, 4, 5]
+        and all(isinstance(field(r, 'hash'), str) and re.fullmatch(r'0x[0-9a-f]{64}', r['hash']) for r in receipts)
+        and len({r['hash'] for r in receipts}) == 5,
+        'PREDEPLOY_EVIDENCE',
+        'BLOCKED: the five pre-deployment transaction hashes are required; without them nothing is deployed'
+    )
+    return UNDEFINED
+
+
 @dataclass(frozen=True)
 class ReleaseContext:
     """One bundle shared by validators, plans and observations.
@@ -389,6 +453,7 @@ def preflight(config, inventory, artifacts):
     validate_config(config)
     validate_recorded_topology(config, RECORDED_REGISTRY)
     validate_inventory(config, inventory, config['review']['inventorySha256'])
+    validate_predeployed(config, artifacts)
     observed, addresses, actors = config['observed'], config['addresses'], config['actors']
     for name in ('oracle', 'stpros', 'bridge', 'distributor', 'factory', 'vault', 'timelock', 'assertions', 'proxyAdmin'):
         artifact = field(artifacts, name)

@@ -19,6 +19,8 @@ COLLECTION = frozenset({
 FORK = frozenset({
     '3dd3ab07248c6e74d156d93978d00ea63c5d2cd6767d867f53f610ae560fd96c',  # fr-d1-s3-testnet-sl20261018
     '19442bc39ee398f7e9daa9bc71818bf78019ee196ed239cb07bd05e37a77599f',  # fr-d1-s3-mainnet-sl20261018
+    'f444b21a6e95bc6e7f78108d3b35cc1e3c1756354ceeb351c910646b18f983f3',  # fr-d1-s3-testnet-e2e20261020 (owner-approved 2026-10-20)
+    'fcb3268466606d4a1ad38043d6baf650405a74d0a6a8af857112012901a9a398',  # fr-d1-s3-mainnet-e2e20261020 (owner-approved 2026-10-20)
 })
 # Agent A's accepted S1/S2 reconciliation records (schema ``faroo-fork-s1-s2-reconciliation-v1``). An S3 fork
 # anchor binds only through one of these.

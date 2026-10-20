@@ -14,12 +14,12 @@ contract RemediationAssertionsTest is ReleaseAssertionsTest {
         ReleaseAssertions.Common memory post=_common(true);
         post.vaults[0].round=mainVault.roundIndex();post.vaults[0].phase=0;
         data[data.length-1]=abi.encodeCall(ReleaseAssertions.assertR4,(post,_core()));
-        _handoff();vm.prank(gov);tl.scheduleBatch(targets,values,data,0,0,48 hours);
+        _handoff();vm.prank(gov);tl.scheduleBatch(targets,values,data,0,0,600);
         ReleaseAssertions.Common memory h=_common(false);h.vaults[0].round=mainVault.roundIndex();h.vaults[0].phase=0;
         bytes32 id=tl.hashOperationBatch(targets,values,data,0,0);
         vm.expectRevert(abi.encodeWithSelector(ReleaseAssertions.ReleaseCheckFailed.selector,bytes32("MAIN_VAULT_SETTLED"),address(mainVault)));
         checks.assertHandoff(h,id);
-        vm.warp(block.timestamp+48 hours);
+        vm.warp(block.timestamp+600);
         vm.expectRevert(abi.encodeWithSelector(ReleaseAssertions.ReleaseCheckFailed.selector,bytes32("MAIN_VAULT_SETTLED"),address(mainVault)));
         vm.prank(gov);tl.executeBatch(targets,values,data,0,0);
         assertEq(_initializedVersion(address(st)),1);
@@ -45,10 +45,10 @@ contract RemediationAssertionsTest is ReleaseAssertionsTest {
         if(omitRetirement){targets[7]=address(testVaults.factory);data[7]=abi.encodeCall(YieldVaultFactory.closeCreation,());}
         data[9]=abi.encodeCall(ReleaseAssertions.assertR4,(post,_core()));
         vm.prank(gov);testVault.openNextRound(_v1RoundParams(1 days,1 days,100 ether));
-        _handoff();vm.prank(gov);tl.scheduleBatch(targets,values,data,0,0,48 hours);
+        _handoff();vm.prank(gov);tl.scheduleBatch(targets,values,data,0,0,600);
         bytes32 id=tl.hashOperationBatch(targets,values,data,0,0);
         checks.assertHandoff(h,id); // original frozen SETTLED expectation, actual OPEN
-        vm.warp(block.timestamp+48 hours);
+        vm.warp(block.timestamp+600);
         if(omitRetirement)vm.expectRevert();
         vm.prank(gov);tl.executeBatch(targets,values,data,0,0);
         assertEq(_initializedVersion(address(st)),omitRetirement?1:4);
@@ -59,7 +59,7 @@ contract RemediationAssertionsTest is ReleaseAssertionsTest {
     function test_remediation_missingRetirementRollsBackAllU() public { _residual(true); }
     function test_remediation_governedCannotClaimResidualException() public {
         _prepareRelease();(address[] memory targets,uint256[] memory values,bytes[] memory data)=_u(false);
-        _handoff();vm.prank(gov);tl.scheduleBatch(targets,values,data,0,0,48 hours);
+        _handoff();vm.prank(gov);tl.scheduleBatch(targets,values,data,0,0,600);
         ReleaseAssertions.Common memory h=_common(false);h.vaults[0].residualRecovery=true;
         bytes32 id=tl.hashOperationBatch(targets,values,data,0,0);
         vm.expectRevert(abi.encodeWithSelector(ReleaseAssertions.ReleaseCheckFailed.selector,bytes32("RESIDUAL_GOVERNED"),address(mainVault)));
@@ -72,8 +72,8 @@ contract RemediationAssertionsTest is ReleaseAssertionsTest {
         address bad=actor==0?gov:actor==1?can:address(tl);
         if(keeper)c.keeper=bad;else c.reporter=bad;
         data[9]=abi.encodeCall(ReleaseAssertions.assertR4,(_common(true),c));
-        _handoff();vm.prank(gov);tl.scheduleBatch(targets,values,data,0,0,48 hours);
-        vm.warp(block.timestamp+48 hours);
+        _handoff();vm.prank(gov);tl.scheduleBatch(targets,values,data,0,0,600);
+        vm.warp(block.timestamp+600);
         vm.expectRevert(abi.encodeWithSelector(ReleaseAssertions.ReleaseCheckFailed.selector,bytes32("OPERATIONAL_AUTHORITY"),address(tl)));
         vm.prank(gov);tl.executeBatch(targets,values,data,0,0);
         assertEq(_initializedVersion(address(st)),1);assertEq(_initializedVersion(address(oracle)),1);
@@ -88,7 +88,7 @@ contract RemediationAssertionsTest is ReleaseAssertionsTest {
     function test_remediation_emptyTimelockBatchHasNoScheduleEvent() public {
         _prepareRelease();
         address[] memory targets=new address[](0);uint256[] memory values=new uint256[](0);bytes[] memory data=new bytes[](0);
-        vm.recordLogs();vm.prank(gov);tl.scheduleBatch(targets,values,data,0,0,48 hours);
+        vm.recordLogs();vm.prank(gov);tl.scheduleBatch(targets,values,data,0,0,600);
         assertEq(vm.getRecordedLogs().length,0);
         assertTrue(tl.isOperationPending(tl.hashOperationBatch(targets,values,data,0,0)));
     }

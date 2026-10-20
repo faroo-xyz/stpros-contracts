@@ -50,7 +50,7 @@ contract ReleaseClosureTest is ReleaseAssertionsTest {
             payloads,
             bytes32(0),
             bytes32(0),
-            48 hours
+            600
         );
         targets[7] = address(checks);
         data[7] = abi.encodeCall(ReleaseAssertions.assertHandoff, (e, pending));
@@ -83,7 +83,7 @@ contract ReleaseClosureTest is ReleaseAssertionsTest {
         VmSafe.AccountAccess[] memory reads = vm.stopAndReturnStateDiff();
         emit log_named_uint("H assertion warm gas", used);
         emit log_named_uint("H assertion static calls including v4 admin forwarding", _staticCalls(reads));
-        vm.warp(block.timestamp + 48 hours);
+        vm.warp(block.timestamp + 600);
         g = gasleft();
         vm.prank(gov);
         tl.executeBatch(u, values, payloads, 0, 0);
@@ -199,8 +199,8 @@ contract ReleaseClosureTest is ReleaseAssertionsTest {
         payloads[9] = abi.encodeCall(ReleaseAssertions.assertR4, (e, c));
         _handoff();
         vm.prank(gov);
-        tl.scheduleBatch(u, values, payloads, 0, 0, 48 hours);
-        vm.warp(block.timestamp + 48 hours);
+        tl.scheduleBatch(u, values, payloads, 0, 0, 600);
+        vm.warp(block.timestamp + 600);
         vm.expectRevert(abi.encodeWithSelector(ReleaseAssertions.ReleaseCheckFailed.selector, reason, target));
         vm.prank(gov);
         tl.executeBatch(u, values, payloads, 0, 0);
@@ -232,8 +232,8 @@ contract ReleaseClosureTest is ReleaseAssertionsTest {
         _handoff();
         vm.store(address(st), bytes32(uint256(1)), bytes32(uint256(11 ether)));
         vm.prank(gov);
-        tl.scheduleBatch(u, values, payloads, 0, 0, 48 hours);
-        vm.warp(block.timestamp + 48 hours);
+        tl.scheduleBatch(u, values, payloads, 0, 0, 600);
+        vm.warp(block.timestamp + 600);
         vm.expectRevert(StPROS.InvalidMigrationState.selector);
         vm.prank(gov);
         tl.executeBatch(u, values, payloads, 0, 0);
@@ -261,8 +261,8 @@ contract ReleaseClosureTest is ReleaseAssertionsTest {
         data[10] = oldData[9];
         _handoff();
         vm.prank(gov);
-        tl.scheduleBatch(targets, values, data, 0, 0, 48 hours);
-        vm.warp(block.timestamp + 48 hours);
+        tl.scheduleBatch(targets, values, data, 0, 0, 600);
+        vm.warp(block.timestamp + 600);
         vm.expectRevert(
             abi.encodeWithSelector(ReleaseAssertions.ReleaseCheckFailed.selector, bytes32("RESERVE"), address(st))
         );
@@ -309,7 +309,7 @@ contract ReleaseClosureTest is ReleaseAssertionsTest {
         LocalAtomicBatch(gov).run(targets, data);
         assertEq(_initializedVersion(address(testVaults.factory)), 4);
         checks.assertHandoff(h, id);
-        vm.warp(block.timestamp + 48 hours);
+        vm.warp(block.timestamp + 600);
         vm.prank(gov);
         tl.executeBatch(u, values, payloads, 0, 0);
         checks.assertR4(_common(true), _core());

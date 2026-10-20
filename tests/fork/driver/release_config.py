@@ -277,7 +277,7 @@ def build(chain, topo, p0, actors, *, case='A', recovery=None, release_id=None, 
         'addresses': a, 'implementations': impl, 'factories': cfg_factories, 'legacy': legacy,
         'destinations': (list(inputs['destinations']) if inputs else
                          list(m.get('destinations', [])) if m.get('evidenceClass') == 'E_FRESH' and not mainnet else []),
-        'policy': {'minDelay': 172800 if mainnet else 300, 'expectedGrossAprPpm': 250000, 'maxAprPpm': 500000,
+        'policy': {'minDelay': 600 if mainnet else 300, 'timelockDelayPolicy': 'V4-CONFIG-600', 'expectedGrossAprPpm': 250000, 'maxAprPpm': 500000,
                    'maxUpdateAmount': '100000000000000000000', 'updateInterval': 3600, 'approvedPerformanceFeeBps': 0,
                    **({'commissionRatePpm': 100000} if mainnet else {}),
                    **({k: inputs['policy'][k] for k in ('expectedGrossAprPpm', 'maxAprPpm', 'maxUpdateAmount', 'updateInterval')}
@@ -325,7 +325,9 @@ def write_bundle(run_dir, config, inv, arts):
     config = {**config, 'inventoryFile': str(inv_path), 'artifactFiles': files,
               'review': {'artifactSha256': {k: j.canonical_sha256(v) for k, v in arts.items()},
                          'inventorySha256': j.canonical_sha256(inv), 'sourceCommit': source_commit(),
-                         'statement': 'SIMULATION ONLY: self-computed digests bind the files read; not an independent review'}}
+                         'statement': 'SIMULATION ONLY: self-computed digests bind the files read; not an independent review',
+                         **({'predeployed': config['review']['predeployed']}
+                            if 'predeployed' in config.get('review', {}) else {})}}
     path = run_dir / 'release-config.json'
     path.write_text(json.dumps(config, indent=1, sort_keys=True))
     return path, hashlib.sha256(path.read_bytes()).hexdigest()

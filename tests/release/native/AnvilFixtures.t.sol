@@ -59,7 +59,7 @@ contract AnvilMainnetFixture is ReleaseClosureTest {
         string memory name=broken?"mainnet-rollback":"mainnet";
         vm.serializeUint(name,"chainId",1672);
         vm.serializeUint(name,"timestamp",block.timestamp);
-        vm.serializeUint(name,"delay",48 hours);
+        vm.serializeUint(name,"delay",600);
         vm.serializeBool(name,"expectRevert",broken);
         vm.serializeAddress(name,"gov",gov);
         vm.serializeAddress(name,"can",can);

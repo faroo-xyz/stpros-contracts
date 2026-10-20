@@ -524,6 +524,38 @@ async def at_fresh_checkpoint(context, raw_rpc, stage, options, verify, clock_ms
     raise j.ReleaseError('CHECKPOINT_SCAN_EXPIRED', 'catch-up limit reached')
 
 
+async def verify_predeployed(config, rpc, block):
+    """Chain evidence of a reused SlpDistributor pre-deployment (``review.predeployed``): each of the five
+    transactions is mined at or before ``block``, from the planned deployer, with the planned nonce, target and data.
+    With the planned CREATE addresses this binds the reused Timelock, implementation and proxy to those transactions;
+    their code, slots, owner, guardian, delay and roles are checked by ``observe_state`` and the preflight."""
+    record = optional(config, 'review', 'predeployed')
+    if record is UNDEFINED:
+        return UNDEFINED
+    plan = record['plan']
+    planned_steps, evidence_steps = field(plan, 'transactions'), field(record, 'transactions')
+    require(
+        isinstance(planned_steps, list) and isinstance(evidence_steps, list)
+        and [field(t, 'step') for t in planned_steps] == [1, 2, 3, 4, 5]
+        and [field(e, 'step') for e in evidence_steps] == [1, 2, 3, 4, 5],
+        'PREDEPLOY_EVIDENCE',
+        'BLOCKED: five planned steps and five transaction hashes in order are required'
+    )
+    for planned, evidence in zip(planned_steps, evidence_steps):
+        tx = await rpc('eth_getTransactionByHash', [evidence['hash']])
+        require(isinstance(tx, dict) and j.truthy(tx.get('blockNumber')), 'PREDEPLOY_NOT_MINED', 'BLOCKED: step '+string(planned['step']))
+        require(bigint(tx['blockNumber']) <= bigint(block), 'PREDEPLOY_AFTER_CHECKPOINT', string(planned['step']))
+        require(
+            string(tx.get('from')).lower() == plan['inputs']['deployer']
+            and bigint(tx['nonce']) == bigint(planned['nonce'])
+            and (tx.get('to') is None if planned['kind'] == 'CREATE' else string(tx.get('to')).lower() == planned['to'])
+            and string(tx.get('input')).lower() == planned['data'].lower(),
+            'PREDEPLOY_TRANSACTION',
+            'step '+string(planned['step'])
+        )
+    return UNDEFINED
+
+
 async def recheck_observed(context, rpc, options=UNDEFINED, *, clock_ms=wall_clock_ms):
     options = {} if options is UNDEFINED else options
     config, inventory = context.config, context.inventory
@@ -532,6 +564,7 @@ async def recheck_observed(context, rpc, options=UNDEFINED, *, clock_ms=wall_clo
         await economics.reconcile_economics(config, inventory, reader, current['head']['block'], historical, observed)
         await upgrade_history(config, reader, current['head']['block'])
         await governance_history(config, reader, current['head']['block'])
+        await verify_predeployed(config, reader, current['head']['block'])
         operations = await timelock_inventory(config, inventory, reader, current['head']['block'], [])
         return {
             'status': 'PASS',
@@ -556,6 +589,8 @@ async def verify_checkpoint(context, rpc, stage='R4', options=UNDEFINED, *, cloc
         header, block = current['head']['header'], current['head']['block']
         call = Reader(reader, block)
         expected, u = plans.expectations(context, stage), plans.build_u(context)
+        # a reused SlpDistributor pre-deployment is re-proven from this checkpoint's own chain reads (H and R4)
+        await verify_predeployed(config, reader, block)
         if config['chainId'] == 1672:
             for vault in [v for v in expected['vaults'] if v['governed']]:
                 inputs.require_mainnet_phase(number(await call(vault['vault'], 'phase')))

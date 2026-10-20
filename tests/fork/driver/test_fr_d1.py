@@ -182,6 +182,8 @@ class RecordTest(Base):
                           frozenset({
                             '3dd3ab07248c6e74d156d93978d00ea63c5d2cd6767d867f53f610ae560fd96c',  # fr-d1-s3-testnet-sl20261018
                             '19442bc39ee398f7e9daa9bc71818bf78019ee196ed239cb07bd05e37a77599f',  # fr-d1-s3-mainnet-sl20261018
+                            'f444b21a6e95bc6e7f78108d3b35cc1e3c1756354ceeb351c910646b18f983f3',  # fr-d1-s3-testnet-e2e20261020 (owner-approved 2026-10-20)
+                            'fcb3268466606d4a1ad38043d6baf650405a74d0a6a8af857112012901a9a398',  # fr-d1-s3-mainnet-e2e20261020 (owner-approved 2026-10-20)
                         }), frozenset({
                             'a27ffd60d7105aa6aebfcc0d638da8b3488535b973e75f79245200d15888cf81',  # testnet S1/S2
                             '158afc230f468be8fb2ad5a68b4eb2036322c1c048fd8ef7ee68a106185bfd61',  # mainnet S1/S2

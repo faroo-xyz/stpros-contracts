@@ -45,8 +45,27 @@ class LossTape:
         self.events.append({'kind':'clock','index':index});self.clock_index+=1
         return self.rec['clocks'][index]
 
+# Frozen LOSS cases whose plan is a mainnet release plan without the V4 profile. The recorded R4 engine admitted
+# 172,800 s there; the V4 tooling refuses it (``loss.release_delays``) with exactly this error. Every other case must
+# still replay exactly, and under the R4 rule (test-only patch) every case, these included, must replay exactly.
+V4_DEVIATIONS = {'loss-supplement.mjs:0057': {'name': 'Error', 'message': 'BLOCKED — POLICY_DELAY'}}
+
+
+def r4_release_delays(profile, _v4=loss.release_delays):
+    return {1672: (172800,), 688689: (300,)} if profile is loss.UNDEFINED else _v4(profile)
+
+
 class LossTests(unittest.TestCase):
+    def test_frozen_cases_under_v4_rules(self):
+        """Production rules: exact, except the declared V4 refusals."""
+        self.replay(production=True)
+
     def test_frozen_security_and_recovery_cases(self):
+        """R4 conformance: every frozen case exactly, with the R4 release delay rule."""
+        with patch.object(loss, 'release_delays', r4_release_delays):
+            self.replay(production=False)
+
+    def replay(self, production):
         raw=(ROOT/'tests/fixtures/native-release/loss.json.gz').read_bytes()
         self.assertEqual(hashlib.sha256(raw).hexdigest(),'fe8667e2e2a49936a500c893f659243fbf55e59d62c0cdc2e3b2a6f2b661859b')
         rows=json.loads(gzip.decompress(raw))
@@ -58,12 +77,18 @@ class LossTests(unittest.TestCase):
                 actual={'outcome':'return','value':pack(value)}
             except Exception as error:actual={'outcome':'throw','error':error_value(error)}
             expected={'outcome':'return','value':rec['value']} if rec['outcome']=='return' else {'outcome':'throw','error':rec['error']}
+            if production and rec['id'] in V4_DEVIATIONS:
+                self.assertEqual(actual,{'outcome':'throw','error':V4_DEVIATIONS[rec['id']]},rec['id'])
+                return
             self.assertEqual(canonical(actual),canonical(expected),rec['id'])
             self.assertEqual(tape.events,rec['events'],rec['id'])
             self.assertEqual(tape.callback_index,len(rec['callbacks']))
             self.assertEqual(tape.clock_index,len(rec['clocks']))
+        seen=set()
         for rec in rows:
+            seen.add(rec['id'])
             with self.subTest(case=rec['id']):asyncio.run(check(rec))
+        self.assertLessEqual(set(V4_DEVIATIONS),seen)
 
     def test_approval_required_before_IO(self):
         with patch.object(j,'checked_json',side_effect=AssertionError('Unexpected I/O')):
@@ -181,6 +206,57 @@ class IndependentLossBoundaryTests(unittest.TestCase):
         self.plan['approvedLossAmount'] = str(50*10**18)
         self.plan['saltB'] = '0x'+'00'*31+'16'
         self.blocked('FROZEN_OPERATION_ID_MISMATCH')
+
+
+class DelayPolicyProfileTests(unittest.TestCase):
+    """Mainnet LOSS timing under the Timelock delay policy (owner policy of 2026-10-20).
+
+    A mainnet release plan must name 'V4-CONFIG-600': the Timelock is 600 s in the configuration phase and 86,400 s
+    after the separate switch. Without a profile a mainnet release plan is refused, whatever the delay (the recorded
+    LOSS corpus has no mainnet release plan). The schedule window is always derived from the delay actually observed.
+    """
+
+    def setUp(self):
+        rows = json.loads(gzip.decompress((ROOT/'tests/fixtures/native-release/loss.json.gz').read_bytes()))
+        # recorded case 0001 (well-formed synthetic inputs), relabelled as a release-mode mainnet plan: only the release
+        # policy branch differs, every other input is the recorded one
+        base = next(r for r in rows if r['id'] == 'loss-contingency.test.mjs:0001')
+        self.plan, self.state, self.clock = revive(base['arguments'])
+        self.plan['mode'] = 'release'; self.plan['chainId'] = 1672; self.state['chainId'] = 1672
+
+    def run_with(self, profile, delay):
+        if profile is not None:
+            self.plan['timelockDelayPolicy'] = profile
+        self.plan['minDelay'] = str(delay); self.state['minDelay'] = str(delay)
+        return loss.build_loss_contingency(self.plan, self.state, self.clock)
+
+    def refused(self, profile, delay):
+        with self.assertRaises(j.ReleaseError) as raised:
+            self.run_with(profile, delay)
+        self.assertEqual(str(raised.exception), 'BLOCKED — POLICY_DELAY')
+
+    def test_mainnet_release_without_profile_is_refused(self):
+        for delay in (172800, 600, 86400):
+            self.setUp()
+            self.refused(None, delay)
+
+    def test_testnet_release_without_profile_keeps_300(self):
+        self.plan['chainId'] = 688689; self.state['chainId'] = 688689
+        self.assertEqual(self.run_with(None, 300)['timing']['minDelay'], '300')
+
+    def test_v4_configuration_and_long_term_phases(self):
+        for delay in (600, 86400):
+            self.setUp()
+            t = self.run_with('V4-CONFIG-600', delay)['timing']
+            self.assertEqual(t['minDelay'], str(delay))
+            self.assertEqual(int(t['latestScheduleAt']), int(t['proposalCutoff']) - delay - int(t['marginSeconds']))
+            self.assertEqual(int(t['earliestReadyIfScheduledNow']), max(int(self.clock), int(self.state['timestamp'])) + delay)
+
+    def test_wrong_phase_values_are_refused(self):
+        for profile, delay in (('V4-CONFIG-600', 172800), ('V4-CONFIG-600', 300), ('V4-CONFIG-600', 3600),
+                               (None, 600), (None, 86400), ('UNKNOWN', 600)):
+            self.setUp()
+            self.refused(profile, delay)
 
 
 if __name__=='__main__':unittest.main()

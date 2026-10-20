@@ -86,6 +86,14 @@ def operation_identity(kind, arguments):
     return hash_hex(abi.encode_parameters([{'type': t} for t in types], arguments))
 
 
+def release_delays(profile):
+    """Release-mode Timelock delays admitted per chain. A mainnet release plan must name 'V4-CONFIG-600' (600 s, or
+    86,400 s after the separately approved switch); without a profile only the testnet's 300 s is admitted."""
+    if profile is UNDEFINED:
+        return {688689: (300,)}
+    return {1672: (600, 86400), 688689: (300,)} if profile == 'V4-CONFIG-600' else {}
+
+
 def build_loss_contingency(plan, state, now):
     now = uint(now, 'now')
     validate_plan(plan, now)
@@ -113,8 +121,10 @@ def build_loss_contingency(plan, state, now):
     delay = uint(field(state, 'minDelay'), 'minDelay')
     check(delay > 0 and delay == uint(plan['minDelay'], 'minDelay'), 'TIMELOCK_DELAY_DRIFT')
     if plan['mode'] == 'release':
-        check(delay == (172800 if plan['chainId'] == 1672 else 300)
-              and plan['chainId'] in (1672, 688689), 'POLICY_DELAY')
+        # a mainnet release plan must name the V4 profile: 600 s in the configuration phase, 86,400 s after the
+        # separately approved switch. Without a profile only the testnet (300 s) is admitted; testnet stays 300 s
+        allowed = release_delays(field(plan, 'timelockDelayPolicy'))
+        check(delay in allowed.get(plan['chainId'], ()) and plan['chainId'] in (1672, 688689), 'POLICY_DELAY')
     grace, window = uint(field(state, 'grace'), 'grace'), uint(plan['round']['settleTimelockWindow'], 'window')
     check(grace == 2592000 and 0 < window <= 1987200, 'ROUND_TIMING')
     maturity = uint(plan['round']['openDeadline'], 'openDeadline') + uint(plan['round']['lockDuration'], 'lockDuration')
