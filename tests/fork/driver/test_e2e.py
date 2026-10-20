@@ -606,6 +606,153 @@ def _simulate_fork(h):
     h.ctx['evidence'] = e2e.REAL
 
 
+@unittest.skipUnless(ANVIL_READY, 'NOT RUN: run the canonical build and the CampaignAnvilFixture tests in this export first')
+class InterruptionTest(unittest.TestCase):
+    """An RPC, node or snapshot failure mid-E2E: completed cases keep their evidence, the interrupted case is FAIL, later
+    cases are BLOCKED, the document is marked PARTIAL, and no complete-report name is written."""
+
+    def _run(self, name, mutate, scenarios=('A01', 'A04', 'A05')):
+        import execution
+        out = execution.OUT / name / 'e2e'
+        if out.is_dir():
+            import shutil
+            shutil.rmtree(out)
+        doc = {}
+        r = execution.testnet('normal', name=name, then=e2e.hook(out, result=doc, scenarios=set(scenarios), mutate=mutate))
+        return doc, out, {c['id']: c for c in r['checks'] if c['id'].startswith('E2E.')}
+
+    def _assert_partial(self, doc, out, checks, reason, completed_min=1):
+        self.assertEqual(doc['completeness']['status'], 'PARTIAL')
+        self.assertTrue(any(reason in x for x in doc['completeness']['reasons']), doc['completeness'])
+        v = doc['verdicts']
+        self.assertEqual(v['execution'], 'FAIL')
+        self.assertNotEqual(v['formal'], 'PASS')
+        self.assertEqual(checks['E2E.execution']['verdict'], 'FAIL')
+        self.assertEqual(checks['E2E.completeness']['verdict'], 'FAIL')
+        passed = [r for r in doc['rows'] if r['verdict'] == 'PASS' and r.get('transactionHash')]
+        self.assertGreaterEqual(len(passed), completed_min)                    # completed cases keep their evidence
+        self.assertTrue(all(r.get('deltas') is not None and 'effects' in r for r in passed))
+        self.assertTrue((out / 'E2E-HARNESS-SELF-TEST-PARTIAL.json').is_file())
+        self.assertFalse((out / 'E2E-HARNESS-SELF-TEST.json').exists())       # never the name of a complete report
+        self.assertFalse((out / 'POST-UPGRADE-USER-E2E.json').exists())
+        self.assertIn('PARTIAL / INCOMPLETE', (out / 'E2E-HARNESS-SELF-TEST-PARTIAL.md').read_text())
+
+    def _after_first_case(self, h, attr, fail):
+        """Patch ``h.<attr>`` so that it raises once the first case has started its restore."""
+        real = getattr(h, attr)
+        state = {'cases': 0}
+        case = h.case
+
+        def counting_case(*a, **kw):
+            state['cases'] += 1
+            return case(*a, **kw)
+        h.case = counting_case
+
+        def patched(*a, **kw):
+            if state['cases'] >= 1 and h.case_state is None and fail(a, kw):
+                raise ValueError("{'code': -32603, 'message': 'failed to get account: error sending request (simulated)'}")
+            return real(*a, **kw)
+        setattr(h, attr, patched)
+
+    def _assert_blocked_after(self, doc, step):
+        restore = [r for r in doc['rows'] if r['id'].endswith('.restore')]
+        self.assertEqual(len(restore), 1)
+        self.assertEqual(restore[0]['verdict'], 'FAIL')
+        self.assertIn(f'snapshot restore ({step}) raised ValueError', restore[0]['detail'])
+        after = doc['rows'][doc['rows'].index(restore[0]) + 1:]
+        self.assertTrue(any(r['verdict'] == 'BLOCKED' and 'case not run' in r['detail'] for r in after))
+        self.assertFalse([r['id'] for r in after if r['verdict'] == 'PASS'])   # nothing after the break can PASS
+
+    def test_snapshot_revert_raises(self):
+        def mutate(h):
+            real = h.chain.revert
+            calls = {'n': 0}
+
+            def revert(snapshot_id):
+                calls['n'] += 1
+                if calls['n'] == 2:
+                    raise ValueError('snapshot revert failed (simulated)')
+                return real(snapshot_id)
+            h.chain.revert = revert
+        doc, out, checks = self._run('test-e2e-int-revert', mutate)
+        self._assert_partial(doc, out, checks, 'S_post not restorable')
+        self._assert_blocked_after(doc, 'revert')
+
+    def test_fingerprint_read_interrupted(self):
+        doc, out, checks = self._run('test-e2e-int-fingerprint', lambda h: self._after_first_case(h, 'fingerprint', lambda a, kw: True))
+        self._assert_partial(doc, out, checks, 'S_post not restorable')
+        self._assert_blocked_after(doc, 'fingerprint')
+
+    def test_balance_read_interrupted_in_restore(self):
+        doc, out, checks = self._run('test-e2e-int-balances',
+                                     lambda h: self._after_first_case(h, 'balances', lambda a, kw: a and a[0] is h.fresh))
+        self._assert_partial(doc, out, checks, 'S_post not restorable')
+        self._assert_blocked_after(doc, 'fresh accounts')
+
+    def _abort_on_case(self, h, number):
+        case = h.case
+        state = {'n': 0}
+
+        def failing_case(*a, **kw):
+            state['n'] += 1
+            if state['n'] == number:
+                raise ValueError('upstream TLS EOF between cases (simulated)')
+            return case(*a, **kw)
+        h.case = failing_case
+
+    def test_abort_after_completed_cases(self):
+        doc, out, checks = self._run('test-e2e-int-abort', lambda h: self._abort_on_case(h, 4))
+        self._assert_partial(doc, out, checks, 'harness aborted: scenarios: ValueError', completed_min=3)
+        self.assertEqual(len(doc['cases']), 3)                                 # exactly the cases that ran
+        self.assertTrue(all(c.get('exception') is None for c in doc['cases']))
+
+    def test_abort_on_simulated_fork_writes_no_official_report(self):
+        def mutate(h):
+            self._abort_on_case(h, 3)
+            h.chain.forked = True
+            h.ctx['evidence'] = e2e.REAL
+            write = h.write
+
+            def write_and_reset(directory, name=None):
+                try:
+                    return write(directory)
+                finally:
+                    h.chain.forked = False
+            h.write = write_and_reset
+        doc, out, checks = self._run('test-e2e-int-realabort', mutate)
+        self.assertEqual(doc['completeness']['status'], 'PARTIAL')
+        self.assertFalse((out / 'POST-UPGRADE-USER-E2E.json').exists())
+        self.assertTrue((out / 'POST-UPGRADE-USER-E2E-PARTIAL.json').is_file())
+        self.assertNotEqual(doc['verdicts']['formal'], 'PASS')
+        self.assertEqual(doc['verdicts']['execution'], 'FAIL')
+
+    def test_report_write_failure_is_recorded_separately(self):
+        def mutate(h):
+            self._abort_on_case(h, 3)
+
+            def failing_write(directory, name=None):
+                raise OSError('disk full (simulated)')
+            h.write = failing_write
+        doc, out, checks = self._run('test-e2e-int-write', mutate)
+        self.assertEqual(checks['E2E.evidenceWrite']['verdict'], 'FAIL')
+        self.assertIn('OSError: disk full', checks['E2E.evidenceWrite']['detail'])
+        self.assertIn('upstream TLS EOF', checks['E2E.completeness']['detail'])  # the original failure is not overwritten
+        emergency = json.loads((out / 'E2E-EVIDENCE-WRITE-FAILED.json').read_text())
+        self.assertIn('upstream TLS EOF', emergency['aborted'])
+        self.assertIn('disk full', emergency['writeError'])
+        self.assertTrue(any(r['verdict'] == 'PASS' for r in emergency['rows']))   # completed rows survive
+        self.assertEqual(emergency['completeness']['status'], 'PARTIAL')
+        self.assertEqual(doc['verdicts']['execution'], 'FAIL')
+
+    def test_normal_path_unchanged(self):
+        doc, out, checks = self._run('test-e2e-int-normal', None, scenarios=('A01',))
+        self.assertNotIn('completeness', doc)
+        self.assertTrue((out / 'E2E-HARNESS-SELF-TEST.json').is_file())
+        self.assertFalse(list(out.glob('*PARTIAL*')))
+        self.assertNotIn('E2E.completeness', checks)
+        self.assertEqual(doc['verdicts']['execution'], 'PASS')
+
+
 @unittest.skipUnless(SAFE_READY, 'NOT RUN: needs the forge output of tests/fork/synthetic/SyntheticSafe.sol')
 class RehearsalTest(unittest.TestCase):
     """Positive rehearsals of the real-state inputs on synthetic nodes (formal verdict stays BLOCKED)."""

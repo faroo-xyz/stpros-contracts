@@ -325,6 +325,7 @@ class Harness:
         self.rows, self.cases, self.problems = [], [], []
         self.case_state = None
         self.broken = None
+        self.aborted = None             # an exception that stopped the harness outside a case (evidence is PARTIAL)
         self.canonical = Path(canonical)
         self.abis = self._abis()
         self.errors = self._errors()
@@ -599,23 +600,39 @@ class Harness:
         self.ctx['integrations'] = {**integ, 'approved': True}
 
     def restore(self):
+        """Back to S_post and prove it. Any exception on the way (revert, new snapshot, fingerprint, fresh-account reads:
+        an RPC, node or proxy failure) means S_post is not proven: ``broken`` is set, the caller records FAIL and every
+        later case is BLOCKED. Never raises."""
+        step = 'revert'
         try:
             self.chain.revert(self.base)
+            step = 'snapshot'
+            self.base = self.chain.snapshot()
+            step = 'fingerprint'
+            fp = self.fingerprint(self.base_accounts, self.base_owners)
+            self.owners = set(self.base_owners)
+            if fp != self.fp0:
+                self.broken = f'state after restore differs from S_post (fingerprint {fp[:12]} != {self.fp0[:12]})'
+                return False
+            step = 'fresh accounts'
+            dirty = sorted(acct for acct, b in self.balances(self.fresh).items()
+                           if any(b.values()) or self.chain.code(acct) not in ('0x', '0x0') or self.records(acct))
         except Exception as error:     # noqa: BLE001 - any restoration failure is evidence
-            self.broken = f'snapshot restore raised {type(error).__name__}: {str(error)[:200]}'
+            self.broken = f'snapshot restore ({step}) raised {type(error).__name__}: {str(error)[:200]}'
             return False
-        self.base = self.chain.snapshot()
-        fp = self.fingerprint(self.base_accounts, self.base_owners)
-        self.owners = set(self.base_owners)
-        if fp != self.fp0:
-            self.broken = f'state after restore differs from S_post (fingerprint {fp[:12]} != {self.fp0[:12]})'
-            return False
-        dirty = sorted(acct for acct, b in self.balances(self.fresh).items()
-                       if any(b.values()) or self.chain.code(acct) not in ('0x', '0x0') or self.records(acct))
         if dirty:
             self.broken = f'fresh accounts not empty after restore: {dirty[:3]}'
             return False
         return True
+
+    def incomplete(self):
+        """Why the evidence does not cover the whole selected run (empty when it ran to its end)."""
+        out = []
+        if self.aborted:
+            out.append(f'harness aborted: {self.aborted}')
+        if self.broken:
+            out.append(f'S_post not restorable, later cases BLOCKED: {self.broken}')
+        return out
 
     @contextlib.contextmanager
     def case(self, cid, title, scenario, intended=REAL):
@@ -889,6 +906,8 @@ class Harness:
         failures = [r['id'] for r in executed if r['verdict'] == FAIL] + [p for p in self.problems if p.startswith('FAIL')]
         if self.broken:
             failures.append(f'snapshot discipline: {self.broken}')
+        if self.aborted:
+            failures.append(f'harness aborted: {self.aborted}')
         if (self.ctx.get('postcheck') or {}).get('verdict') == 'FAIL':
             failures.append(f'upgrade postcheck FAIL: {self.ctx["postcheck"].get("why", [])[:3]}')
         uncovered = sorted(k for k, v in cov.items() if v['status'] in (NOT_RUN, BLOCKED))
@@ -938,7 +957,10 @@ class Harness:
         classes = {}
         for r in self.rows:
             classes[r['class']] = classes.get(r['class'], 0) + 1
+        partial = self.incomplete()
         return {'schema': SCHEMA, 'chainId': self.ctx['chainId'], 'evidence': self.ctx['evidence'],
+                **({'completeness': {'status': 'PARTIAL', 'reasons': partial,
+                                     'note': 'INCOMPLETE evidence: never an E2E PASS'}} if partial else {}),
                 'anchor': self.ctx['anchor'], 'source': self.ctx['source'],
                 'spec': {'sha256': _sha(json.dumps(self.spec, sort_keys=True).encode()), 'derivedFrom': self.spec['derivedFrom']},
                 'context': {**{k: self.ctx.get(k) for k in ('addresses', 'actors', 'actorClasses', 'postcheck', 'governance', 'formal',
@@ -960,6 +982,8 @@ class Harness:
         name = name or ('POST-UPGRADE-USER-E2E' if real else 'E2E-HARNESS-SELF-TEST')
         if name == 'POST-UPGRADE-USER-E2E' and not real:
             raise E2EError('only a REAL context on a Fork node may write POST-UPGRADE-USER-E2E')
+        if 'completeness' in doc and not name.endswith('-PARTIAL'):
+            name += '-PARTIAL'             # a partial document never carries the name of a complete report
         directory.mkdir(parents=True, exist_ok=True)
         (directory / f'{name}.json').write_text(json.dumps(doc, indent=1, sort_keys=True, default=str) + '\n')
         (directory / f'{name}.md').write_text(render_markdown(doc))
@@ -974,6 +998,8 @@ def render_markdown(doc):
     lines = [f'# {title}', '', f"Chain {doc['chainId']}; evidence {doc['evidence']}; anchor {doc['anchor']}; "
              f"source {doc['source'].get('commit')}; spec {doc['spec']['sha256'][:16]}.", '',
              f"**Execution verdict: {v['execution']}. Formal E2E verdict: {v['formal']}.**", '']
+    if doc.get('completeness'):
+        lines += [f"**PARTIAL / INCOMPLETE evidence (never an E2E PASS):** {'; '.join(doc['completeness']['reasons'])}", '']
     if v['blockers']:
         lines += ['Blockers:', ''] + [f'- {b}' for b in v['blockers']] + ['']
     if v['failures']:
@@ -1113,28 +1139,92 @@ def hook(out_dir=None, *, spec=None, scenarios=None, record=None, integrations=N
     ``result`` (a dict) receives the evidence document."""
     def then(run, ctx):
         import e2e_scenarios
-        context = context_from_run(run, ctx['p0'], ctx['actors'], record=record, integrations=integrations)
-        h = Harness(run.chain, context, spec)
-        h.run = run
-        if setup:
-            h.ctx.setdefault('rehearsal', [])
-            setup(h, run)
-            h.ctx['rehearsal'] = h.ctx['rehearsal'] or ['setup']
-        if mutate:
-            mutate(h)
-        if h.begin():
-            e2e_scenarios.run_all(h, scenarios)
-        doc = h.write(out_dir or (run.dir / 'e2e'))
-        if result is not None:
+        directory = Path(out_dir or (run.dir / 'e2e'))
+        h, phase = None, 'context'
+        try:
+            context = context_from_run(run, ctx['p0'], ctx['actors'], record=record, integrations=integrations)
+            phase = 'harness'
+            h = Harness(run.chain, context, spec)
+            h.run = run
+            if setup:
+                phase = 'setup'
+                h.ctx.setdefault('rehearsal', [])
+                setup(h, run)
+                h.ctx['rehearsal'] = h.ctx['rehearsal'] or ['setup']
+            if mutate:
+                phase = 'mutate'
+                mutate(h)
+            phase = 'begin'
+            if h.begin():
+                phase = 'scenarios'
+                e2e_scenarios.run_all(h, scenarios)
+        except Exception as error:     # noqa: BLE001 - an infrastructure failure ends the run, never silently
+            detail = f'{phase}: {type(error).__name__}: {str(error)[:300]}'
+            if h is None:
+                return _abort_without_harness(run, directory, detail, result)
+            h.aborted = detail
+        doc, write_error = None, None
+        try:
+            doc = h.write(directory)
+        except Exception as error:     # noqa: BLE001 - kept apart from the original failure
+            write_error = f'{type(error).__name__}: {str(error)[:300]}'
+            try:
+                doc = h.evidence()
+            except Exception as again:     # noqa: BLE001
+                doc = None
+                write_error += f'; evidence rebuild: {type(again).__name__}: {str(again)[:200]}'
+            _emergency_write(directory, h, write_error, doc)
+        if result is not None and doc is not None:
             result.update(doc)
-        v = doc['verdicts']
-        sev = {'PASS': 'PASS', 'FAIL': 'FAIL', 'BLOCKED': 'BLOCKED'}
-        run.add({'id': 'E2E.execution', 'verdict': sev[v['execution']], 'expected': '1', 'actual': '1' if v['execution'] == 'PASS' else '0',
-                 'detail': '; '.join(v['failures'])[:300]},
-                {'id': 'E2E.formal', 'verdict': sev[v['formal']], 'expected': '1',
-                 'actual': '1' if v['formal'] == 'PASS' else '0', 'detail': '; '.join(v['blockers'])[:300]})
+        rows = []
+        if doc is not None:
+            v = doc['verdicts']
+            sev = {'PASS': 'PASS', 'FAIL': 'FAIL', 'BLOCKED': 'BLOCKED'}
+            rows += [{'id': 'E2E.execution', 'verdict': sev[v['execution']], 'expected': '1',
+                      'actual': '1' if v['execution'] == 'PASS' else '0', 'detail': '; '.join(v['failures'])[:300]},
+                     {'id': 'E2E.formal', 'verdict': sev[v['formal']], 'expected': '1',
+                      'actual': '1' if v['formal'] == 'PASS' else '0', 'detail': '; '.join(v['blockers'])[:300]}]
+        else:
+            rows.append({'id': 'E2E.execution', 'verdict': 'FAIL', 'expected': '1', 'actual': '0',
+                         'detail': f'no E2E evidence document: {h.aborted or "no harness failure"}'[:300]})
+        if h.incomplete():
+            rows.append({'id': 'E2E.completeness', 'verdict': 'FAIL', 'expected': '1', 'actual': '0',
+                         'detail': ('PARTIAL: ' + '; '.join(h.incomplete()))[:300]})
+        if write_error:
+            rows.append({'id': 'E2E.evidenceWrite', 'verdict': 'FAIL', 'expected': '1', 'actual': '0', 'detail': write_error[:300]})
+        run.add(*rows)
         return ['E2E']
     return then
+
+
+def _emergency_write(directory, h, write_error, doc):
+    """Last-resort JSON when the normal report cannot be written: the rows, cases and both errors, plain."""
+    payload = {'schema': SCHEMA, 'completeness': {'status': 'PARTIAL', 'reasons': h.incomplete() + [f'report write failed: {write_error}'],
+                                                  'note': 'INCOMPLETE evidence: never an E2E PASS'},
+               'aborted': h.aborted, 'broken': h.broken, 'writeError': write_error, 'problems': h.problems,
+               'verdicts': (doc or {}).get('verdicts'), 'cases': h.cases, 'rows': h.rows}
+    try:
+        directory.mkdir(parents=True, exist_ok=True)
+        (directory / 'E2E-EVIDENCE-WRITE-FAILED.json').write_text(json.dumps(payload, indent=1, sort_keys=True, default=str) + '\n')
+    except Exception:     # noqa: BLE001 - the write error is already recorded in the run ledger
+        pass
+
+
+def _abort_without_harness(run, directory, detail, result):
+    """The harness could not even be built: an error document and a FAIL row, no verdict beyond that."""
+    payload = {'schema': SCHEMA, 'completeness': {'status': 'PARTIAL', 'reasons': [f'harness not started: {detail}'],
+                                                  'note': 'INCOMPLETE evidence: never an E2E PASS'}, 'rows': [], 'cases': []}
+    rows = [{'id': 'E2E.execution', 'verdict': 'FAIL', 'expected': '1', 'actual': '0', 'detail': f'harness not started: {detail}'[:300]}]
+    try:
+        directory.mkdir(parents=True, exist_ok=True)
+        (directory / 'E2E-HARNESS-NOT-STARTED.json').write_text(json.dumps(payload, indent=1, sort_keys=True, default=str) + '\n')
+    except Exception as error:     # noqa: BLE001
+        rows.append({'id': 'E2E.evidenceWrite', 'verdict': 'FAIL', 'expected': '1', 'actual': '0',
+                     'detail': f'{type(error).__name__}: {str(error)[:300]}'})
+    if result is not None:
+        result.update(payload)
+    run.add(*rows)
+    return ['E2E']
 
 
 def compose(*thens):
