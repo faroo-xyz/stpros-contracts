@@ -200,12 +200,15 @@ def mainnet_actors(meta):
     return {**actors, 'gov': meta['safe'], 'ops': meta['safe'], 'guardian': actors['can']}
 
 
-def build(chain, topo, p0, actors, *, case='A', recovery=None, release_id=None, inputs=None):
+def build(chain, topo, p0, actors, *, case='A', recovery=None, release_id=None, inputs=None, single_factory=False):
     """The simulation release config (``tools/release/native/inputs.py`` contract) and its inventory.
 
     ``inputs`` (testnet, ``approved_inputs`` APPROVED_RECORD mode) replaces the simulation values: the ordered
     destinations, the APR / reporting policy and the reporter come from the approved record (already checked against
-    the node). Without it the policy and the labelled actors are SYNTHETIC."""
+    the node). Without it the policy and the labelled actors are SYNTHETIC.
+
+    ``single_factory`` (mainnet): the V4 release scope, the official Factory and its governed Vault only. Factory_test
+    and the test vault stay on the node, untouched and outside the config."""
     m, network = topo['meta'], topo['meta']['chain']
     mainnet = network == 'mainnet'
     head = chain.block()
@@ -219,6 +222,9 @@ def build(chain, topo, p0, actors, *, case='A', recovery=None, release_id=None, 
                      (m['factoryTest'], m['beaconTest'], m['vaultImplTest'], [(m['testVault'], m['e2'], 'RETIRED')])]
         legacy_impls = {m['oracle']: m['oracleImpl'], m['stpros']: m['stprosImpl'], m['factory']: m['factoryImpl'],
                         m['factoryTest']: m['factoryTestImpl']}
+        if single_factory:
+            factories = factories[:1]
+            legacy_impls.pop(m['factoryTest'])
     else:
         e2_out = bool(recovery and recovery.get('e2Unavailable'))
         factories = [(m['factory'], m['beacon'], m['vaultImpl'],
@@ -299,6 +305,11 @@ def build(chain, topo, p0, actors, *, case='A', recovery=None, release_id=None, 
                               'actors': 'SYNTHETIC labelled actors except E1/E2 (FR-D5/FR-D6)',
                               'state': 'SYNTHETIC loopback state on recorded legacy runtimes'}),
     }
+    if mainnet and single_factory and not inputs:
+        # the V4 mainnet release profile (product decision 2026-10-20): APR 10 % reference, 3 x cap, 80,000 PROS,
+        # 20 h minimum interval, 1-day waiting period for new requests
+        config['policy'].update(expectedGrossAprPpm=100000, maxAprPpm=300000, maxUpdateAmount='80000000000000000000000',
+                                updateInterval=72000, unbondingPeriod=86400)
     if mainnet:
         config['p1Case'] = case
         if case != 'A':

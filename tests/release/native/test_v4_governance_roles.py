@@ -26,6 +26,8 @@ from tools.lib import release_json as j  # noqa: E402
 from tools.release.native import checkpoint, distributor_predeploy as dp, inputs, loss  # noqa: E402
 
 REAL = dp.governance_inputs()
+V4_MAINNET_POLICY = {'expectedGrossAprPpm': 100000, 'maxAprPpm': 300000, 'maxUpdateAmount': '80000000000000000000000',
+                     'updateInterval': 72000, 'unbondingPeriod': 86400}
 
 
 def other(n):
@@ -48,6 +50,8 @@ class V4GovernanceRolesTest(unittest.TestCase):
             c['actors'][role] = REAL[role]
         c['actors'].update(roles)
         c['review'].pop('safes', None)
+        c['factories'] = c['factories'][:1]                 # V4 mainnet release scope: the official Factory only
+        c['policy'].update(V4_MAINNET_POLICY)                # the V4 mainnet release profile
         return c
 
     def refused(self, code, config):
@@ -87,6 +91,14 @@ class V4GovernanceRolesTest(unittest.TestCase):
             raise AssertionError(f'Safe state was read: {method}')
         for check_nonce in (True, False):
             self.assertIsNone(asyncio.run(checkpoint.check_safes(self.v4(), no_rpc, '0x1', check_nonce)))
+
+    def test_v4_mainnet_release_is_single_factory(self):
+        c = self.v4(); c['factories'] = copy.deepcopy(self.r4['factories'])          # with Factory_test again
+        self.refused('FACTORY_COUNT', c)
+        c = self.v4(); c['p1Case'] = 'B'; c['fallbackApproval'] = {'ownerApproved': True, 'reference': 'x'}
+        self.refused('V4_MAINNET_P1_CASE', c)
+        c = self.v4(); c['actors']['keeper'] = '0x' + '00' * 20
+        inputs.validate_config(c)                                                 # zero keeper: distribution stays off
 
     def test_r4_configs_keep_the_r4_rules(self):
         c = copy.deepcopy(self.r4); c['mode'] = 'simulation'

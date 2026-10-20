@@ -6,6 +6,11 @@ from ._shared import (SCHEMAS, UNDEFINED, ZERO, ZERO32, ROLES, address, bigint,
                       hash_text, call_data, number, string)
 
 
+# VToken.setUnbondingPeriod(uint256), owner only (the Timelock after H); bounded on chain to [1 day, 30 days]
+SET_UNBONDING_PERIOD = [{'type': 'function', 'name': 'setUnbondingPeriod', 'stateMutability': 'nonpayable',
+                         'inputs': [{'name': '_unbondingPeriod', 'type': 'uint256'}], 'outputs': []}]
+
+
 def transaction(to, name, args=(), note=''):
     return {'to': address(to), 'value': '0', 'data': call_data(SCHEMAS['core'], name, args), 'note': note}
 
@@ -212,7 +217,7 @@ def core_expectation(config):
         'aprPpm': bigint(config['policy']['maxAprPpm']),
         'maxUpdateAmount': bigint(config['policy']['maxUpdateAmount'] if mainnet else current['maxUpdateAmount']),
         'interval': bigint(config['policy']['updateInterval'] if mainnet else max(number(current['interval']), 3600)),
-        'unbondingPeriod': bigint(current['unbondingPeriod']),
+        'unbondingPeriod': inputs.target_unbonding_period(config),     # R4: the waiting period U leaves behind
         'maxWithdrawCount': bigint(current['maxWithdrawCount']),
         'mainnetV1': mainnet,
         'destinations': config['destinations']
@@ -264,6 +269,13 @@ def build_u(context):
         [addresses['distributor'], addresses['bridge'], actors['guardian'], addresses['timelock']]
     ) if config['chainId'] == 1672 else call_data(SCHEMAS['core'], 'migrateFromV2', [actors['guardian'], addresses['timelock']])
     upgrade(addresses['stpros'], implementations['stpros'], staking)
+    # V4 mainnet: the waiting period for new redemption requests, set by the Timelock (StPROS owner since H) right
+    # after the StPROS upgrade, in the same batch; queued requests keep their snapshot
+    unbonding = inputs.target_unbonding_period(config)
+    if unbonding != bigint(config['observed']['core']['unbondingPeriod']):
+        calls.append({'to': addresses['stpros'], 'value': '0',
+                      'data': call_data(SET_UNBONDING_PERIOD, 'setUnbondingPeriod', [unbonding]),
+                      'note': 'StPROS unbonding period'})
     if config['chainId'] == 688689:
         for name in ('bridge', 'distributor'):
             upgrade(
@@ -285,6 +297,18 @@ def build_u(context):
             )
         if config['chainId'] == 1672 and index == 1:
             calls.append(transaction(factory['address'], 'closeCreation'))
+    # A pre-deployed SlpDistributor is configured inside this same atomic batch, after the upgrades and before
+    # assertR4: the whitelist first, then the keeper, so distribution is never enabled before its SLP list exists.
+    # A zero keeper or an empty list adds no call; R4 then requires exactly that state.
+    if optional(config, 'review', 'predeployed') is not UNDEFINED:
+        pre_keeper, pre_slps = inputs.distributor_pre_u(config)
+        abi_ = artifacts['distributor']['abi']
+        if config['destinations'] and config['destinations'] != pre_slps:
+            calls.append({'to': addresses['distributor'], 'value': '0',
+                          'data': call_data(abi_, 'setSlps', [config['destinations'], True]), 'note': 'SlpDistributor whitelist'})
+        if actors['keeper'] != ZERO and actors['keeper'] != pre_keeper:
+            calls.append({'to': addresses['distributor'], 'value': '0',
+                          'data': call_data(abi_, 'setKeeper', [actors['keeper']]), 'note': 'SlpDistributor keeper'})
     calls.append(
         {
             'to': addresses['assertions'],
@@ -313,8 +337,8 @@ def build_u(context):
 
 
 def require_p1_complete(config, inventory):
-    if config['chainId'] != 1672 or config['mode'] != 'release':
-        return UNDEFINED
+    if config['chainId'] != 1672 or config['mode'] != 'release' or inputs.v4_mainnet_scope(config):
+        return UNDEFINED                # V4 mainnet: no P-1 (Factory_test is outside the release)
     factory = config['factories'][1]; vault = factory['vaults'][0]
     case = coalesce(field(config, 'p1Case'), 'A')
     if case in ('A', 'C'):
@@ -388,6 +412,14 @@ def build_handoff(context):
 def p1_runbook(context):
     context.preflight(); config, inventory = context.config, context.inventory
     require(config['chainId'] == 1672, 'MAINNET_ONLY')
+    if inputs.v4_mainnet_scope(config):
+        return {
+            'case': 'A', 'simulationOnly': config['mode'] == 'simulation', 'deployable': config['mode'] == 'release',
+            'steps': [],
+            'residual': 'V4 mainnet: Factory_test and its historical vault are outside the release (no P-1 step); '
+                        'they stay on chain under their legacy authority',
+            'recovery': 'Not applicable'
+        }
     factory = config['factories'][1]; vault = factory['vaults'][0]; actor = factory['legacyOwner']
     case = coalesce(field(config, 'p1Case'), 'A'); calls = []
     if case in ('A', 'C') and config['observed']['proxies'][factory['address']]['owner'] != config['addresses']['timelock']:

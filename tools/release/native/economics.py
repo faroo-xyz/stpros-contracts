@@ -11,6 +11,7 @@ from . import inputs, residual
 DEPOSIT = hash_text('Deposit(address,address,uint256,uint256)')
 WITHDRAW = hash_text('Withdraw(address,address,address,uint256,uint256)')
 CLAIM = hash_text('WithdrawalCompleted(address,address,uint256)')
+UNBONDING = hash_text('UnbondingPeriodChanged(uint256,uint256)')
 TRANSFER = hash_text('Transfer(address,address,uint256)')
 POOL_TOPICS = [hash_text(abi.item_signature(item)) for item in SCHEMAS['poolEvents']]
 
@@ -235,7 +236,10 @@ async def reconcile_economics(config, inventory, rpc, block, before, after, post
     if from_block > to_block:
         return UNDEFINED
     upgraded = hash_text('Upgraded(address)')
-    rows = await range_logs(rpc, config['addresses']['stpros'], from_block, to_block, [DEPOSIT, WITHDRAW, CLAIM, upgraded])
+    # the waiting-period change is part of U only in the V4 mainnet scope; elsewhere the request stays the frozen one
+    scoped = inputs.v4_mainnet_scope(config)
+    rows = await range_logs(rpc, config['addresses']['stpros'], from_block, to_block,
+                            [DEPOSIT, WITHDRAW, CLAIM, upgraded, *([UNBONDING] if scoped else [])])
     legacy_version = config['observed']['proxies'][config['addresses']['stpros']]['version']
     require(
         equal(legacy_version, config['legacy'][config['addresses']['stpros']]['version'])
@@ -250,7 +254,19 @@ async def reconcile_economics(config, inventory, rpc, block, before, after, post
         a['owner']: copy.deepcopy(a, {id(UNDEFINED): UNDEFINED}) for a in before['economic']['withdrawals']['accounts']
     }
     queued, completed = bigint(before['economic']['withdrawals']['queued']), bigint(before['economic']['withdrawals']['completed'])
+    # each new request snapshots the waiting period in force when it is queued; only U changes it, once, after the
+    # StPROS upgrade, to the V4 policy value (earlier requests keep theirs)
+    period, period_changed = bigint(before['core']['unbondingPeriod']), False
     for row in rows:
+        if row['topics'][0] == UNBONDING:
+            old, new = words(row, 2)
+            require(
+                post and migrated and not period_changed and old == period
+                and new == inputs.target_unbonding_period(config) and new != period,
+                'UNREVIEWED_UNBONDING_HISTORY'
+            )
+            period, period_changed = new, True
+            continue
         if row['topics'][0] == upgraded:
             require(
                 post
@@ -279,7 +295,7 @@ async def reconcile_economics(config, inventory, rpc, block, before, after, post
                 'queued': str(queued),
                 'pending': str(amount),
                 'createdAt': str(bigint(header['timestamp'])),
-                'unbondingPeriod': str(before['core']['unbondingPeriod'])
+                'unbondingPeriod': str(period)
             }
             if config['chainId'] == 688689 or migrated:
                 record['receiver'] = request_receiver('0x'+row['topics'][2][-40:], owner, migrated)

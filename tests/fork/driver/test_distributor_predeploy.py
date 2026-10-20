@@ -164,18 +164,10 @@ class PredeployThenUpgradeTest(unittest.TestCase):
         cls.facts.update(plan=p, observed=observed, failures=dp.verify(observed, p))
         # a wrong ProxyAdmin owner is caught from the chain read, not from the inputs
         cls.facts['wrongPaOwner'] = dp.verify({**observed, 'proxyAdminOwner': actors['deployer']}, p)
-        # configuration phase: the GOV Safe sets the release keeper through a 600 s Timelock operation
-        call = abi.calldata('setKeeper(address)', actors['keeper'])
-        salt = '0x' + keccak256(b'faroo predeploy keeper')[2:]
-        sched = abi.encode_function({'type': 'function', 'name': 'schedule', 'inputs': [{'type': t} for t in (
-            'address', 'uint256', 'bytes', 'bytes32', 'bytes32', 'uint256')]}, [proxy, 0, call, ZERO32, salt, 600])
-        execute = abi.encode_function({'type': 'function', 'name': 'execute', 'inputs': [{'type': t} for t in (
-            'address', 'uint256', 'bytes', 'bytes32', 'bytes32')]}, [proxy, 0, call, ZERO32, salt])
-        safe_exec.execute(chain, 'PREDEPLOY.config.schedule', m['safe'], m['safeOwners'], m['safeThreshold'], safe_exec.safe_tx(tl, sched, 0))
-        chain.warp(601)
-        safe_exec.execute(chain, 'PREDEPLOY.config.execute', m['safe'], m['safeOwners'], m['safeThreshold'], safe_exec.safe_tx(tl, execute, 0))
-        cls.facts['keeperAfterConfig'] = chain.addr(proxy, 'keeper()')
+        # no pre-upgrade configuration: the keeper stays 0 until U sets it in the same Timelock batch
+        cls.facts['keeperBeforeU'] = chain.addr(proxy, 'keeper()')
         cls.facts['releaseKeeper'] = actors['keeper'].lower()
+        cls.facts['proxy'] = proxy
         record = {'plan': p, 'planSha256': j.canonical_sha256(json.loads(json.dumps(p))), 'transactions': hashes}
         cls.facts['record'] = record
         return {'timelock': tl, 'distributor': got[1], 'distributorProxy': proxy, 'record': record}
@@ -186,6 +178,7 @@ class PredeployThenUpgradeTest(unittest.TestCase):
         loopback node at the H checkpoint block and at the post-U (R4) head, plus failing evidence."""
         async def rpc(method, params):
             return run.chain.rpc(method, params)
+        cls.facts['keeperAfterU'] = run.chain.addr(cls.facts['proxy'], 'keeper()')
         blocks = {'H': hex(next(s['block'] for s in run.stages if s['stage'] == 'H')), 'R4': run.chain.block()['number']}
         step5 = next(t['block'] for t in run.chain.transcript if t['label'] == 'PREDEPLOY.5')
         record = cls.facts['record']
@@ -239,7 +232,8 @@ class PredeployThenUpgradeTest(unittest.TestCase):
                          sorted(k for k, c in self.v.items() if c['verdict'] != 'PASS')[:10])
         self.assertNotIn('P-0 SlpDistributor proxy (v4 TUP)', [t['label'] for t in self.r['transcript']])
         self.assertNotIn('P-0 TimelockController', [t['label'] for t in self.r['transcript']])
-        self.assertEqual(self.facts['keeperAfterConfig'], self.facts['releaseKeeper'])   # set by the 600 s Timelock operation
+        self.assertEqual(self.facts['keeperBeforeU'], '0x' + '00' * 20)                  # no pre-upgrade configuration
+        self.assertEqual(self.facts['keeperAfterU'], self.facts['releaseKeeper'])        # set inside the U batch
 
     def test_cli_preflight_emits_no_second_deployment(self):
         stage = next(s for s in self.doc['stages'] if s['stage'] == 'P-0.definitions')

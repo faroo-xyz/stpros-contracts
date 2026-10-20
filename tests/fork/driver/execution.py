@@ -306,6 +306,21 @@ REAL_FAILURE_IDS = {
                 'FS-5t.partial.runException', 'U_t.vault.runException', 'FS-3t.runException')}
 
 
+def _with_distributor_config(run, expected_u, config):
+    """Expected U shape with a pre-deployed SlpDistributor: U sets the SLP list, then the keeper, right before
+    assertR4, when they differ from the deployment values (owner decision 2026-10-20; no separate configuration)."""
+    record = getattr(run, 'predeployed', None)
+    if not record:
+        return expected_u
+    pre = record['plan']['inputs']
+    extra = []
+    if config['destinations'] and [d.lower() for d in config['destinations']] != pre['destinations']:
+        extra.append(('TL', 'distributor', 'setSlps'))
+    if config['actors']['keeper'] not in (lc.ZERO, pre['keeper']):
+        extra.append(('TL', 'distributor', 'setKeeper'))
+    return expected_u[:-1] + extra + expected_u[-1:]
+
+
 def _real_failure(run, error, ids, finish):
     """An exception in a real-state run: recorded as a FAIL in every ledger family, with its traceback, the stages
     and the full transcript (receipts, estimates and revert outcomes) kept as evidence."""
@@ -402,7 +417,7 @@ def _mainnet(run, case, waiting, donation, variant):
     h = run.cli('pre-h', 'build-handoff', config, inv, 'mainnet')
     u = run.cli('pre-h', 'build-u', config, inv, 'mainnet')
     run.shape(f'H.{case}', expected['h'], h['transactions'], labels)
-    run.shape(f'U.{case}', expected['u'], u['transactions'], labels)
+    run.shape(f'U.{case}', _with_distributor_config(run, expected['u'], config), u['transactions'], labels)
     _check_operation_binding(run, h['transactions'], u, MAINNET_DELAY)
     run.h_transactions = h['transactions']
     residual = set(inv['roles'][m['testVault']]['current']) if case in 'CD' else set()

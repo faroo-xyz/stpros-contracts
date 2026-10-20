@@ -167,23 +167,23 @@
     "ReleaseAssertions": {
       "fieldSha256": {
         "abi": "720fb9dd47e9671a0561b88b6ce1ccd29de29115b335d8ac57f70b14465b8f79",
-        "creationBytecode": "ab0ba6a465227333db9e3ffda8b14056078a6d57353e94ac40d73353986ffdaa",
+        "creationBytecode": "f46f2559c899531f26784f4e5bc76236302eb2f51a883a80aa0ed34149768a9e",
         "creationLinks": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
-        "deployedBytecode": "6f46643679d29bf0ccad1f8c91bd37f2bf8143ef65dbb6e6f01c00fcdc30b226",
+        "deployedBytecode": "f44f194f4c45c9b61c025484db8ed258cdaadadf45c14a1e4045e8f03a8b9080",
         "immutableReferences": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
-        "metadata": "964774dae18fb9a56633ff19fab490cd0384ec5cc4bc90d48a8ef184214b6ad4",
+        "metadata": "c7dca0ab98261bd052a4587f3870645bfb20c10ccb49bc459d0c7c5645170264",
         "namespaces": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
-        "runtimeKeccak": "570bd0ef4c55566479fd88b2d0204f9417d0fd36a9be7e5b8a996eca59a8d226",
+        "runtimeKeccak": "008e206c1fd71df4e993c55a7898c6b76f1de180ee62b4dd12ee2e06751cf9e0",
         "runtimeLinks": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
         "selectors": "8274ce42d1b5a13ac0c23190e05892cb5c2c2c35b94d338d1a06d45ed5125ba7",
         "source": "8fa06879966855ec753c455c7a366a348b2c5738d2785adbbbb439f5869c9b38",
-        "sourceClosureSha256": "e371e6ba6b32bff5b7f2c823f1be8bf5a0ec60dadf92f2463ca9406ffbaa30d9",
+        "sourceClosureSha256": "59b3e33845d442b83d502490b60e396305bbc946657e0bf79799ce9956f64501",
         "storageLayout": "e7ad284d2288f5904ee11f44c0fe63736f5f5caca0faf21a1e52a5717df21149"
       },
       "historicalCoverage": "ABI/storage/runtime/immutables/source closure: PASS; creation and namespace artifact: INCOMPLETE",
       "source": "project/contracts/release/ReleaseAssertions.sol",
       "sourceClosureSha256": {
-        "project/contracts/release/ReleaseAssertions.sol": "3a44388d9644cd8b94e4c70e5665d5becf06ecdc56848af6fe3fbb62666c440a"
+        "project/contracts/release/ReleaseAssertions.sol": "4e0c09e8b9281e351ff6969e1af266874247de76f77b22d44d913a5324c1fac0"
       }
     },
     "SlpDistributor": {

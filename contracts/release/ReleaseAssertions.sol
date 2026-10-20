@@ -134,17 +134,17 @@ contract ReleaseAssertions {
     }
 
     function _fullTopology(Common calldata e) private pure {
-        uint256 factories = e.chainId == 1672 ? 2 : 1;
-        _require(
-            e.beacons.length == factories && e.vaults.length == (e.chainId == 1672 ? 2 : 15)
-                && e.proxies.length == 4 + factories,
-            "TOPOLOGY_COVERAGE",
-            address(0)
-        );
-        // Canonical mainnet ordering is governed Vault, then retirement target.
+        // Mainnet V4 release: the official Factory and its governed Vault (1 + 1). The recorded R4 shape with the
+        // Factory_test retirement target (2 + 2) stays accepted for its recorded witnesses. Testnet: 1 + 15.
+        uint256 factories = e.beacons.length;
+        bool shape = e.chainId == 1672
+            ? (factories == 1 && e.vaults.length == 1) || (factories == 2 && e.vaults.length == 2)
+            : (factories == 1 && e.vaults.length == 15);
+        _require(shape && e.proxies.length == 4 + factories, "TOPOLOGY_COVERAGE", address(0));
+        // Canonical mainnet ordering is the governed Vault first (then, in the R4 shape, the retirement target).
         // A caller must not disable its SETTLED/round/terms guards by clearing a flag.
         if (e.chainId == 1672) {
-            _require(e.vaults[0].governed && !e.vaults[1].governed, "MAINNET_VAULT_CLASS", address(0));
+            _require(e.vaults[0].governed && (e.vaults.length == 1 || !e.vaults[1].governed), "MAINNET_VAULT_CLASS", address(0));
         }
         for (uint256 i; i < e.proxies.length; ++i) {
             for (uint256 j; j < i; ++j) {

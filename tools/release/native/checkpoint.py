@@ -221,9 +221,12 @@ async def observe_state(config, inventory, rpc, block, reviewed, expected_roles=
         and await call(addresses['bridge'], 'vTokenAddresses', [addresses['stpros']]),
         'BRIDGE_CONFIGURATION'
     )
-    require((await call(addresses['distributor'], 'keeper')).lower() == config['actors']['keeper'], 'KEEPER')
+    # pre-U state: a pre-deployed distributor still holds its deployment values; U configures the final ones and
+    # assertR4 checks them exactly
+    pre_keeper, pre_slps = inputs.distributor_pre_u(config)
+    require((await call(addresses['distributor'], 'keeper')).lower() == pre_keeper, 'KEEPER')
     require(
-        j.canonical([a.lower() for a in await call(addresses['distributor'], 'getSlps')]) == j.canonical(config['destinations']),
+        j.canonical([a.lower() for a in await call(addresses['distributor'], 'getSlps')]) == j.canonical(pre_slps),
         'DESTINATIONS'
     )
     for address in config['destinations']:
@@ -407,7 +410,26 @@ CONFIG_TOPICS = [
 ]
 
 
-async def governance_history(config, rpc, block, stage='pre', proxies=()):
+def u_distributor_events(config, u_execution):
+    """The SlpDistributor configuration events the executed U itself emits (V4: a pre-deployed distributor gets
+    ``setSlps`` then ``setKeeper`` inside U, without an upgrade). Bound to the verified U execution transaction and
+    block hash from the Timelock replay; mirrors ``plans.build_u`` exactly. UNDEFINED when U configures nothing."""
+    if u_execution is UNDEFINED or optional(config, 'review', 'predeployed') is UNDEFINED:
+        return UNDEFINED
+    word = lambda a: '0x' + '00' * 12 + a[2:].lower()
+    pre_keeper, pre_slps = inputs.distributor_pre_u(config)
+    keeper, slps = config['actors']['keeper'], config['destinations']
+    events = []
+    if slps and slps != pre_slps:
+        events += [(hash_text('SlpWhitelistUpdated(address,bool)'), (word(slp),), '0x' + '00' * 31 + '01')
+                   for slp in slps if slp not in pre_slps]
+    if keeper != ZERO and keeper != pre_keeper:
+        events.append((hash_text('KeeperChanged(address,address)'), (word(pre_keeper), word(keeper)), '0x'))
+    return {'target': config['addresses']['distributor'], 'transactionHash': u_execution['transactionHash'],
+            'blockHash': u_execution['blockHash'], 'events': events} if events else UNDEFINED
+
+
+async def governance_history(config, rpc, block, stage='pre', proxies=(), u_configuration=UNDEFINED):
     ownership, pending, upgraded = [
         hash_text(x) for x in (
             'OwnershipTransferred(address,address)',
@@ -419,6 +441,8 @@ async def governance_history(config, rpc, block, stage='pre', proxies=()):
     owners[config['addresses']['proxyAdmin']] = config['observed']['proxyAdminOwner']
     for factory in config['factories']:
         owners[factory['beacon']] = factory['address']
+    # the expected U distributor events still to be found (consumed below; the caller's list is not modified)
+    remaining = [] if u_configuration is UNDEFINED else list(u_configuration['events'])
     for target in [*owners, config['addresses']['timelock']]:
         rows = await range_logs(
             rpc,
@@ -454,6 +478,15 @@ async def governance_history(config, rpc, block, stage='pre', proxies=()):
                 if row['topics'][0] == ownership:
                     transferred, current_owner = True, expected
             else:
+                allowed = u_configuration
+                if stage == 'R4' and allowed is not UNDEFINED and target == allowed['target'] \
+                        and row['transactionHash'] == allowed['transactionHash'] and row['blockHash'] == allowed['blockHash']:
+                    data = row.get('data') or '0x'
+                    key = (row['topics'][0].lower(), tuple(t.lower() for t in row['topics'][1:]),
+                           '0x' if data in ('0x', '') else '0x' + format(int(data, 16), '064x'))
+                    if key in remaining:
+                        remaining.remove(key)                   # each expected U event is accepted exactly once
+                        continue
                 require(
                     (
                         stage == 'R4'
@@ -468,6 +501,9 @@ async def governance_history(config, rpc, block, stage='pre', proxies=()):
                     'UNREVIEWED_CONFIGURATION_HISTORY',
                     target
                 )
+    if stage == 'R4' and u_configuration is not UNDEFINED:
+        # completeness: every event U must have emitted is in the scanned history of its execution transaction
+        require(not remaining, 'INCOMPLETE_U_CONFIGURATION_HISTORY', u_configuration['target'])
 
 
 async def timelock_inventory(config, inventory, rpc, block, pending, done_id=UNDEFINED):
@@ -739,7 +775,12 @@ async def verify_checkpoint(context, rpc, stage='R4', options=UNDEFINED, *, cloc
                 },
                 True
             )
-        await governance_history(config, reader, block, stage, expected['proxies'])
+        u_execution = UNDEFINED
+        if stage == 'R4' and optional(config, 'review', 'predeployed') is not UNDEFINED:
+            done = operations['operations'][u['operation']['id']]          # the replay-verified U execution
+            u_execution = {'transactionHash': done['executionTransaction'], 'blockHash': done['executionBlockHash']}
+        await governance_history(config, reader, block, stage, expected['proxies'],
+                                 u_distributor_events(config, u_execution))
         return {
             'status': 'PASS',
             'scope': 'action-bearing pending operations, roles and implementation checks; action-bearing operation coverage with dependency verification' if stage == 'H' else 'post-state invariants, versions, roles and economics; action-bearing operation coverage with dependency verification',

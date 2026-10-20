@@ -21,11 +21,18 @@ from tools.release.native import inputs, plans  # noqa: E402
 CODE = 'POLICY_DELAY_PROFILE'
 
 
+# product decision 2026-10-20: the V4 mainnet release profile (the corpus policy uses the frozen 2 x rule)
+V4_MAINNET_POLICY = {'expectedGrossAprPpm': 100000, 'maxAprPpm': 300000, 'maxUpdateAmount': '80000000000000000000000',
+                     'updateInterval': 72000, 'unbondingPeriod': 86400}
+
+
 def approved_governance(config):
     """One role-valid V4 topology (GOV = OPS, CAN = Guardian). V4 accepts any role-valid topology and never reads
     Safe internals; the Safe records set here are inert."""
     a, safes = config['actors'], config.get('review', {}).get('safes')
     a['ops'], a['guardian'] = a['gov'], a['can']
+    config['factories'] = config['factories'][:1]        # V4 mainnet release scope: the official Factory only
+    config['policy'].update(V4_MAINNET_POLICY)           # the V4 mainnet release profile (3 x APR, 1-day waiting)
     if safes:
         safes['can'] = {**safes['can'], 'threshold': 2, 'owners': ['0x' + format(0xc000 + i, '040x') for i in range(5)]}
         safes['ops'], safes['guardian'] = copy.deepcopy(safes['gov']), copy.deepcopy(safes['can'])

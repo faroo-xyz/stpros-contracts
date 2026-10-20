@@ -193,6 +193,8 @@ SIGS = {name: _sig(sig) for name, sig in {
     'migrateFromV3': 'migrateFromV3(address,uint256,address,address)',
     'migrateFromV1.stpros': 'migrateFromV1(address,address,address,address)',
     'migrateFromV1.oracle': 'migrateFromV1((address,address,uint256,uint256,uint256,address,uint256,address,address))',
+    'setSlps': 'setSlps(address[],bool)',
+    'setKeeper': 'setKeeper(address)',
 }.items()}
 
 

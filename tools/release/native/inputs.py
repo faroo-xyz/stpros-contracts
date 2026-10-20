@@ -138,6 +138,44 @@ def v4_config(config):
     return optional(config, 'policy', 'timelockDelayPolicy') == V4_MAINNET_RELEASE_POLICY
 
 
+def v4_mainnet_scope(config):
+    """V4 mainnet release scope (owner decision, 2026-10-20): the official Factory and its governed Vault only.
+    Factory_test and its historical vault are outside the release: no P-1, H or U transaction touches them."""
+    return v4_config(config) and equal(field(config, 'chainId'), 1672) and (
+        field(config, 'mode') == 'release' or equal(optional(config, 'factories', 'length'), 1))
+    # (a release config is always in this scope; a simulation config enters it by carrying the single Factory, so
+    # the recorded two-factory rehearsals stay available as simulations)
+
+
+# V4 mainnet release profile (product decision, 2026-10-20), applied only inside ``v4_mainnet_scope``:
+# - Oracle maxAprPpm = 3 x expectedGrossAprPpm (the contract's MAX_APR_PPM = 500,000 still applies);
+# - StPROS waiting period for new requests: ``policy.unbondingPeriod`` = 1 day, set by U through the Timelock after
+#   the StPROS upgrade. Queued requests keep their own snapshot. Outside the scope (frozen R4 corpus, testnet, the
+#   recorded two-Factory mainnet rehearsals) the APR multiple stays 2 and the waiting period is left as observed.
+V4_MAINNET_APR_MULTIPLE = 3
+V4_MAINNET_UNBONDING_PERIOD = 86400
+
+
+def apr_multiple(config):
+    return V4_MAINNET_APR_MULTIPLE if v4_mainnet_scope(config) else 2
+
+
+def target_unbonding_period(config):
+    """The StPROS waiting period U must leave behind: the V4 mainnet policy value in scope, else the observed one."""
+    if v4_mainnet_scope(config):
+        return bigint(config['policy']['unbondingPeriod'])
+    return bigint(config['observed']['core']['unbondingPeriod'])
+
+
+def distributor_pre_u(config):
+    """(keeper, SLP list) the SlpDistributor holds before U. A pre-deployed distributor (``review.predeployed``) holds
+    its deployment values until U configures it; otherwise P-0 initialized it with the final values."""
+    record = optional(config, 'review', 'predeployed')
+    if record is not UNDEFINED:
+        return record['plan']['inputs']['keeper'], list(record['plan']['inputs']['destinations'])
+    return config['actors']['keeper'], list(config['destinations'])
+
+
 def require_v4_mainnet_release_policy(config):
     """A mainnet release config is deployable only under 'V4-CONFIG-600' (600 s)."""
     profile = optional(config, 'policy', 'timelockDelayPolicy')
@@ -182,6 +220,11 @@ def validate_config(config):
         'legacyFactoryOwner',
         'legacyTestVaultAdmin'
     ):
+        if name == 'keeper' and v4_config(config) and optional(config, 'actors', 'keeper') == ZERO:
+            continue                    # V4: a zero keeper keeps distribution disabled (U configures no keeper)
+        if name in ('legacyFactoryOwner', 'legacyTestVaultAdmin') and v4_mainnet_scope(config) \
+                and optional(config, 'actors', name) is UNDEFINED:
+            continue                    # V4 mainnet: Factory_test is outside the release scope
         address(optional(config, 'actors', name), name)
     for name in ('timelock', 'proxyAdmin', 'assertions', 'oracle', 'stpros', 'bridge', 'distributor', 'asset'):
         address(optional(config, 'addresses', name), name)
@@ -226,7 +269,7 @@ def validate_config(config):
     policy = config['policy']
     require(
         field(policy, 'expectedGrossAprPpm') is not UNDEFINED
-        and bigint(policy['maxAprPpm']) == 2 * bigint(policy['expectedGrossAprPpm'])
+        and bigint(policy['maxAprPpm']) == apr_multiple(config) * bigint(policy['expectedGrossAprPpm'])
         and bigint(policy['maxAprPpm']) <= 500000,
         'APR_POLICY'
     )
@@ -234,10 +277,16 @@ def validate_config(config):
     require(equal(field(policy, 'approvedPerformanceFeeBps'), 0), 'FEE_POLICY')
     if chain == 1672:
         require(equal(field(policy, 'commissionRatePpm'), 100000), 'COMMISSION_POLICY')
-    require(equal(optional(config, 'factories', 'length'), 2 if chain == 1672 else 1), 'FACTORY_COUNT')
+    single = v4_mainnet_scope(config)
+    require(
+        equal(field(policy, 'unbondingPeriod'), V4_MAINNET_UNBONDING_PERIOD) if single
+        else field(policy, 'unbondingPeriod') is UNDEFINED,
+        'UNBONDING_POLICY'
+    )
+    require(equal(optional(config, 'factories', 'length'), 1 if single else 2 if chain == 1672 else 1), 'FACTORY_COUNT')
     factories = config['factories']
     vaults = [v for f in factories for v in f['vaults']]
-    require(len(vaults) == (2 if chain == 1672 else 15), 'VAULT_COUNT')
+    require(len(vaults) == (1 if single else 2 if chain == 1672 else 15), 'VAULT_COUNT')
     exact_set([address(v['address']) for v in vaults], [address(v['address']) for v in vaults], 'DUPLICATE_VAULT')
     for index, factory in enumerate(factories):
         address(factory['address']); address(factory['beacon']); address(factory['legacyOwner'])
@@ -248,6 +297,7 @@ def validate_config(config):
             require(field(vault, 'endState') == ('GOVERNED' if governed else 'RETIRED'), 'VAULT_RECONCILIATION')
     case = coalesce(field(config, 'p1Case'), 'A')
     require(case in ('A', 'B', 'C', 'D'), 'FALLBACK_CASE')
+    require(not single or case == 'A', 'V4_MAINNET_P1_CASE', 'cases B-D act on Factory_test, outside the V4 release')
     if case != 'A':
         require(
             optional(config, 'fallbackApproval', 'ownerApproved') is True
@@ -375,10 +425,14 @@ def validate_recorded_topology(config, registry):
         and addresses['asset'] == recorded['wpros'],
         'RECORDED_CORE_TARGETS'
     )
-    require(j.canonical([f['address'] for f in factories]) == j.canonical(recorded['factories']), 'RECORDED_FACTORIES')
+    # V4 mainnet: the official Factory only; the recorded Factory_test stays on chain but outside the release
+    in_scope = recorded['factories'][:1] if v4_mainnet_scope(config) else recorded['factories']
+    require(j.canonical([f['address'] for f in factories]) == j.canonical(in_scope), 'RECORDED_FACTORIES')
     used = [addresses[n] for n in ('oracle', 'stpros', 'bridge', 'distributor')] + [f['address'] for f in factories]
     exact_set(list(config['legacy']), used, 'RECORDED_PROXY_COVERAGE')
     for proxy, entry in recorded['expected_proxies'].items():
+        if proxy in recorded['factories'] and proxy not in in_scope:
+            continue
         require(
             proxy in used
             and optional(config, 'legacy', proxy, 'implementation') == entry['implementation']
