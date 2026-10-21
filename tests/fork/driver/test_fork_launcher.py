@@ -36,6 +36,8 @@ ANCHORS = {'testnet': (31_580_881, '0x8727295552e06aa735c8f7de00410a8f9bdac627e3
            'mainnet': (20_582_384, '0x42090507f18a3b7d8646d39c7a8dbceff2adf7fd158751b1fefc6cfde418aea9')}
 FINAL = {'testnet': 'a27ffd60d7105aa6aebfcc0d638da8b3488535b973e75f79245200d15888cf81',
          'mainnet': '158afc230f468be8fb2ad5a68b4eb2036322c1c048fd8ef7ee68a106185bfd61'}
+# The V4 mainnet S1/S2 reconciliation (anchor 20,788,614; Agent A, record written by the owner, pinned 2026-10-21).
+V4RF_MAINNET = '98b0c8adbfb3181dd564d1a8c0b092b2799afb08c6643178092a6750da258507'
 
 
 def loopback_ready():
@@ -76,7 +78,7 @@ class StaticTest(Base):
         self.stop(lambda: fl.ForkNode(Fake(), ROOT), 'FORK_PROXY')
 
     def test_the_two_pinned_reconciliations_are_exactly_the_accepted_records(self):
-        self.assertEqual(approvals.RECONCILIATIONS, frozenset(FINAL.values()))
+        self.assertEqual(approvals.RECONCILIATIONS, frozenset(FINAL.values()) | {V4RF_MAINNET})
         self.assertNotIn('tests/fork/driver/fr_d1_approvals.py', scope.SOURCE_BINDING_FILES)
 
 
@@ -378,7 +380,7 @@ class RealRecordTest(Base):
         _, s2_main = self.refs('mainnet')
         with self.assertRaises(CollectionStop):
             self.bind('testnet', (tpath, tsha), refs=(s1, s2_main))
-        self.assertEqual(copy.deepcopy(approvals.RECONCILIATIONS), frozenset(FINAL.values()))
+        self.assertEqual(copy.deepcopy(approvals.RECONCILIATIONS), frozenset(FINAL.values()) | {V4RF_MAINNET})
 
 
 if __name__ == '__main__':

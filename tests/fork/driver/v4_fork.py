@@ -67,13 +67,18 @@ DEPLOYED = {
 CREATED_TARGETS = ('timelock', 'distributorProxy', 'bridgeProxy', 'assertions')
 PREDEPLOYED_FILE = HERE / 'v4_mainnet_predeployed.json'
 PREDEPLOYED_SHA256 = '7add61e095998fc793bb0e8ff4a4de9738d79a3628828705ed5373681551b8d6'
-# Reviewed rev 2 release inputs (research mainnet-v4-business-params-20261020, product decision 2026-10-20).
+# Reviewed rev 2 release inputs (research mainnet-v4-business-params-20261020, product decision 2026-10-20), with the
+# rev 3 SLP whitelist (product decision 2026-10-21): the Oracle reporter (a SlpPharosRewardsVault) is appended as the
+# fourth, ordered destination. The reporter, keeper, treasury and policy are unchanged; no allocation is implied.
 REAL_INPUTS = {
     'reporter': '0xd0c44d3079e97ff285dd7a3e4e0246320a9487e5',
     'treasury': '0x3754fd5ec997c07ca528bb0bdcb0b4f5b93605df',
     'keeper': '0x8736e68f37c1156e09445ac2d395a139e58fcab4',
     'destinations': ['0xec1d6163e05b3f5d0fb8f354881f6c8b793ad612', '0xc53d2c9dd1e488e23ff77e219ca68d8138f90c2c',
-                     '0xf1df1cb080256f48e8702c24149136e4a6dec25e'],
+                     '0xf1df1cb080256f48e8702c24149136e4a6dec25e', '0xd0c44d3079e97ff285dd7a3e4e0246320a9487e5'],
+    # Owner-approved release id (2026-10-21, Agent A PASS): the Fork's U salt and operation id are the release ones
+    # (operation 0x6918b294…c959). The config mode stays simulation; this approves nothing.
+    'releaseId': 'faroo-v4-mainnet-rev3-4slp-20261021',
     'policy': {'expectedGrossAprPpm': 100000, 'maxAprPpm': 300000, 'maxUpdateAmount': '80000000000000000000000',
                'updateInterval': 72000, 'unbondingPeriod': 86400},
 }
@@ -332,7 +337,8 @@ def run_release(run, deployed, actors, release_inputs, *, history_segments, crea
         enter('config')
         try:
             run.predeployed = load_predeployed() if release_inputs.get('predeployed') is None else release_inputs['predeployed']
-            config, inv = rc.build(chain, run.topo, p0, {**actors, 'keeper': release_inputs['keeper']}, single_factory=True)
+            config, inv = rc.build(chain, run.topo, p0, {**actors, 'keeper': release_inputs['keeper']}, single_factory=True,
+                                   release_id=release_inputs.get('releaseId'))
             config['actors'].update(reporter=release_inputs['reporter'], treasury=release_inputs['treasury'])
             config['destinations'] = list(release_inputs['destinations'])
             config['policy'].update(release_inputs['policy'])

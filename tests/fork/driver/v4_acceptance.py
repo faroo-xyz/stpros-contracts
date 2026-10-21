@@ -289,9 +289,20 @@ def vault_case(w, holder):
 
 
 # ------------------------------------------------------------------------------------------------------- G
-def oracle_cases(w, candidates):
+def role_members(w, vault):
+    """The WHITELIST_ROLE members of a RewardsVault, enumerated on chain (AccessControlEnumerable); [] if unreadable."""
+    try:
+        n = w.u(vault, 'getRoleMemberCount(bytes32)', WHITELIST_ROLE)
+        return [w.chain.addr(vault, 'getRoleMember(bytes32,uint256)', WHITELIST_ROLE, i) for i in range(min(n, 16))]
+    except ValueError:
+        return []
+
+
+def oracle_cases(w, candidates, members=()):
     """Three updates (>= 20 h, >= 20 h, ~24 h): independent allowance, pool, rate and commission math; two refusals;
-    then a redeem at the latest rate. Accounting and the real RewardsVault integration are separate verdicts."""
+    then a redeem at the latest rate. Accounting and the real RewardsVault integration are separate verdicts.
+    ``members``: the reporter's WHITELIST_ROLE members read from the chain; a member is impersonated on the local
+    Fork only (``LOCAL_IMPERSONATED_ROLE_MEMBER``), no role is granted or invented."""
     acc = Case('G', 'Oracle: three updates, rate and Treasury commission (ORACLE ACCOUNTING)')
     integ = Case('G-INTEGRATION', 'real RewardsVault.notifyOracle path (REPORTER INTEGRATION)')
     o = w.oracle
@@ -300,18 +311,25 @@ def oracle_cases(w, candidates):
                                     w.u(o, 'updateInterval()'), w.u(o, 'maxAprPpm()'))
     acc.check('rev2 parameters', (rate, cap, interval, max_apr) == (100000, 80000 * E18, 72000, 300000),
               (rate, cap, interval, max_apr))
-    # the real reporter integration: a RewardsVault wired to this Oracle and a known WHITELIST_ROLE caller
+    # the real reporter integration: a RewardsVault wired to this Oracle and a real WHITELIST_ROLE caller
     caller, wiring = None, {}
     try:
         wiring = {'oracle': w.chain.addr(reporter, 'getVTokenOracle()'), 'wpros': w.chain.addr(reporter, 'getWPROS()'),
                   'slpPharosProxy': w.chain.addr(reporter, 'getSlpPharosProxy()')}
         integ.check('wiring', wiring['oracle'] == o and wiring['wpros'] == w.wpros, wiring)
-        caller = next((x for x in candidates if w.chain.boolean(reporter, 'hasRole(bytes32,address)', WHITELIST_ROLE, x)), None)
+        caller = next((x for x in [*members, *candidates]
+                       if w.chain.boolean(reporter, 'hasRole(bytes32,address)', WHITELIST_ROLE, x)), None)
     except ValueError as error:
         integ.notes.append(f'reporter is not a readable RewardsVault: {str(error)[:120]}')
+    integ.notes.append({'whitelistRoleMembers': list(members), 'caller': caller,
+                        'callerSource': None if caller is None else
+                        'REAL ROLE MEMBER enumerated on chain; impersonated on the local Fork only' if caller in members
+                        else 'known actor holding the role on chain; impersonated on the local Fork only'})
     if caller is None:
-        integ.blocked = ('no WHITELIST_ROLE caller among the known actors; the RewardsVault caller is an owner input '
-                         '(REPORTER INTEGRATION BLOCKED)')
+        integ.blocked = (f'no WHITELIST_ROLE caller (enumerated members: {len(members)}; none among the known actors); '
+                         'the RewardsVault caller is an owner input (REPORTER INTEGRATION BLOCKED)')
+    else:
+        integ.evidence.add('LOCAL_IMPERSONATED_ROLE_MEMBER')
     user = labelled('G holder')
     w.fund(acc, user, 10 * E18)
     w.send(acc, 'holder.deposit', user, w.st, abi.calldata('depositWithPROS()'), value=4 * E18)
@@ -369,6 +387,8 @@ def oracle_cases(w, candidates):
             acc.check('G4.aboveAllowance.unchanged', same)
         tb, sup, val0 = (w.u(w.st, 'balanceOf(address)', w.treasury), w.u(w.st, 'totalSupply()'),
                          w.u(w.st, 'convertToAssets(uint256)', fixed))
+        preview0 = w.u(w.st, 'previewRedeem(uint256)', fixed)
+        acc.check(f'U{n}.previewRedeem before==floor(X*T/V)', preview0 == fixed * T // V, preview0, fixed * T // V)
         proxy0 = w.balance(wiring['slpPharosProxy']) if caller is not None else None
         f = amount * rate // PPM
         shares = f * V // (T + amount - f) if f else 0
@@ -390,13 +410,19 @@ def oracle_cases(w, candidates):
         value = w.u(w.st, 'convertToAssets(uint256)', fixed)
         acc.check(f'U{n}.fixedValue==floor(X*T1/V1)', value == fixed * T1 // V1, value, fixed * T1 // V1)
         acc.check(f'U{n}.rate grows', value > val0, value, val0)
+        preview1 = w.u(w.st, 'previewRedeem(uint256)', fixed)
+        acc.check(f'U{n}.previewRedeem after==floor(X*T1/V1)', preview1 == fixed * T1 // V1 and preview1 > preview0,
+                  preview1, fixed * T1 // V1)
         worth = shares * T1 // V1
         acc.check(f'U{n}.commission worth ~= 10% (rounding)', abs(worth - f) <= ceil_div(T1, V1) + 1, worth, f)
         if caller is not None:
             integ.check(f'U{n}.forwarded to the SLP proxy', w.balance(wiring['slpPharosProxy']) - proxy0 == amount)
         total_commission += shares
         table.append({'n': n, 'intervalSeconds': elapsed, 'allowance': str(allowance), 'amount': str(amount),
+                      'bindingLimit': 'maxUpdateAmount' if cap < allowance else 'maxApr',
                       'before': {'T': str(T), 'V': str(V)}, 'after': {'T': str(T1), 'V': str(V1)},
+                      'supplyAfter': str(w.u(w.st, 'totalSupply()')),
+                      'previewRedeemBefore': str(preview0), 'previewRedeemAfter': str(preview1),
                       'fixedValueBefore': str(val0), 'fixedValueAfter': str(value), 'commissionPROS': str(f),
                       'commissionShares': str(shares), 'treasuryCumulative': str(total_commission),
                       'receipt': r['transactionHash'], 'gasUsed': int(r['gasUsed'], 16), 'status': 'PASS' if ok else 'FAIL'})
@@ -405,32 +431,190 @@ def oracle_cases(w, candidates):
     # G5: a redeem after the third update uses the latest rate
     T3, V3 = w.pool()
     x = fixed // 2
+    preview = w.u(w.st, 'previewRedeem(uint256)', x)
     w.send(acc, 'G5.redeem', user, w.st, abi.calldata('redeem(uint256,address,address)', x, user, user))
     rec = w.records(user)[-1]
     acc.check('G5.pending==floor(x*T3/V3)', rec['pending'] == x * T3 // V3 and rec['pending'] > x * T0 // V0,
               rec['pending'], x * T3 // V3)
+    acc.check('G5.pending==previewRedeem just before', rec['pending'] == preview, rec['pending'], preview)
     acc.notes.append({'table': table})
     if caller is not None:
         integ.check('three notifyOracle calls succeeded through the whitelisted caller', all(t['status'] == 'PASS' for t in table))
     return [acc, integ]
 
 
+# ------------------------------------------------------------------------------------------------------- SLP4
+# Product rev 3 (2026-10-21): the Oracle reporter (a SlpPharosRewardsVault proxy) is appended as the fourth
+# SlpDistributor destination. Recorded evidence: research mainnet-v4-business-params-20261020/evidence/
+# reporter-check.json (EIP-1967 slots) and slp-check.json (code size, block 20,742,547).
+SLP4 = '0xd0c44d3079e97ff285dd7a3e4e0246320a9487e5'
+SLP4_RECORDED = {'codeBytes': 2739, 'implementation': '0xe6985303e0c917bda24c4566bb2f9af99916c531',
+                 'admin': '0x480eb384681777bf21e72b8c8538987c2801b4b7'}
+IMPL_SLOT = '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc'
+ADMIN_SLOT = '0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103'
+DISTRIBUTION = [{'type': 'tuple[]', 'components': [{'type': 'address'}, {'type': 'uint256'}]}]
+
+
+def distribute_data(pairs):
+    return abi.selector('distribute((address,uint256)[])') + abi.encode_parameters(DISTRIBUTION, [[list(p) for p in pairs]])[2:]
+
+
+def _slot_address(w, target, slot):
+    return '0x' + w.chain.slot(target, slot)[-40:].lower()
+
+
+def slp4_case(w, destinations, keeper):
+    """The fourth destination on S_post: identity against the recorded evidence, the ordered whitelist, native
+    receipt, refusal of a non-whitelisted destination, and no automatic allocation of a deposit. The keeper is the real
+    keeper impersonated on the local Fork (``LOCAL_KEEPER_SIMULATION``); nothing is distributed on chain."""
+    c = Case('SLP4', 'fourth SlpDistributor destination (the Oracle reporter): identity, whitelist, receipt, refusal, '
+                     'no automatic allocation')
+    if w.run.real:
+        code = w.chain.code(SLP4)
+        size = (len(code) - 2) // 2 if isinstance(code, str) else None
+        c.check('code present, recorded size', size == SLP4_RECORDED['codeBytes'], size, SLP4_RECORDED['codeBytes'])
+        impl, admin = _slot_address(w, SLP4, IMPL_SLOT), _slot_address(w, SLP4, ADMIN_SLOT)
+        c.check('EIP-1967 implementation == recorded', impl == SLP4_RECORDED['implementation'], impl,
+                SLP4_RECORDED['implementation'])
+        c.check('EIP-1967 admin == recorded', admin == SLP4_RECORDED['admin'], admin, SLP4_RECORDED['admin'])
+    else:
+        c.not_applicable.append('SLP4.identity: code, implementation and admin against the recorded mainnet evidence '
+                                'are real-state checks (a synthetic state carries stub code at the address)')
+    c.check('Oracle reporter unchanged: Oracle.slp() == SLP4', w.chain.addr(w.oracle, 'slp()') == SLP4,
+            w.chain.addr(w.oracle, 'slp()'), SLP4)
+    slps = [x.lower() for x in abi.decode_parameters([{'type': 'address[]'}], w.chain.call(w.dist, 'getSlps()'))[0]]
+    c.check('getSlps() == the four ordered destinations', slps == destinations, slps, destinations)
+    c.check('slpCount() == 4', w.u(w.dist, 'slpCount()') == 4, w.u(w.dist, 'slpCount()'), 4)
+    c.check('isSlp(SLP4)', w.chain.boolean(w.dist, 'isSlp(address)', SLP4))
+    user = labelled('SLP4 depositor')
+    w.fund(c, user, 10 * E18)
+    b0, d0 = w.balance(SLP4), w.balance(w.dist)
+    w.send(c, 'depositWithPROS', user, w.st, abi.calldata('depositWithPROS()'), value=2 * E18)
+    c.check('a deposit reaches the SlpDistributor, not SLP4 (no automatic allocation)',
+            w.balance(w.dist) - d0 == 2 * E18 and w.balance(SLP4) == b0, (w.balance(w.dist) - d0, w.balance(SLP4) - b0),
+            (2 * E18, 0))
+    r = w.send(c, 'nativeTransfer', user, SLP4, '0x', value=E18)
+    c.check('receives native PROS (receive())', int(r['status'], 16) == 1 and w.balance(SLP4) - b0 == E18,
+            w.balance(SLP4) - b0, E18)
+    c.evidence.add('LOCAL_KEEPER_SIMULATION')
+    outsider = labelled('not whitelisted')
+    d1, b1 = w.balance(w.dist), w.balance(SLP4)
+    r = w.send(c, 'distribute.notWhitelisted', keeper, w.dist, distribute_data([(outsider, E18)]), expect=False)
+    c.check('a non-whitelisted destination is refused; nothing moves',
+            int(r['status'], 16) == 0 and w.balance(w.dist) == d1 and w.balance(outsider) == 0,
+            (int(r['status'], 16), w.balance(w.dist) - d1, w.balance(outsider)), (0, 0, 0))
+    r = w.send(c, 'distribute.SLP4', keeper, w.dist, distribute_data([(SLP4, E18)]))
+    c.check('the keeper can pay SLP4 (local simulation only)',
+            int(r['status'], 16) == 1 and w.balance(SLP4) - b1 == E18 and d1 - w.balance(w.dist) == E18,
+            (w.balance(SLP4) - b1, d1 - w.balance(w.dist)), (E18, E18))
+    return c
+
+
+def slp4_semantics_case(w, caller, keeper):
+    """What paying SLP4 means for the Oracle, through the real RewardsVault path (local simulation): notifyOracle
+    reports and forwards the vault's whole native balance. (a) principal within the APR allowance is reported as
+    yield; (b) a balance above maxUpdateAmount makes every notifyOracle revert. The checks confirm these facts; the
+    case is then BLOCKED on a product decision, never PASS: the whitelist itself allocates nothing."""
+    s = Case('SLP4-SEMANTICS', 'paying SLP4 (the reporter): notifyOracle reports the whole native balance '
+                               '(risk confirmation, local simulation)')
+    o = w.oracle
+    s.notes.append({'realBalanceAtSpost': str(w.balance(SLP4))})
+    if caller is None:
+        s.blocked = ('no WHITELIST_ROLE caller to execute notifyOracle; by source (SlpPharosRewardsVault.notifyOracle) it '
+                     'reports address(this).balance: NEEDS PRODUCT DECISION before any allocation to SLP4')
+        return s
+    s.evidence |= {'LOCAL_KEEPER_SIMULATION', 'LOCAL_IMPERSONATED_ROLE_MEMBER'}
+    proxy = w.chain.addr(SLP4, 'getSlpPharosProxy()')
+    interval, cap = w.u(o, 'updateInterval()'), w.u(o, 'maxUpdateAmount()')
+
+    def warp_past_interval():
+        last = w.u(o, 'lastUpdateAt(address)', w.wpros)
+        latest = int(w.chain.block()['timestamp'], 16)
+        if last + interval + 60 > latest:
+            w.chain.warp(last + interval + 60 - latest)
+
+    # (a) a depositor's principal, paid to SLP4 by the keeper, then notifyOracle
+    snap = w.snapshot()
+    try:
+        w.chain.rpc('anvil_setBalance', [SLP4, hex(0)])
+        s.evidence.add('CONSTRUCTED_ZERO_REPORTER_BALANCE')        # isolates the principal from real accrued rewards
+        user = labelled('SLP4 principal')
+        w.fund(s, user, 10 * E18)
+        p = 2 * E18
+        w.send(s, 'a.depositWithPROS', user, w.st, abi.calldata('depositWithPROS()'), value=p)
+        w.send(s, 'a.distribute.SLP4', keeper, w.dist, distribute_data([(SLP4, p)]))
+        warp_past_interval()
+        fixed = w.u(w.st, 'balanceOf(address)', user)
+        T, V = w.pool()
+        val0, x0 = w.u(w.st, 'convertToAssets(uint256)', fixed), w.balance(proxy)
+        r = w.send(s, 'a.notifyOracle', caller, SLP4, abi.calldata('notifyOracle()'))
+        T1, V1 = w.pool()
+        s.check('a.notifyOracle succeeded', int(r['status'], 16) == 1)
+        s.check('a.the principal was reported as Oracle yield: T += principal', T1 - T == p, T1 - T, p)
+        s.check('a.the principal went to the SlpPharosProxy', w.balance(proxy) - x0 == p and w.balance(SLP4) == 0,
+                w.balance(proxy) - x0, p)
+        s.check('a.the depositor\'s share value rose by the reported principal', w.u(w.st, 'convertToAssets(uint256)', fixed) > val0,
+                w.u(w.st, 'convertToAssets(uint256)', fixed), val0)
+        s.notes.append({'a': {'principal': str(p), 'T': str(T), 'V': str(V), 'T1': str(T1), 'V1': str(V1),
+                              'gasUsed': int(r['gasUsed'], 16)}})
+    finally:
+        w.revert(snap)
+    # (b) a balance above maxUpdateAmount: every notifyOracle reverts while it stays there
+    snap = w.snapshot()
+    try:
+        big = cap + E18
+        w.chain.rpc('anvil_setBalance', [w.dist, hex(w.balance(w.dist) + big)])
+        s.evidence.add('CONSTRUCTED_DISTRIBUTOR_BALANCE')            # stands for queued deposit principal
+        b0 = w.balance(SLP4)
+        w.send(s, 'b.distribute.SLP4', keeper, w.dist, distribute_data([(SLP4, big)]))
+        warp_past_interval()
+        r1 = w.send(s, 'b.notifyOracle', caller, SLP4, abi.calldata('notifyOracle()'), expect=False)
+        w.chain.warp(interval + 60)
+        r2 = w.send(s, 'b.notifyOracle.later', caller, SLP4, abi.calldata('notifyOracle()'), expect=False)
+        s.check('b.notifyOracle reverts with a balance above maxUpdateAmount', int(r1['status'], 16) == 0)
+        s.check('b.it still reverts one interval later (reporting blocked)', int(r2['status'], 16) == 0)
+        s.check('b.the PROS stays in the RewardsVault', w.balance(SLP4) == b0 + big, w.balance(SLP4) - b0, big)
+        s.notes.append({'b': {'balance': str(b0 + big), 'maxUpdateAmount': str(cap)}})
+    finally:
+        w.revert(snap)
+    s.blocked = ('NEEDS PRODUCT DECISION: a keeper allocation to SLP4 is reported by notifyOracle as yield (a) or, '
+                 'above maxUpdateAmount, blocks every report (b). The whitelist itself allocates nothing; no allocation '
+                 'to SLP4 is approved')
+    return s
+
+
 # ------------------------------------------------------------------------------------------------------- entry
 def acceptance(run, ctx):
-    """``then`` hook of ``v4_fork.run_release``: A-G, each on S_post."""
+    """``then`` hook of ``v4_fork.run_release``: A-G and the SLP4 cases, each on S_post."""
     w = World(run, ctx)
     upgrade_time = int(run.chain.rpc('eth_getBlockByNumber', ['latest', False])['timestamp'], 16)
     owners = sorted({o.lower() for o in run.m.get('users', [])})
     holder = (run.m.get('vault001Holder') or largest_holder(run, ctx['config']['factories'][0]['vaults'][0]['address'])).lower()
     candidates = [x.lower() for x in (ctx['inputs']['keeper'], ctx['actors'].get('gov'), ctx['actors'].get('deployer'),
                                       ctx['actors'].get('ops'), w.treasury, *ctx.get('rewardsCallers', [])) if x]
+    reporter = w.chain.addr(w.oracle, 'slp()')
+    members = role_members(w, reporter)
+    caller = next((x for x in [*members, *candidates]
+                   if _has_role(w, reporter, x)), None)
+    destinations = [d.lower() for d in ctx['config']['destinations']]
+    keeper = ctx['inputs']['keeper'].lower()
     out = []
     out += isolated(w, lambda: [mint_case(w)])
     out += isolated(w, lambda: redeem_claim_cases(w))
     out += isolated(w, lambda: [old_records_case(w, owners, upgrade_time)])
     out += isolated(w, lambda: [vault_case(w, holder)] if holder else [_blocked('F', 'no vault 001 holder in the topology')])
-    out += isolated(w, lambda: oracle_cases(w, candidates))
+    out += isolated(w, lambda: oracle_cases(w, candidates, members))
+    if SLP4 in destinations:
+        out += isolated(w, lambda: [slp4_case(w, destinations, keeper)])
+        out += isolated(w, lambda: [slp4_semantics_case(w, caller if reporter == SLP4 else None, keeper)])
     return {c.cid: c.doc() for c in out}
+
+
+def _has_role(w, vault, who):
+    try:
+        return w.chain.boolean(vault, 'hasRole(bytes32,address)', WHITELIST_ROLE, who)
+    except ValueError:
+        return False
 
 
 def largest_holder(run, vault):

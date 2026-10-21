@@ -20,6 +20,12 @@ controls for such a run, to sit in front of anvil:
   no redirect. At the ceiling every further request is refused and the run stops. The ledger must belong to the
   proxy's own authorization. Under a v2 authorization every read must be at the bound fork block, and a chain id or
   fork-header answer that contradicts the bound anchor stops the proxy.
+- Private upstream (``fr_d1_scope.FORK_SCHEMA_PRIVATE``): the same scope with the endpoint replaced by the committed
+  ``PHAROS_RPC_URL`` selector (``private_rpc``). The formal mode needs a ``fr_d1_approvals.FORK`` pin (Agent A), the
+  diagnostic mode a ``fr_d1_approvals.DIAGNOSTICS`` pin (owner, non-release). The proxy resolves the endpoint only
+  after every gate passed, retries one POST at most ``private_rpc.TRANSPORT['attempts']`` times within its deadline,
+  reserves each attempt in the ledger before it is sent, and answers a final failure with a categorized JSON-RPC error
+  (never the URL). The public path is unchanged.
 No fork launcher is part of the driver: the accepted WP-04.1 isolation rule (``test_driver.IsolationTest``) keeps
 any fork flag out of these sources. The loopback-only rehearsal that starts anvil in fork mode behind this proxy is
 a research evidence script (``execution-readiness/evidence/scripts/fork_witness.py``); moving it into the driver
@@ -40,6 +46,7 @@ ROOT = HERE.parents[2]
 sys.path[:0] = [str(HERE), str(ROOT)]
 import fr_d1_approvals as approvals  # noqa: E402
 import fr_d1_scope as scope  # noqa: E402
+import private_rpc as prpc  # noqa: E402
 import transport as tp  # noqa: E402
 from transport import BudgetExhausted, CollectionStop  # noqa: E402
 from tools.lib.rpc import PUBLIC_RPC  # noqa: E402
@@ -57,6 +64,9 @@ CHAIN_IDS = {'mainnet': 1672, 'testnet': 688689}
 # FR-D1 owner authorizations of a local Fork of public state (``fr_d1_approvals.FORK``). Empty: no real-state Fork
 # is authorized. An entry is added only by a separate reviewed change, never by this package.
 APPROVED_FORK_AUTHORIZATIONS = approvals.FORK
+# Owner-authorized non-release diagnostics of the private upstream (``fr_d1_approvals.DIAGNOSTICS``); never valid
+# for a formal record, never an Agent A acceptance.
+APPROVED_DIAGNOSTICS = getattr(approvals, 'DIAGNOSTICS', frozenset())
 _ID = re.compile(r'[A-Za-z0-9][A-Za-z0-9._-]{0,63}')
 _HASH = re.compile(r'0x[0-9a-f]{64}')
 
@@ -66,8 +76,20 @@ def _stop(code, detail='', status='REFUSED'):
 
 
 # --------------------------------------------------------------------------------------------- authorization
-def load_authorization(path, sha256, approved=APPROVED_FORK_AUTHORIZATIONS):
+def private_pins(auth, approved=None, diagnostics=None):
+    """The pin set of a private record: FORK for the formal mode, DIAGNOSTICS for the diagnostic mode."""
+    if auth['mode'] == scope.PRIVATE_DIAGNOSTIC:
+        return APPROVED_DIAGNOSTICS if diagnostics is None else diagnostics
+    return APPROVED_FORK_AUTHORIZATIONS if approved is None else approved
+
+
+def load_authorization(path, sha256, approved=APPROVED_FORK_AUTHORIZATIONS, diagnostics=None):
     _, doc = scope.read_record(path, sha256, 'AUTHORIZATION_HASH')
+    if isinstance(doc, dict) and doc.get('schema') == scope.FORK_SCHEMA_PRIVATE:
+        scope.check_private_fork_authorization(doc)
+        if sha256 not in private_pins(doc, approved, diagnostics):
+            raise _stop('FR_D1_NOT_AUTHORIZED', f'the private {doc["mode"]} authorization is not approved')
+        return {**doc, 'sha256': sha256}
     v2 = isinstance(doc, dict) and doc.get('schema') in (scope.FORK_SCHEMA, scope.FORK_SCHEMA_V3)
     # v3 alone may name the historical transaction read, and only for its exact ``historicalReads`` entries
     methods = set(FORK_METHODS) | ({scope.TX_METHOD} if isinstance(doc, dict) and doc.get('schema') == scope.FORK_SCHEMA_V3
@@ -139,10 +161,12 @@ def http_forward(url, raw, timeout_s):
 
 
 class ForkBudgetProxy:
-    def __init__(self, auth, ledger, *, forward=None, clock_s=time.monotonic, sleep=time.sleep):
+    def __init__(self, auth, ledger, *, forward=None, clock_s=time.monotonic, sleep=time.sleep, private_source=None):
         self.auth, self.ledger = auth, ledger
-        self.upstream = auth['endpoint']
-        if auth['mode'] != 'SIMULATION' and auth['sha256'] not in APPROVED_FORK_AUTHORIZATIONS:
+        self.private = auth.get('schema') == scope.FORK_SCHEMA_PRIVATE
+        self.upstream = None if self.private else auth['endpoint']
+        pins = private_pins(auth) if self.private else APPROVED_FORK_AUTHORIZATIONS
+        if auth['mode'] != 'SIMULATION' and auth['sha256'] not in pins:
             raise _stop('FR_D1_NOT_AUTHORIZED', 'the proxy refuses a public upstream without an approved authorization')
         if auth['mode'] != 'SIMULATION' and 'scope' not in auth:
             raise _stop('FORK_SCOPE_REQUIRED', 'a public upstream needs a v2 authorization with a bound fork anchor')
@@ -157,10 +181,23 @@ class ForkBudgetProxy:
             raise _stop('FORK_ANCHOR_NOT_BOUND', 'the fork anchor is not bound by an accepted reconciliation', 'BLOCKED')
         if ledger is not None and ledger.authorization.get('sha256') != auth['sha256']:
             raise _stop('FORK_LEDGER_FOREIGN', 'the budget ledger belongs to another authorization')
-        self.forward = forward or http_forward
+        if self.private:
+            # resolved last, after every gate: ``private_source`` = (url provider) for tests, else the launcher pipe
+            commitment = auth['scope']['privateEndpoint']['commitment']
+            try:
+                upstream = (prpc.PrivateUpstream(private_source(), commitment) if private_source is not None
+                            else prpc.resolve(commitment))
+            except prpc.PrivateRpcError as error:
+                raise _stop(f'PRIVATE_RPC_{error.category}', 'private endpoint refused (value not shown)') from None
+            self._private_upstream = upstream                       # redacted repr; closed in ``__exit__``
+            self.forward = forward or (lambda raw, timeout_s: upstream.post(raw, timeout_s))
+        else:
+            self._private_upstream = None
+            self.forward = forward or http_forward
         self.clock, self.sleep = clock_s, sleep
         self.last = None
         self.methods_seen, self.refused, self.forwarded = {}, [], 0
+        self.attempts, self.network = 0, []             # private: every upstream attempt and its outcome category
         self.stopped = None
         proxy = self
 
@@ -188,6 +225,47 @@ class ForkBudgetProxy:
     def __exit__(self, *exc):
         self.server.shutdown()
         self.server.server_close()
+        if self._private_upstream is not None:
+            self._private_upstream.close()
+
+    def _forward_private(self, raw, n):
+        """One POST to the private upstream: at most ``attempts`` attempts within ``deadlineS``. ``handle`` reserved
+        the first; each retry is reserved here before it is sent. Returns (status, body), or (None, a categorized
+        JSON-RPC error body) when no attempt succeeded. A redirect stops the proxy for the session."""
+        t = prpc.TRANSPORT
+        start, category, made = self.clock(), 'UNEXPECTED', 0
+        for attempt in range(t['attempts']):
+            if attempt:
+                backoff = t['backoffS'][attempt - 1]
+                if t['deadlineS'] - (self.clock() - start) <= backoff + 1:
+                    break
+                self.sleep(backoff)
+                self.ledger.reserve(n, 'fork-retry')            # before the retry is sent
+            timeout = min(t['attemptTimeoutS'], t['deadlineS'] - (self.clock() - start))
+            if timeout <= 0:
+                break
+            began = self.clock()
+            self.attempts += 1
+            made += 1
+            try:
+                status, out = self.forward(raw, timeout)
+                category = f'HTTP_{status}' if status in prpc.RETRY_HTTP else None
+            except prpc.PrivateRpcError as error:
+                category = error.category
+            except Exception as error:                  # noqa: BLE001 - a category only, never the message
+                category = prpc.classify(error)
+            self.network.append({'attempt': attempt, 'items': n, 'ms': round((self.clock() - began) * 1000),
+                                 'outcome': category or 'OK'})
+            if category is None:
+                return status, out
+            if category == 'REDIRECT':
+                self.stopped = _stop('PRIVATE_RPC_REDIRECT', 'the private upstream redirected', 'STOP')
+                break
+            if category not in t['retryOn']:
+                break
+        self.refused.append({'code': f'PRIVATE_RPC_{category}', 'detail': f'no answer after {made} attempt(s)'})
+        return None, json.dumps({'jsonrpc': '2.0', 'id': None, 'error': {
+            'code': -32603, 'message': f'STOP: PRIVATE_RPC_{category}'}}).encode()
 
     def handle(self, raw):
         try:
@@ -210,7 +288,12 @@ class ForkBudgetProxy:
                 if wait > 0:
                     self.sleep(wait)
             self.last = self.clock()
-            status, out = self.forward(self.upstream, raw, 30)
+            if self.private:
+                status, out = self._forward_private(raw, len(items))
+                if status is None:
+                    return 502, out                     # categorized, unforwarded failure: no response check
+            else:
+                status, out = self.forward(self.upstream, raw, 30)
             self.forwarded += 1
             if self.scoped:
                 try:

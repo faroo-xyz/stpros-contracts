@@ -178,18 +178,25 @@ class RecordTest(Base):
                             'f4ca9cf3ccb8a5241aefaaa51497171e877f8f7e25f701bd6cdac19f2a4c28cf',  # fr-d1-s2-testnet-sl20261018
                             '00c6ab29bf49d545608306a1543b309b555e04e943ad3cd4358018227512b669',  # fr-d1-s1-mainnet-sl20261018
                             '71357ba54d74ccaa04aad6acb39dc02cacdda9993effd3fefa2e5618c05efe74',  # fr-d1-s2-mainnet-sl20261018
+                            'fb2737836845386c8fd8f4030cecb9ab3d60c461243682796c4f0f4337a4dd1f',  # fr-d1-s1-mainnet-v4rf20261021
+                            'e8102a8969e76a273fe65c640d6fa34b20e1e83d555bcbe171e4c014706e3ae8',  # fr-d1-s2-mainnet-v4rf20261021
                         }),
                           frozenset({
                             '3dd3ab07248c6e74d156d93978d00ea63c5d2cd6767d867f53f610ae560fd96c',  # fr-d1-s3-testnet-sl20261018
                             '19442bc39ee398f7e9daa9bc71818bf78019ee196ed239cb07bd05e37a77599f',  # fr-d1-s3-mainnet-sl20261018
                             'f444b21a6e95bc6e7f78108d3b35cc1e3c1756354ceeb351c910646b18f983f3',  # fr-d1-s3-testnet-e2e20261020 (owner-approved 2026-10-20)
                             'fcb3268466606d4a1ad38043d6baf650405a74d0a6a8af857112012901a9a398',  # fr-d1-s3-mainnet-e2e20261020 (owner-approved 2026-10-20)
+                            '989872a1b693678fa3c777dbb0dba519390738c171a07a39ec95b66f25b44efc',  # fr-d1-s3-mainnet-v4rf20261021 (owner-approved, A-accepted; exhausted)
+                            '05e40946721daf56764f1b2e7aa83fa9606eb150b7f98d8a8149c98273934553',  # fr-d1-s3-mainnet-v4rf20261021pvt1 (A-accepted)
                         }), frozenset({
                             'a27ffd60d7105aa6aebfcc0d638da8b3488535b973e75f79245200d15888cf81',  # testnet S1/S2
                             '158afc230f468be8fb2ad5a68b4eb2036322c1c048fd8ef7ee68a106185bfd61',  # mainnet S1/S2
+                            '98b0c8adbfb3181dd564d1a8c0b092b2799afb08c6643178092a6750da258507',  # mainnet S1/S2 v4rf20261021
                         })))
         self.assertIs(col.APPROVED_COLLECTION_AUTHORIZATIONS, approvals.COLLECTION)
         self.assertIs(fm.APPROVED_FORK_AUTHORIZATIONS, approvals.FORK)
+        self.assertIs(fm.APPROVED_DIAGNOSTICS, approvals.DIAGNOSTICS)          # never merged with FORK
+        self.assertFalse(approvals.DIAGNOSTICS & approvals.FORK)
 
     def test_every_envelope_change_is_refused(self):
         w = self.world('mainnet')

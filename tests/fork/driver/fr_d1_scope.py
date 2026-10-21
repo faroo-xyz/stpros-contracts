@@ -18,7 +18,11 @@ campaign envelope, and every value of it that the code can derive is checked for
 - ``bind_fork_anchor`` (S3): the fork block and hash come from the S1 and S2 ledgers and an Agent A
   reconciliation record pinned in ``fr_d1_approvals.RECONCILIATIONS`` (empty: every real-state Fork is BLOCKED);
   ``check_fork_request`` / ``check_fork_response`` keep every forwarded read at that block and stop on a chain id
-  or fork-header mismatch.
+  or fork-header mismatch;
+- ``check_private_fork_authorization`` (schema ``FORK_SCHEMA_PRIVATE``): the v3 S3 envelope with the public endpoint
+  replaced by the committed private selector (``private_rpc``), mainnet only, the bounded budgeted retry transport,
+  exactly the reviewed historical reads (``REVIEWED_HISTORICAL_READS``) and the source binding of
+  ``PRIVATE_BINDING_FILES``. The public v1-v3 checks are unchanged.
 
 Nothing here signs, sends a transaction or reads the environment or a secret.
 """
@@ -33,6 +37,7 @@ sys.path.insert(0, str(HERE))
 import collection_plan as cp  # noqa: E402
 import fr_d1_approvals as approvals  # noqa: E402
 import history as h  # noqa: E402
+import private_rpc as prpc  # noqa: E402
 import transport as tp  # noqa: E402
 from transport import CollectionStop  # noqa: E402
 from tools.lib.rpc import PUBLIC_RPC  # noqa: E402
@@ -79,6 +84,22 @@ FORK_KEYS = frozenset({'schema', 'authorizationId', 'mode', 'stage', 'chain', 'e
 FORK_SCOPE_KEYS = frozenset({'chainId', 'endpoint', 'transport', 'paramPolicy', 'forkAnchor', 'validity', 'owner',
                              'prerequisites', 'sourceBinding'})
 FORK_SCOPE_KEYS_V3 = FORK_SCOPE_KEYS | {'historicalReads'}
+# Private upstream (v3 plus a committed private endpoint selector). The formal mode is pinned in
+# ``fr_d1_approvals.FORK`` (Agent A); the diagnostic mode only in ``fr_d1_approvals.DIAGNOSTICS`` (owner-authorized,
+# non-release evidence, never an S3 acceptance). Both have the same scope.
+FORK_SCHEMA_PRIVATE = 'faroo-fork-execution-authorization-v4-private'
+PRIVATE_FORMAL = 'LOCAL_FORK_PRIVATE_READ_ONLY'
+PRIVATE_DIAGNOSTIC = 'LOCAL_FORK_PRIVATE_DIAGNOSTIC'
+PRIVATE_ID_PREFIX = {PRIVATE_FORMAL: 'fr-d1', PRIVATE_DIAGNOSTIC: 'diag'}
+PRIVATE_ENDPOINT = f'env:{prpc.VARIABLE}'
+PRIVATE_CHAINS = ('mainnet',)
+FORK_SCOPE_KEYS_PRIVATE = FORK_SCOPE_KEYS_V3 | {'privateEndpoint'}
+PRIVATE_BINDING_FILES = SOURCE_BINDING_FILES + ('tests/fork/driver/private_rpc.py', 'tests/fork/driver/fork_launcher.py',
+                                                'tools/verify/run_private_rpc.py', 'tools/verify/run.sh')
+# SHA-256 of the canonical JSON (sorted keys, no spaces) of the historical reads Agent A accepted for the V4 mainnet
+# real-state Fork (records fr-d1-s3-mainnet-v4rf20261021 and ...retry1, 16 entries). A private record names exactly
+# these; v3 bounds only their form and count.
+REVIEWED_HISTORICAL_READS = {'mainnet': '70019ec4ae71c0971c47e0c455c8b6d77fa70f08e51836a29163582f70f85f5e'}
 RECONCILIATION_KEYS = frozenset({'schema', 'chain', 'chainId', 'anchorBlock', 'anchorHash', 'specSha256',
                                  's1AuthorizationSha256', 's2AuthorizationSha256', 's1ManifestSha256',
                                  's2ManifestSha256', 'comparisonSha256', 'verdict', 'reviewer', 'statement'})
@@ -118,8 +139,8 @@ def read_record(path, expected_sha256, code):
         raise CollectionStop(code.replace('_HASH', '_KEYS'), f'{path}: not JSON', 'REFUSED') from None
 
 
-def source_files():
-    return {name: sha256((ROOT / name).read_bytes()) for name in SOURCE_BINDING_FILES}
+def source_files(files=SOURCE_BINDING_FILES):
+    return {name: sha256((ROOT / name).read_bytes()) for name in files}
 
 
 def _texts(value):
@@ -187,6 +208,21 @@ def expected_fork_transport():
             'requestsInFlight': 1, 'redirects': 'REFUSED', 'environmentProxy': 'REFUSED'}
 
 
+def expected_private_transport():
+    t = prpc.TRANSPORT
+    return {'pacingMsMin': tp.PACING_MS, 'maxItemsPerPost': tp.GROUP_LIMIT, 'upstreamRetries': t['attempts'] - 1,
+            'attemptTimeoutS': t['attemptTimeoutS'], 'deadlineS': t['deadlineS'], 'backoffS': list(t['backoffS']),
+            'retryOn': list(t['retryOn']), 'everyAttemptBudgeted': True, 'requestsInFlight': 1,
+            'redirects': 'REFUSED', 'environmentProxy': 'REFUSED'}
+
+
+def expected_private_endpoint(commitment):
+    return {'variable': prpc.VARIABLE, 'delivery': 'tools/verify/run_private_rpc.py pipe descriptor',
+            'scheme': prpc.SCHEME, 'ports': [443], 'host': 'DNS name only (no IP literal, no localhost)',
+            'commitmentRule': prpc.COMMITMENT_RULE, 'commitment': commitment,
+            'urlInRecordsOrLogs': 'NEVER'}
+
+
 # --------------------------------------------------------------------------------------- record builders
 def collection_record(stage, chain, *, mode, ident, ceiling, restarts, b0_targets, anchor_policy, validity, retention,
                       owner, statement, bases):
@@ -213,6 +249,20 @@ def fork_record(chain, *, mode, ident, upstream, ceiling, restarts, s1_sha256, s
     if historical_reads is not None:
         doc['schema'], doc['methods'] = FORK_SCHEMA_V3, list(FORK_STATE_METHODS) + [TX_METHOD]
         doc['scope']['historicalReads'] = historical_reads
+    return doc
+
+
+def private_fork_record(chain, *, mode, ident, commitment, ceiling, restarts, s1_sha256, s2_sha256, validity, retention,
+                        owner, prerequisites, statement, bases, historical_reads):
+    """A ``FORK_SCHEMA_PRIVATE`` record: the v3 envelope with the committed private selector, the bounded retry
+    transport and the source binding of ``PRIVATE_BINDING_FILES``."""
+    doc = fork_record(chain, mode=mode, ident=ident, upstream=PRIVATE_ENDPOINT, ceiling=ceiling, restarts=restarts,
+                      s1_sha256=s1_sha256, s2_sha256=s2_sha256, validity=validity, retention=retention, owner=owner,
+                      prerequisites=prerequisites, statement=statement, bases=bases, historical_reads=historical_reads)
+    doc['schema'] = FORK_SCHEMA_PRIVATE
+    doc['scope']['transport'] = expected_private_transport()
+    doc['scope']['privateEndpoint'] = expected_private_endpoint(commitment)
+    doc['scope']['sourceBinding']['files'] = source_files(PRIVATE_BINDING_FILES)
     return doc
 
 
@@ -257,15 +307,15 @@ def _validity(scope):
              'AUTHORIZATION_VALIDITY')
 
 
-def _source_binding(scope):
+def _source_binding(scope, files=SOURCE_BINDING_FILES):
     b = scope['sourceBinding']
     _require(isinstance(b, dict) and set(b) == {'productionBase', 'researchBase', 'files'}
              and isinstance(b['productionBase'], str) and _COMMIT.fullmatch(b['productionBase']) is not None
              and isinstance(b['researchBase'], str) and _COMMIT.fullmatch(b['researchBase']) is not None
-             and isinstance(b['files'], dict) and set(b['files']) == set(SOURCE_BINDING_FILES),
+             and isinstance(b['files'], dict) and set(b['files']) == set(files),
              'AUTHORIZATION_SOURCE_BINDING', 'binding keys or file set')
-    actual = source_files()
-    changed = sorted(name for name in SOURCE_BINDING_FILES if b['files'][name] != actual[name])
+    actual = source_files() if files is SOURCE_BINDING_FILES else source_files(files)     # public path: as before
+    changed = sorted(name for name in files if b['files'][name] != actual[name])
     _require(not changed, 'AUTHORIZATION_SOURCE_BINDING', f'source differs from the authorized version: {changed}')
 
 
@@ -358,6 +408,55 @@ def check_fork_authorization(doc):
              'AUTHORIZATION_KEYS', 'prerequisites')
     _require(_texts(doc['retention']), 'AUTHORIZATION_KEYS', 'retention')
     _source_binding(s)
+
+
+def historical_reads_digest(reads):
+    return sha256(json.dumps(reads, sort_keys=True, separators=(',', ':')).encode())
+
+
+def check_private_fork_authorization(doc):
+    """Schema ``FORK_SCHEMA_PRIVATE``: every value of the v3 S3 envelope as for a public record, except the endpoint,
+    which is the committed private selector; mainnet only; the bounded retry transport; exactly the reviewed
+    historical reads; the source binding of ``PRIVATE_BINDING_FILES``. The approval pin is the loader's."""
+    _require(isinstance(doc, dict) and set(doc) == FORK_KEYS and doc['schema'] == FORK_SCHEMA_PRIVATE
+             and doc['stage'] == 'S3' and doc['chain'] in PRIVATE_CHAINS and isinstance(doc['scope'], dict)
+             and set(doc['scope']) == FORK_SCOPE_KEYS_PRIVATE and doc['forkBlock'] is None
+             and doc['forkBlockHash'] is None and doc['mode'] in PRIVATE_ID_PREFIX, 'AUTHORIZATION_KEYS',
+             'private fork keys')
+    chain, s, mode = doc['chain'], doc['scope'], doc['mode']
+    _require(_texts(doc['statement']) and isinstance(doc['statement'], str) and _texts(doc['retention'])
+             and isinstance(doc['retention'], str), 'AUTHORIZATION_KEYS', 'statement / retention')
+    _require(re.fullmatch(rf'{PRIVATE_ID_PREFIX[mode]}-s3-{chain}-[0-9a-z]+', doc['authorizationId']) is not None,
+             'AUTHORIZATION_ID', f'{doc["authorizationId"]!r} must carry the {mode} prefix, stage S3 and chain {chain}')
+    _require(type(doc['maxHttpPosts']) is int and 0 < doc['maxHttpPosts'] <= OWNER_CEILINGS['S3'][chain],
+             'AUTHORIZATION_CEILING', str(doc['maxHttpPosts']))
+    _require(type(doc['maxRestarts']) is int and 0 <= doc['maxRestarts'] <= OWNER_MAX_RESTARTS,
+             'AUTHORIZATION_RESTARTS', str(doc['maxRestarts']))
+    _require(doc['methods'] == list(FORK_STATE_METHODS) + [TX_METHOD], 'AUTHORIZATION_METHODS',
+             'the measured anvil reads plus the listed historical transaction reads, exactly')
+    check_historical_reads(s['historicalReads'])
+    _require(historical_reads_digest(s['historicalReads']) == REVIEWED_HISTORICAL_READS[chain],
+             'AUTHORIZATION_HISTORICAL_READS', 'not the reviewed historical reads')
+    _require(s['chainId'] == h.CHAINS[chain], 'AUTHORIZATION_CHAIN', str(s['chainId']))
+    _require(doc['endpoint'] == s['endpoint'] == PRIVATE_ENDPOINT, 'FORK_ENDPOINT', 'the private selector only')
+    p = s['privateEndpoint']
+    _require(isinstance(p, dict) and isinstance(p.get('commitment'), str) and _SHA.fullmatch(p['commitment']) is not None
+             and p == expected_private_endpoint(p['commitment']), 'FORK_ENDPOINT', 'private endpoint selector')
+    _require(s['transport'] == expected_private_transport() and type(doc['pacingMs']) is int
+             and doc['pacingMs'] >= tp.PACING_MS, 'AUTHORIZATION_TRANSPORT')
+    _require(s['paramPolicy'] == expected_param_policy(), 'AUTHORIZATION_PARAMS')
+    f = s['forkAnchor']
+    _require(isinstance(f, dict) and set(f) == {'rule', 's1AuthorizationSha256', 's2AuthorizationSha256',
+                                                'reconciliationSchema'}
+             and f['rule'] == 'S1_S2_RECONCILED' and f['reconciliationSchema'] == RECONCILIATION_SCHEMA
+             and all(isinstance(f[k], str) and _SHA.fullmatch(f[k]) for k in ('s1AuthorizationSha256',
+                                                                            's2AuthorizationSha256'))
+             and f['s1AuthorizationSha256'] != f['s2AuthorizationSha256'], 'AUTHORIZATION_ANCHOR_POLICY')
+    _validity(s)
+    _require(isinstance(s['owner'], dict) and s['owner'] and _texts(s['owner']), 'AUTHORIZATION_KEYS', 'owner')
+    _require(isinstance(s['prerequisites'], list) and s['prerequisites'] and _texts(s['prerequisites']),
+             'AUTHORIZATION_KEYS', 'prerequisites')
+    _source_binding(s, PRIVATE_BINDING_FILES)
 
 
 def check_historical_reads(reads):

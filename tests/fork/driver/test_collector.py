@@ -636,6 +636,8 @@ class GateTest(Tmp):
             'f4ca9cf3ccb8a5241aefaaa51497171e877f8f7e25f701bd6cdac19f2a4c28cf',  # fr-d1-s2-testnet-sl20261018
             '00c6ab29bf49d545608306a1543b309b555e04e943ad3cd4358018227512b669',  # fr-d1-s1-mainnet-sl20261018
             '71357ba54d74ccaa04aad6acb39dc02cacdda9993effd3fefa2e5618c05efe74',  # fr-d1-s2-mainnet-sl20261018
+            'fb2737836845386c8fd8f4030cecb9ab3d60c461243682796c4f0f4337a4dd1f',  # fr-d1-s1-mainnet-v4rf20261021
+            'e8102a8969e76a273fe65c640d6fa34b20e1e83d555bcbe171e4c014706e3ae8',  # fr-d1-s2-mainnet-v4rf20261021
         }))
         self.assertFalse(ledger.lock.exists())
 
