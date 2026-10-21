@@ -1,5 +1,19 @@
 # Offline release construction and verification
 
+> **Status (2026-10-21).** This document specifies the release tooling, inputs and sequencing designed for the V4
+> upgrade. It is the reference for preparing future governed releases, not a user guide.
+>
+> **Mainnet V4 was executed on 2026-10-21** in a narrower scope than the full sequence below:
+> - one governed Factory; Factory_test, its beacon B2 and its test vault were left out of scope by owner decision, so
+>   no P-1 step or test-vault retirement took place;
+> - the Timelock delay was 600 seconds, not 48 hours;
+> - BridgeVault and SlpDistributor were fresh proxies;
+> - U also set the 1-day waiting period, the four SlpDistributor destinations and the keeper.
+>
+> The as-executed record is [`deployments/mainnet/v4/V4_UpgradeReceipt.json`](../deployments/mainnet/v4/V4_UpgradeReceipt.json).
+> The testnet sequence (T-0 to U_t) **has not been executed**: at testnet block 31,692,763 every recorded proxy still
+> used its pre-V4 implementation ([deployments/testnet](../deployments/testnet/README.md)).
+
 All native build and Foundry commands run only inside the native allowlisted export through `tools/verify/run.sh`. Never invoke them in the live checkout. No command below signs, broadcasts, deploys, commits or pushes. Do not supply environment files, private material or wallet clients.
 
 ## Reviewed input bundle
@@ -44,7 +58,7 @@ Mainnet primary sequence:
 1. P-0 offline definitions: Timelock, separately reviewed Vault/Factory implementations, fresh BridgeVault and SlpDistributor proxies owned by TL using the existing v4 ProxyAdmin, and ReleaseAssertions. Grant CAN, remove temporary deployer admin and verify complete Timelock history. Definitions never execute deployment.
 2. P-1: verify Factory_test/B2 identities; factory owner emergency-cancels if needed; test-vault admin revokes every inventoried role and renounces ADMIN last; factory owner transfers Factory_test to TL. Release H generation requires completed P-1 state (case A).
 3. H, **one atomic Safe MultiSend**: PA ownership to TL; StPROS/Oracle/main Factory ownership to TL; vault 001 grants TL ADMIN and revokes all old roles, GOV renounces ADMIN last; schedule U; `assertHandoff` including pending U.
-4. U, **one atomic Timelock batch** after 48h: Oracle V1 upgradeAndCall; immediately StPROS V1 upgradeAndCall; main Factory migration; main beacon upgrade; vault 001 OPS grant; Factory_test migration; B2 upgrade; test-vault retirement; Factory_test closeCreation; `assertR4` last.
+4. U, **one atomic Timelock batch** after 48h *(mainnet V4: after 600 seconds, single-Factory scope; see the status note above)*: Oracle V1 upgradeAndCall; immediately StPROS V1 upgradeAndCall; main Factory migration; main beacon upgrade; vault 001 OPS grant; Factory_test migration; B2 upgrade; test-vault retirement; Factory_test closeCreation; `assertR4` last.
 
 For B/D, approved fallback H item 0 migrates Factory_test before PA handoff, and U omits its repeated migration. C/D preserve inventoried stale test-vault roles as explicitly accepted, inert roles after retirement. The mainnet governed vault must always be SETTLED. For the separate retirement target, H retains the reviewed phase in non-residual cases; owner-approved C/D residuals require explained transitions rather than a frozen phase. The governed vault keeps its round/terms; retired vault safety depends on final SETTLED/retired/backing, not freezing terms an owner-accepted stale admin could change during H→U.
 

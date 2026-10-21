@@ -3,7 +3,8 @@
 ## Build identity
 
 `make build` exports the current safe source tree and runs `tools/ci/canonical.py`
-through the empty-environment runner. Python's standard library, reviewed native
+through the empty-environment runner. At the current tree this is expected to stop on source inventory drift; see
+[Sources outside the canonical build](#sources-outside-the-canonical-build). Python's standard library, reviewed native
 solc and vendored Solidity sources are the only build dependencies.
 
 Solidity 0.8.28 (`7893614a`), Cancun, optimizer 200, non-IR, literal-content IPFS
@@ -25,9 +26,38 @@ The build writes per-contract input, output, artifact and build-info JSON plus a
 manifest under the export's `cache/native-r4/`. Stale local generated files are
 never inputs. No Node or package-manager installation is required.
 
+## Sources outside the canonical build
+
+`contracts/SlpPharosProxy.sol` and `contracts/SlpPharosRewardsVault.sol` (the SLP execution layer) were added to `main`
+after the V4 audit freeze. They are **not** part of the protected production root set (`productionRoots` in
+`tools/ci/r4-reference.json`) or of the `a110037` core audit package; they are not externally audited
+([audit scope](../README.md#audit-scope)). They import `../interfaces/pharos/*` and an OpenZeppelin
+extension that are not vendored, so they do not compile in this repository.
+
+The research decision TD-0 fixed the V4 build source at commit `a110037`, and the V4 verification exports were built
+without these two files. Because `tools/ci/canonical.py` compares the `.sol` files under `contracts/` with
+`productionRoots`, a build of the unmodified current tree is expected to stop with `production source inventory drift`.
+**Two baselines, kept apart.**
+
+| | Protected production build | SLP-layer sources |
+|---|---|---|
+| Files | The 12 sources in `productionRoots` | `contracts/SlpPharosProxy.sol`, `contracts/SlpPharosRewardsVault.sol` |
+| Identity | 13 artifacts fixed by `tools/ci/r4-reference.json`; V4 built from `a110037` | None recorded; dependencies not vendored |
+| Status | Reproduced by the V4 verification exports, which did not contain the two SLP sources | Not compilable here; adapting them (vendoring or relocation) is pending |
+
+Until the SLP sources are adapted, a protected build of the current tree needs an export without them, as the V4
+verification exports were made. No command in this repository removes them automatically. Never refresh
+`r4-reference.json` to make the drift pass.
+
+This documentation update did not run that build. It did observe a related effect in an isolated export of the current
+tree: `tools/snapshot/abi.py`, `storage.py` and `capabilities.py --check` stop with a missing vendored file
+(`lib/openzeppelin-contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol`, imported by `SlpPharosProxy.sol`).
+The result is the same at `HEAD`. How these sources are kept is a separate decision.
+
 ## Commands
 
-Create a fresh export with `tools/verify/export.sh`. Execute every command through
+Create a fresh export with `tools/verify/export.sh DESTINATION`, using a new directory under `/Volumes/project/tmp`
+(without an argument the export goes to the system temporary directory, as the `make` targets do). Execute every command through
 `tools/verify/run.sh EXPORT ...`. Exports copy only safe Git-known native paths,
 reject symlinks, and exclude ignored local data and platform metadata.
 
@@ -58,8 +88,8 @@ sequences, bundle admission, historical evidence and approval requirements.
 ## Focused checks
 
 ```sh
-dest=$(tools/verify/export.sh | tail -1)
-tools/verify/run.sh "$dest" python3 tools/ci/canonical.py
+dest=$(tools/verify/export.sh /Volumes/project/tmp/faroo-export-$(date +%s) | tail -1)
+tools/verify/run.sh "$dest" python3 tools/ci/canonical.py   # see "Sources outside the canonical build"
 tools/verify/run.sh "$dest" python3 -m unittest discover -s tests/toolchain -p 'test_*.py' -v
 tools/verify/run.sh "$dest" python3 tests/release/native/gate.py
 tools/verify/run.sh "$dest" python3 -m unittest discover -s tests/release/native -p 'test_*.py' -v

@@ -1,10 +1,15 @@
 # Source map
 
+Developer documentation: [ARCHITECTURE](ARCHITECTURE.md), [INTEGRATION](INTEGRATION.md),
+[SLP-STAKING](SLP-STAKING.md), [PARAMETERS](PARAMETERS.md), [GOVERNANCE](GOVERNANCE.md). Specification and release
+design: [SPEC](SPEC.md), [UPGRADES](UPGRADES.md), [RECOVERY](RECOVERY.md), [TOOLCHAIN](TOOLCHAIN.md).
+[DEPLOYED-STATE](DEPLOYED-STATE.md) is a generated pre-V4 snapshot.
+
 | Path | Concrete purpose |
 | --- | --- |
-| `contracts/` | Protocol, authority and atomic release assertions |
+| `contracts/` | Protocol, authority and atomic release assertions. `SlpPharosProxy.sol` and `SlpPharosRewardsVault.sol` are SLP-layer sources outside the canonical build ([TOOLCHAIN](TOOLCHAIN.md#sources-outside-the-canonical-build)) |
 | `lib/` | Exact dependency import closure, identities and licenses |
-| `deployments/` | Immutable historical deployment records |
+| `deployments/` | Append-only deployment records: mainnet V1 (top level), mainnet V4 (`mainnet/v4/`, current), testnet; index `registry.json` ([README](../deployments/README.md)) |
 | `snapshots/` | Reviewed historical ABI/storage/runtime/state/gas baselines |
 | `tools/ci/` | Native compiler and 13-target source/artifact gate |
 | `tools/lib/` | ABI/Keccak, strict JSON identity, read-only RPC and bytecode helpers |

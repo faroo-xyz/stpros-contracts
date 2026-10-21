@@ -1,5 +1,11 @@
 # Handoff failure and recovery
 
+> **Status (2026-10-21).** The handoff and upgrade recovery cases below apply while a governed release is in progress.
+> The mainnet V4 handoff (H) and upgrade (U) completed on 2026-10-21 without needing them. The table remains the
+> reference for future releases. Unexecuted testnet stages still depend on it. The
+> [BridgeVault custody recovery](#bridgevault-custody-recovery-and-fifo-resumption-lab-obs-01) section remains current
+> operational guidance for the deployed protocol. Current roles and delay: [GOVERNANCE.md](GOVERNANCE.md).
+
 No recovery below is automatic. It requires fresh read-only identity checks and reviewed unsigned calldata; no command signs or broadcasts. Never change a proxy admin, renounce ownership or bypass guarded migration to recover. Do not modify a pending operation's payload under the same operation ID.
 
 | State | Required response |
