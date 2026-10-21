@@ -2,7 +2,7 @@
 
 **Testnet has not been upgraded to V4.** At testnet block 31,692,763 (read-only check, 2026-10-21) every proxy below
 still used the implementation recorded here, the core contracts and the ProxyAdmin were owned by externally owned
-accounts (`0x4597…01dd`; the Factory by `0xb29e…adf1`), and the StPROS waiting period was 0. The V4 testnet sequence in [UPGRADES.md](../../docs/UPGRADES.md) has not been executed. Do not
+accounts (`0x4597…01dd`; the Factory by `0xb29e…adf1`), and the StPROS waiting period was 0. The prepared V4 testnet sequence ([UPGRADES.md](../../docs/UPGRADES.md#testnet-v4-sequence-not-executed)) has not been executed. Do not
 assume testnet behaves like mainnet V4.
 
 | Contract | Proxy | Recorded implementation | Files |

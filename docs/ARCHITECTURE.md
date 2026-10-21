@@ -116,6 +116,9 @@ reward from other funds, so non-reward funds reported by mistake are charged as 
 ([SLP-STAKING.md](SLP-STAKING.md#known-risk-principal-reported-as-yield)). Values:
 [PARAMETERS.md](PARAMETERS.md#oracle-and-yield-reporting).
 
+`canUpdate(token, amount)` previews these checks. It is advisory: a report it accepts can still revert, for example when
+commission minting fails while StPROS is paused.
+
 The Oracle has no knowledge of where PROS physically is. `T` is an accounting figure that the protocol keeps consistent
 with deposits, redemptions and reported rewards. The physical PROS can be in the SlpDistributor, in staking, in transit
 or in the BridgeVault.
@@ -192,9 +195,13 @@ stateDiagram-v2
   settlement pays up to `maxLossBps` of managed assets to the vault's counterparty, and only the Timelock can propose
   it.
 - After `settlementDeadline() = openDeadline + lockDuration + 30 days`, anyone can force a par settlement of a round
-  that is still LOCKED or has an unfunded proposal.
+  that is still LOCKED or has an unfunded proposal. A forced par settlement applies neither profit nor loss: a LOSS
+  that was not proposed in time is not paid to the counterparty, and an unfunded PROFIT proposal pays holders nothing.
+  Funded PROFIT, zero PROFIT and proposed LOSS settlements stay binding; they settle through `finalize`, which needs
+  the Factory unpaused.
 - The Factory owner (the Timelock) can also `emergencyCancel` an unsettled round (back to SETTLED at principal) or
-  `retire` a vault permanently.
+  `retireVault` a vault permanently. Both refund a funded PROFIT proposal; after retirement, redemptions stay available
+  and no new round can open. `closeCreation()` permanently stops new vaults from the Factory.
 - Vault shares use 24 decimals (an ERC-4626 decimals offset of 6 over stPROS's 18).
 
 Authenticate a vault with `YieldVaultFactory.isFactoryVault(vault)` on the official Factory. A vault created by

@@ -44,7 +44,8 @@ Oracle `0x051713fd66845a13bf23baca008c5c22c27ccb58`.
 
 The 80,000 PROS cap binds only when `T` is above ≈ 116.8 million PROS at a 20-hour spacing, or ≈ 13.9 million PROS
 after a full 7-day gap. Below that, the APR allowance is the effective limit. The allowance restarts at every accepted
-report; unused allowance beyond 7 days is not carried forward.
+report; unused allowance beyond 7 days is not carried forward. Reports carry no accrual period, so a later report may
+include earlier unreported yield within its own allowance, and the allowance may exceed the yield actually earned.
 
 ## Pool state (snapshot, block 20,815,667)
 
@@ -148,8 +149,8 @@ values for each round with `openNextRound`. They apply to round 8 only.
 
 ## Values that changed with V4
 
-[SPEC.md](SPEC.md) records the policy as it was approved before the mainnet parameters were final. The following
-statements there are superseded on mainnet:
+The product policy approved before the mainnet parameters were final, archived in the research repository, stated
+different values for these items. They are superseded on mainnet:
 
 | Item | Earlier design value | Mainnet V4 value |
 |---|---|---|
@@ -157,3 +158,4 @@ statements there are superseded on mainnet:
 | Operational APR rule | 2 × expected gross APR | 3 × expected gross APR: 30 % for 10 % expected |
 | Report interval | at least 1 hour (contract minimum) | 20 hours |
 | Timelock delay | 48 hours in the earliest plan | 600 seconds now; 86,400 seconds later, after a separate authorization |
+| Historical test factory and its vault | Retired in the release | Left out of V4 by owner decision; not upgraded and not retired ([GOVERNANCE.md](GOVERNANCE.md#out-of-scope-legacy-contracts)) |

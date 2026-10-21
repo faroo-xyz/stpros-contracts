@@ -1,86 +1,56 @@
-# Handoff failure and recovery
+# Recovery
 
-> **Status (2026-10-21).** The handoff and upgrade recovery cases below apply while a governed release is in progress.
-> The mainnet V4 handoff (H) and upgrade (U) completed on 2026-10-21 without needing them. The table remains the
-> reference for future releases. Unexecuted testnet stages still depend on it. The
-> [BridgeVault custody recovery](#bridgevault-custody-recovery-and-fifo-resumption-lab-obs-01) section remains current
-> operational guidance for the deployed protocol. Current roles and delay: [GOVERNANCE.md](GOVERNANCE.md).
+## Purpose
 
-No recovery below is automatic. It requires fresh read-only identity checks and reviewed unsigned calldata; no command signs or broadcasts. Never change a proxy admin, renounce ownership or bypass guarded migration to recover. Do not modify a pending operation's payload under the same operation ID.
+This is the recovery manual for the deployed V4 protocol on Pharos Mainnet: what to do when custody, the redemption
+queue, the Oracle, a YieldVault round or a governed upgrade goes wrong. Roles and the Timelock process are in
+[GOVERNANCE.md](GOVERNANCE.md); parameter values are in [PARAMETERS.md](PARAMETERS.md).
 
-| State | Required response |
+Rules that apply to every case:
+- No recovery is automatic. Each needs fresh read-only identity checks at a pinned block and reviewed, unsigned
+  calldata. No repository command signs or broadcasts.
+- Governance actions other than a pause go through the Timelock and wait its delay (600 seconds at block 20,815,667).
+  There is no faster path.
+- Never change a proxy admin, renounce ownership or bypass a guarded migration to recover.
+- Never modify a pending Timelock operation. Cancel it and schedule a new, reviewed operation with the full delay.
+- Keep user records unchanged: no recovery skips, reprices, reorders or edits redemption records.
+- When identities, reconciliation or funding are unresolved, keep the affected function paused and report
+  **BLOCKED**.
+
+## Emergency controls
+
+| Control | Who | Effect |
+|---|---|---|
+| `StPROS.pause()` | Guardian Safe, or the Timelock as owner | Stops deposits and new redemption requests, and commission minting. Claims continue |
+| `Oracle.pause()` | Guardian Safe, or the Timelock | Stops yield reports (`update`) and, through `onMint` / `onRedeem`, deposits and new requests. Claims continue |
+| `BridgeVault.pause()` | Guardian Safe, or the Timelock | Stops every claim payout (`withdrawToken`, `withdrawTokenWrapped`). `emergencyWithdraw` stays available to the owner |
+| `SlpDistributor.pause()` | Guardian Safe, or the Timelock | Stops `distribute`. Deposits still arrive at the distributor |
+| `YieldVaultFactory.pause()` | Guardian Safe, or the Timelock | Stops vault deposits, settlement proposals, profit funding and finalization of the Factory's vaults |
+| `unpause()` on any of them | Timelock only | Restores the paused functions |
+| `setGuardian(address)` | Timelock only | Replaces the pausing account of one contract |
+| `cancel(id)` on the Timelock | GOV Safe or CAN Safe | Removes a Waiting or Ready operation before it executes |
+
+Pausing StPROS or the Oracle does **not** pause claims. To stop payouts, pause the BridgeVault.
+
+## Oracle anomalies
+
+The Oracle accepts a report only within the interval, the APR allowance and the absolute cap
+([PARAMETERS.md](PARAMETERS.md#oracle-and-yield-reporting)). The reporter cannot reduce `T` or mint shares to itself.
+Bounded is not the same as correct: the Oracle cannot tell reward from other funds
+([SLP-STAKING.md](SLP-STAKING.md#known-risk-principal-reported-as-yield)).
+
+| Situation | Response |
 |---|---|
-| Wrong codehash, immutable, canonical asset, version, delay, Safe state or incomplete inventory | Stop; investigate and obtain reviewed inputs. No force, implementation-only upgrade or guessed address |
-| P-1 partly completed | Fresh snapshot/inventory; skip already neutralized steps. If roles remain but the cleanup admin is absent, stop |
-| A: both P-1 actors available | Cancel test round, revoke all roles, renounce admin last, transfer Factory_test to TL |
-| B: Factory_test owner unavailable | Explicit D10 owner sign-off; admin cleanup only in P-1; H item 0 migrates Factory_test to TL; U omits duplicate migration and retires legacy locked vault |
-| C: test-vault admin unavailable | Explicit D10 owner sign-off; cancel round and transfer factory; notify holders they may redeem; stale admin exposure lasts until U retirement |
-| D: both unavailable | Explicit D10 owner sign-off; no P-1 transaction; B-style H item 0; stale test-vault authority remains until U retirement |
-| H reverts | Atomic MultiSend leaves no partial H state; correct reviewed inputs and re-sign |
-| H completed, U pending | Reuse frozen operation; execution checkpoint verifies identities, all roles and pending ID. CAN/GOV may cancel using the emitted unsigned cancel call |
-| U reverts | Entire U rolls back, including Oracle if StPROS fails. Diagnose, cancel, then review and schedule a new operation with the full delay |
-| T-1 partially processed | Builder skips only vaults whose complete current roles prove handoff finished; remaining vaults are processed by E2 |
-| E2 unavailable on testnet | Explicit recovery approval; all 15 vaults RETIRED; preserve/report inert stale roles. Factory owner is forced to TL in U_t; recovery handoff assertion makes this distinction visible |
-| Approved T-3 incomplete after PA handoff | Use explicitly reviewed `testnetRecovery.incompleteT3` with owner approval; the recovery assertion verifies the listed remaining legacy owners, current config/history and PA→TL. U_t forces core ownership to TL. E1 availability is still required for T-4 |
-| T-2/T-3 already completed | Builder omits completed owner transfers using fresh state; T-4 is still the last E1 step |
-| E1 unavailable before T-4 | BLOCKED. An offline plan is not proof of signer availability; do not silently replace E1 |
-| Gas exceeds binding cap | Stop. FS-6 real-fork H and U cap is 2.2M each unless a higher cap is independently confirmed. A split needs a new approved amendment |
-| Core-only contingency | `R4-CORE-ONLY — INCOMPLETE`; full R4 remains unmet. This batch does not generate U1/U2 |
+| Unexpected or wrong report pending or likely | Pause the Oracle (Guardian). This also stops deposits and new requests; claims continue |
+| Reporter compromised or wrong | Timelock: `setSlp(newReporter)`, or `setUpdateLimits(0, interval)` to disable reporting until a reviewed reporter is in place |
+| `T` known to be wrong | Timelock: `setTokenAmount(WPROS, expectedOldT, newT)`. It is a compare-and-set: it reverts if `T` changed after review, and it never changes `V`. Commission shares minted by an earlier report are not reversed |
+| `canUpdate` returns true but a report reverts | `canUpdate` is advisory; commission minting can still fail (for example while StPROS is paused). Investigate before retrying |
 
-A testnet designated-multisig alternative without supported Safe introspection is explicitly unsupported by this release adapter and needs review before emitting release-ready artifacts. Missing actors, Safe owners/nonces, APR, reporting cap, Treasury, keeper or whitelist are external release gates, not values for the tool to invent.
+Unpause only after the cause is understood and the configuration is verified.
 
-The preliminary local smoke measurements exclude real Safe overhead, historical inventory size and real Pharos execution conditions. They cannot close FS-6. Batch 04 owns the full FS-1…FS-7 real-fork sequence, all recovery cases, exact execution-frame preservation and binding gas gates. Batch 01 stops for independent review; it does not start Batch 02 or authorize release.
+## BridgeVault custody recovery and FIFO resumption
 
-A reviewed pin behind the head is not itself a failure. Verify its canonical hash and independently reconcile current state. Pre-schedule evidence expires after one hour; slow scans and stale heads fail after the documented 120-second limit. After H, keep the original operation bundle and supply separately reviewed fresh execution/fork evidence and current GOV/CAN nonces. Do not reset the pin or rebuild a pending operation to work around an unexplained owner/role/code/configuration/ledger change. Missing historical RPC data is a hard stop. Postcheck accepts consumed nonces but never a changed Safe authority configuration.
-
-### Residual-state evidence at release checkpoints
-
-The residual recovery exception is limited to explicitly approved C/D and
-E2-unavailable retirement targets. The historical anchor, complete role/holder
-history, physical code, proxy/beacon identity and canonical factory/asset wiring
-remain mandatory. Current backing also includes refundable funded PROFIT.
-
-The checker reconciles round lifecycle events and settlement asset deltas.
-For a new legacy round it binds all round parameters to the authenticated
-`openNextRound` transaction, then checks the full terms tuple against current
-views. A terms change without sufficient evidence is rejected. The present
-transaction proof supports direct calls to the residual Vault; internal Safe
-calls and legacy debug setters lacking complete events require additional
-independently reviewed evidence and are not general drift exceptions. Keep
-GOVERNED vault round/terms checks strict. Final retirement and creation closure
-requirements remain unchanged.
-
-Testnet Oracle replay checks share mint/burn events, PoolUpdated post-state and
-Deposit/Withdraw events in transaction order. It resets arithmetic NAV dust only
-when the independently replayed pool shares reach zero; otherwise all remaining
-NAV must match. Commission events and share issuance are checked separately.
-
-
-### Approved closure boundaries (2026-10-10)
-
-Mainnet GOVERNED release handoff requires SETTLED at every gate; do not force a
-business settlement or weaken phase checks to make a release pass. OPS must be
-independent of GOV/CAN addresses and reviewed signer/control sets; OPS==reviewed
-GRD remains allowed. Unproven contract signer control stops release validation.
-
-Safe-forwarded residual openNextRound remains `INCOMPLETE_SAFE_RECOVERY_EVIDENCE`
-until an actual reviewed historical Safe implementation/authority/nonce and
-canonical successful transaction/receipt/inner-call proof is available. No real
-Safe proof was supplied with this implementation package; the local forwarding
-model is a rejection-boundary test only. Direct calls continue to work. Unknown
-Safe versions, MultiSend, delegatecalls, modules/nested forwarders and unexplained
-legacy debug setters remain unsupported. Required future evidence is the actual
-proxy/singleton/runtime, owner/threshold authorization, nonce/hash, CALL target,
-value/calldata, successful Safe execution, matching Vault events and full
-round/economic/backing reconciliation. No self-approved bypass is accepted.
-
-Timelock recovery inspects all pending action-bearing operations and referenced
-predecessor states, including blocked dependencies. Empty completion or funding
-does not exempt a nonempty successor from inventory. Full empty-ID history is
-not claimed. Preserve the frozen U identity; cancellation and a new reviewed
-schedule are separate governed operations, not edits to an existing operation.
-
-## BridgeVault custody recovery and FIFO resumption (LAB-OBS-01)
+This section is the custody and queue recovery procedure (referred to in the tests as LAB-OBS-01).
 
 Outstanding withdrawal liabilities are `Q - C`, where `Q = queuedWithdrawal`
 and `C = completedWithdrawal`. Reconcile this value with the sum of every current
@@ -127,6 +97,13 @@ Conservative recovery workflow:
 6. Only after reconciliation and payment checks pass may authorized governance
    unpause BridgeVault and resume operations. Continue checking as claims execute.
 
+**Replacing the BridgeVault.** If custody must move to a new BridgeVault, deploy a reviewed proxy under the shared
+ProxyAdmin, owned by the Timelock, and execute one Timelock batch: `oldBridge.emergencyWithdraw(address(0), newBridge,
+balance)` followed by `StPROS.setBridgeVault(newBridge)`. Before execution, check the recipient, amount, asset, order and
+the identities (runtime, implementation, admin) of StPROS and both BridgeVaults against reviewed values; take the
+expected old BridgeVault from the reviewed topology, not from `StPROS.bridgeVault()`. Then follow the workflow above
+before claims resume.
+
 Alert on custody below Q−C, frontier reductions after recovery/repointing, positive
 previews exceeding payable custody, repeated `InsufficientBalance` or stalled mature
 records, unexpected receiver/registration changes, and queue/history reconciliation
@@ -135,7 +112,49 @@ requirements. Neither the preview nor a local regression proves them. Keep claim
 paused or report **BLOCKED** when identities, reconciliation or full release funding
 are unresolved; do not modify tickets to force resumption.
 
-For LOSS recovery, use the paired-path controls in [GOVERNANCE.md](GOVERNANCE.md#loss-contingency-planning-lab-f-01-approved-2026-10-10).
-An expired scheduling window, existing proposal replacement, or an unused stale
-Ready operation needs explicit re-review/cancellation; there is no universal
-pause-state-independent call and no deadline bypass.
+## SLP layer incidents
+
+The SLP execution contracts and the RewardsVault are administered by the SLP administrator, outside the Timelock
+([SLP-STAKING.md](SLP-STAKING.md#changeable-by-governance-or-by-the-slp-administrator)). From the core contracts,
+governance can:
+- pause the SlpDistributor (Guardian) to stop all keeper allocations;
+- remove a destination from the whitelist (Timelock: `setSlps([destination], false)`) or replace the keeper
+  (`setKeeper`);
+- replace or disable the Oracle reporter (see [Oracle anomalies](#oracle-anomalies)).
+
+If principal reached the RewardsVault, it must not be reported. Pause the Oracle before the next `notifyOracle()`:
+`Oracle.update` reverts while the Oracle is paused, so the balance cannot be reported. `notifyOracle()` is the
+RewardsVault's only outflow ([SLP-STAKING.md](SLP-STAKING.md#known-risk-principal-reported-as-yield)); any other remedy
+is in the hands of the SLP administrator, outside the Timelock. The core contracts cannot recover funds held by the SLP
+contracts.
+
+## YieldVault incidents
+
+| Situation | Response |
+|---|---|
+| A round must settle at a loss | Follow [LOSS contingency planning](GOVERNANCE.md#loss-contingency-planning): paired Timelock operations, scheduled before the proposal cutoff with a reviewed margin |
+| A round must be stopped before settlement | Timelock: `YieldVaultFactory.emergencyCancel(vault)`. The round goes to SETTLED at principal; a funded PROFIT proposal is refunded |
+| A vault must be closed for good | Timelock: `YieldVaultFactory.retireVault(vault)`. Terminal; a funded PROFIT proposal is refunded and redemptions stay available |
+| Nobody settles a round | After `settlementDeadline()`, anyone can call `forceParSettlement()` on a round that is LOCKED or has an unfunded proposal |
+| Unused or stale LOSS operation | Cancel it (CAN or GOV) before the vault opens its next round ([GOVERNANCE.md](GOVERNANCE.md#loss-contingency-planning)) |
+
+An expired scheduling window, replacement of an existing proposal, or an unused stale Ready operation needs explicit
+re-review or cancellation. There is no pause-independent LOSS call and no deadline bypass.
+
+## During a governed upgrade
+
+These cases apply while a future governed release is in progress ([UPGRADES.md](UPGRADES.md)).
+
+| State | Required response |
+|---|---|
+| Wrong codehash, immutable, canonical asset, version, delay or role state, or incomplete inventory | Stop. Investigate and obtain reviewed inputs. No forced or implementation-only upgrade and no guessed address |
+| Safe transaction that schedules the operation reverts | Nothing applies; correct the reviewed inputs and sign again |
+| Operation scheduled, not yet executed | Keep the scheduled operation. Before execution, verify identities, roles and the pending ID again. GOV or CAN can cancel it with the prepared unsigned cancel call |
+| Timelock batch reverts | The whole batch rolls back. Diagnose, cancel, then review and schedule a new operation with the full delay |
+| Gas above the reviewed cap | Stop. Splitting an atomic upgrade needs a new reviewed design |
+| Only the core contracts can be verified | `assertCoreR4` is a diagnostic only. Report the release as INCOMPLETE; the full release assertion remains unmet |
+| Unexplained owner, role, code, configuration or ledger change after review | Stop. Do not reset the pinned block or rebuild a pending operation to work around it |
+
+A reviewed block behind the chain head is not a failure by itself: verify its canonical hash and reconcile the current
+state. Missing historical RPC data is a hard stop. Recovery cases of the unexecuted testnet sequence are in
+[UPGRADES.md](UPGRADES.md#testnet-v4-sequence-not-executed).

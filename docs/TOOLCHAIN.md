@@ -1,5 +1,33 @@
 # Native toolchain
 
+This document is for maintainers: how the repository is laid out, how sources are built, how commands run in
+isolation, and which baselines are protected.
+
+## Repository layout
+
+| Path | Purpose |
+| --- | --- |
+| `contracts/` | Protocol contracts, access control, migration guard and atomic release assertions. `SlpPharosProxy.sol` and `SlpPharosRewardsVault.sol` are SLP-layer sources outside the canonical build ([below](#sources-outside-the-canonical-build)) |
+| `lib/` | Exact vendored dependency import closure, identities and licenses (`lib/DEPENDENCIES.json`) |
+| `deployments/` | Append-only deployment records: mainnet V1 (top level), mainnet V4 (`mainnet/v4/`, current), testnet; index `registry.json` ([README](../deployments/README.md)) |
+| `snapshots/` | Reviewed historical ABI, storage, runtime, state and gas baselines |
+| `tools/ci/` | Native compiler and the 13-target source and artifact gate |
+| `tools/lib/` | ABI / Keccak, strict JSON identity, read-only RPC and bytecode helpers |
+| `tools/release/native/` | Unsigned upgrade plans, history and economic checkpoints, LOSS preparation |
+| `tools/release/` | Registry, recorded-bytecode reconstruction, interfaces, provenance and log archives |
+| `tools/snapshot/` | Reproducible historical snapshot generation and comparison |
+| `tools/verify/` | Safe export, isolated execution and explicit historical checks |
+| `tests/fixtures/legacy/` | Authoritative recorded legacy bytecode for migration tests |
+| `tests/fixtures/native-foundation/`, `tests/fixtures/native-release/`, `tests/fixtures/upgrade-reference/` | Independent ABI / Keccak witnesses, upgrade-plan and LOSS values, recorded upgrade state and Timelock runtime witnesses |
+| `tests/helpers/`, `tests/mocks/` | Shared protocol test base, legacy topology and boundary test doubles |
+| `tests/release/`, `tests/protocol/` | Upgrade, recovery, custody, governance and policy regressions |
+| `tests/toolchain/` | Compiler drift, primitive and isolation controls |
+| `tests/legacy/`, `tests/security/`, `tests/invariant/` | Historical behaviour, security regressions and accounting properties |
+| `tests/fork/`, `tests/gas/` | Explicitly gated chain-feasibility and gas baselines; not default commands |
+
+Root contract tests protect business behaviour during tooling changes. Retired framework and application sources and
+complete reference harnesses are kept in the research repository.
+
 ## Build identity
 
 `make build` exports the current safe source tree and runs `tools/ci/canonical.py`
@@ -34,7 +62,7 @@ after the V4 audit freeze. They are **not** part of the protected production roo
 ([audit scope](../README.md#audit-scope)). They import `../interfaces/pharos/*` and an OpenZeppelin
 extension that are not vendored, so they do not compile in this repository.
 
-The research decision TD-0 fixed the V4 build source at commit `a110037`, and the V4 verification exports were built
+The V4 build source was fixed at commit `a110037`, and the V4 verification exports were built
 without these two files. Because `tools/ci/canonical.py` compares the `.sol` files under `contracts/` with
 `productionRoots`, a build of the unmodified current tree is expected to stop with `production source inventory drift`.
 **Two baselines, kept apart.**
@@ -67,11 +95,11 @@ reject symlinks, and exclude ignored local data and platform metadata.
 | `python3 -m tools.release.native artifact normalize ...` | Unapproved candidate artifact |
 | `python3 -m tools.release.native release preflight ...` | Bundle admission, deployment definitions and state verification |
 | `release authority` | Reviewed role inventory and completeness boundaries |
-| `release p1-runbook` | Mainnet actor-specific preparation and recovery |
-| `release build-handoff` | Atomic H Safe calldata |
-| `release build-u` | Exact U/U_t, operation IDs and unsigned cancellation calldata |
-| `release testnet-handoff` | E1/E2/GOV stages and approved recovery |
-| `release estimate-gas` | Local individual estimates; never atomic FS-6 certification |
+| `release p1-runbook` | Mainnet Factory_test preparation of the original V4 scope (not used) |
+| `release build-handoff` | Atomic mainnet V4 handoff Safe calldata |
+| `release build-u` | Exact V4 upgrade operation, operation ID and unsigned cancellation calldata |
+| `release testnet-handoff` | Testnet handoff stages and approved recovery |
+| `release estimate-gas` | Local individual estimates; never an atomic gas certification |
 | `release postcheck` | Fresh identity, authority, version and economic checks |
 | `python3 -m tools.release.native loss contingency ...` | Reviewed LOSS alternatives and pinned observations |
 
@@ -82,8 +110,11 @@ Production tooling has no signing, write RPC or transaction-submission surface.
 
 Deployment preparation validates configuration, constructors, candidate artifacts
 and immutable-bound runtime. Recorded v4 ProxyAdmin identity is independent of
-the current vendored v5 implementation. [UPGRADES](UPGRADES.md) specifies exact
-sequences, bundle admission, historical evidence and approval requirements.
+the current vendored v5 implementation. The `release` actions implement the
+executed V4 release (`migrateFromV1`, `migrateFromV3`, `migrateToR4`, `assertR4`);
+they are not a general builder for future versions. [UPGRADES](UPGRADES.md#scope-of-the-release-tooling)
+describes that scope, the procedure, bundle admission, history evidence and
+approval requirements.
 
 ## Focused checks
 
@@ -116,11 +147,11 @@ fixtures and runs six loopback-only Anvil cases. The local actor handoff model
 is not a Safe signature or public-chain readiness proof.
 
 Historical snapshot tools remain for reproducibility and `--check` comparisons.
-Normal build/test does not refresh snapshots. B0 ABI/storage/bytecode differences
-remain FAIL-existing. Missing historical creation, namespace and proxy/beacon
-provenance remains INCOMPLETE. Safe-forwarded residual evidence limitations remain.
-Real-state forks/FS-1–7, actual Safe/explorer checks, broad fuzz/formal campaigns
-and production readiness are not established by local checks.
+Normal build/test does not refresh snapshots. Comparisons against the pre-V4 baseline
+snapshots report the intended V4 ABI, storage and bytecode differences as an existing
+FAIL. Missing historical creation, namespace and proxy/beacon provenance remains
+INCOMPLETE. Real-state forks, actual Safe or explorer checks, broad fuzz or formal
+campaigns and production readiness are not established by local checks.
 
 ## Repository rules
 

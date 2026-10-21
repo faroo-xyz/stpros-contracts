@@ -94,41 +94,18 @@ and the out-of-scope historical contracts are listed in [deployments](deployment
 
 ## Getting started
 
-| You want to | Read |
+| Document | Read it to |
 |---|---|
-| Integrate stPROS: deposits, redemption requests, claims, events | [docs/INTEGRATION.md](docs/INTEGRATION.md) |
-| Understand the contracts and their asset flows | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
-| Understand Pharos staking, rewards and the SLP layer | [docs/SLP-STAKING.md](docs/SLP-STAKING.md) |
-| Look up current parameters and who can change them | [docs/PARAMETERS.md](docs/PARAMETERS.md) |
-| Review roles, the Timelock and emergency controls | [docs/GOVERNANCE.md](docs/GOVERNANCE.md) |
-| Find addresses, ABIs, testnet and historical records | [deployments/README.md](deployments/README.md) |
-| Build, test and work on the repository | [docs/TOOLCHAIN.md](docs/TOOLCHAIN.md), [docs/CODE_MAP.md](docs/CODE_MAP.md) |
-| Read the protocol policy and the upgrade design | [docs/SPEC.md](docs/SPEC.md), [docs/UPGRADES.md](docs/UPGRADES.md), [docs/RECOVERY.md](docs/RECOVERY.md) |
+| [Architecture](docs/ARCHITECTURE.md) | Understand the contracts, their asset flows and their limits |
+| [Integration](docs/INTEGRATION.md) | Integrate stPROS: deposits, redemption requests, claims, events and examples |
+| [SLP staking](docs/SLP-STAKING.md) | Understand Pharos staking, rewards and the SLP layer, and its risks |
+| [Parameters](docs/PARAMETERS.md) | Look up current values and who can change them |
+| [Governance](docs/GOVERNANCE.md) | Review roles, the Timelock, permissions and LOSS planning |
+| [Recovery](docs/RECOVERY.md) | Handle pauses, custody and queue recovery, Oracle anomalies and vault incidents |
+| [Developer toolchain](docs/TOOLCHAIN.md) | Build, test and work on the repository; repository layout |
+| [Deployment addresses and ABIs](deployments/README.md) | Find mainnet V4, testnet and historical records |
 
-### Local development
-
-The toolchain uses Python, a pinned native solc binary and Foundry. Solidity dependencies are vendored byte for byte,
-so nothing needs to be installed from a package manager.
-
-Every command runs inside an isolated export: an allowlisted copy of the tree without environment files. Create the
-export under the project's temporary directory, `/Volumes/project/tmp`. The destination must not exist yet.
-
-```sh
-dest=$(tools/verify/export.sh /Volumes/project/tmp/faroo-export-$(date +%s) | tail -1)
-tools/verify/run.sh "$dest" python3 -m unittest discover -s tests/toolchain -p 'test_*.py' -v
-```
-
-**Build status of the current tree.** The protected build (`tools/ci/canonical.py`) covers 12 production sources whose
-artifacts are fixed by `tools/ci/r4-reference.json`. `contracts/` currently also contains two SLP-layer sources,
-`SlpPharosProxy.sol` and `SlpPharosRewardsVault.sol`, whose dependencies are not vendored yet. With them present the
-protected build is expected to stop with `production source inventory drift`, and some snapshot checks fail. `make build`
-is therefore not a working quick start for the current tree. Read
-[the toolchain note](docs/TOOLCHAIN.md#sources-outside-the-canonical-build) before building.
-
-The `make` targets also create their export in the default system temporary directory; for this project use the
-explicit form above. Foundry binaries load environment files from their working directory and its parents: run them only
-through `tools/verify/run.sh` inside an export ([toolchain rules](docs/TOOLCHAIN.md#repository-rules)). The repository tooling prepares and verifies
-unsigned upgrade plans. It cannot sign, send or deploy transactions.
+Maintainers preparing a future upgrade also read [Upgrades](docs/UPGRADES.md).
 
 ## Security
 
