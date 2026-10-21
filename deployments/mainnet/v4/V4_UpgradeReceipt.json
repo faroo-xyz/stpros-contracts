@@ -1,0 +1,96 @@
+{
+  "chainId": 1672,
+  "releaseId": "faroo-v4-mainnet-rev3-4slp-20261021",
+  "operationId": "0x6918b2948262402d63bce93439012cbff5a451430e7dcf4c8f13d6da46f2c959",
+  "salt": "0x6702034fb7406ed6252eee430667f93f7c7bbbd571817037035d068d1ec63814",
+  "govSafe": "0x3658e00f5ddb9fa0c7e9820e8d16c3c17eab73ca",
+  "timelock": "0xc30db0543412c6881a543390d2c21fbbff42805b",
+  "minDelay": 600,
+  "handoff": {
+    "transaction": "0x8649402fccf056bf523ba53cec87ac4425ed466347460eb4069345ce80097add",
+    "blockNumber": 20812661,
+    "blockHash": "0x9d86cef06d7fb39a766d468f70cf2e12e7df8fef6da2fee57db0f9c27313d967",
+    "status": 1,
+    "gasUsed": 871887,
+    "effect": "ProxyAdmin, StPROS, Oracle and Factory ownership to the Timelock; vault 001 admin to the Timelock; Timelock scheduleBatch(U); assertHandoff"
+  },
+  "upgrade": {
+    "transaction": "0xac1fd830e147cae17262763fee24e81cc27d06149bba897deb55c2cf1bf31e1b",
+    "blockNumber": 20813316,
+    "blockHash": "0xa4922beed48a867bc6311f1aba5e2d6e832e2c30e30d6adfa9df32f64ce889c0",
+    "status": 1,
+    "gasUsed": 1703264,
+    "effect": "Oracle, StPROS and Factory upgraded with migration; StPROS unbonding 86400 s; beacon to YieldVault V4; vault 001 OPERATOR to GOV; SlpDistributor SLPs and keeper; assertR4"
+  },
+  "before": {
+    "Oracle": "0x7746ef546d562b443ae4b4145541a3b1a3d75717",
+    "StPROS": "0xc096f8e4b1cc222899752a5504fde557a147c57b",
+    "YieldVaultFactory": "0x772e27a320a60aeeb0b5c68dc6c8633460ef5706",
+    "beacon": "0xba6f3053d3e1eab84a8237a46409df6c2d569ab9",
+    "owner": "0x3658e00f5ddb9fa0c7e9820e8d16c3c17eab73ca"
+  },
+  "after": {
+    "implementations": {
+      "oracle": "0x09c5ec5eb4e717c3c472d8c89812b7fad32929b5",
+      "stpros": "0xfd59860894e01773e9780b0d1dfae4ca2b56708d",
+      "factory": "0xfe34322dcd367b6cc3067a034e8f64b488bfbae9",
+      "beacon": "0xd42fef079a694fc3f6259a614ae271cba2d5ee65"
+    },
+    "oracle": {
+      "slp(reporter)": "0xd0c44d3079e97ff285dd7a3e4e0246320a9487e5",
+      "maxAprPpm": 300000,
+      "maxUpdateAmount": 80000000000000000000000,
+      "updateInterval": 72000,
+      "commissionRatePpm": 100000,
+      "owner": "0xc30db0543412c6881a543390d2c21fbbff42805b",
+      "guardian": "0xa046988889871c6c7abc69e63cccf9adb3e57ef5",
+      "pool": {
+        "T": 974848994537647201066334,
+        "V": 974848994537647201066334
+      }
+    },
+    "stpros": {
+      "unbondingPeriod": 86400,
+      "slp": "0xf772b375f93650f798bf724ce7a9a45c9e7a579f",
+      "bridgeVault": "0xf1df1cb080256f48e8702c24149136e4a6dec25e",
+      "owner": "0xc30db0543412c6881a543390d2c21fbbff42805b",
+      "guardian": "0xa046988889871c6c7abc69e63cccf9adb3e57ef5",
+      "totalSupply": 974848994537647201066334,
+      "queuedWithdrawal": 1196109664197029552323320,
+      "completedWithdrawal": 1194979080157442600930821,
+      "selfShareBalance": 0,
+      "wprosHeld": 0
+    },
+    "distributor": {
+      "slps": [
+        "0xec1d6163e05b3f5d0fb8f354881f6c8b793ad612",
+        "0xc53d2c9dd1e488e23ff77e219ca68d8138f90c2c",
+        "0xf1df1cb080256f48e8702c24149136e4a6dec25e",
+        "0xd0c44d3079e97ff285dd7a3e4e0246320a9487e5"
+      ],
+      "slpsOk": true,
+      "slpCount": 4,
+      "keeper": "0x8736e68f37c1156e09445ac2d395a139e58fcab4",
+      "owner": "0xc30db0543412c6881a543390d2c21fbbff42805b"
+    },
+    "factory": {
+      "owner": "0xc30db0543412c6881a543390d2c21fbbff42805b",
+      "guardian": "0xa046988889871c6c7abc69e63cccf9adb3e57ef5"
+    },
+    "vault001": {
+      "operatorGov": true,
+      "adminTimelock": true,
+      "totalSupply": 342003731281275242319114071215
+    },
+    "bridgeNativeBalance": 1130584039586951392499,
+    "proxyAdminOwner": "0xc30db0543412c6881a543390d2c21fbbff42805b",
+    "verifiedAtBlock": 20813404
+  },
+  "statePreserved": {
+    "stprosSupplyAfter == supplyBefore - escrow": true,
+    "bridgeReserve == queued - completed == escrow": true,
+    "queuedAndCompletedUnchanged": true,
+    "vault001SupplyUnchanged": true
+  },
+  "evidence": "faroo-contracts-reserch development-history/v4-release-readiness/mainnet-v4-release-gates-20261021/mainnet-execution/"
+}

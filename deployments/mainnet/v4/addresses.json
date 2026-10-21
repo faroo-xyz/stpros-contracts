@@ -1,0 +1,48 @@
+{
+  "chainId": 1672,
+  "release": "V4 (faroo-v4-mainnet-rev3-4slp-20261021)",
+  "verifiedAtBlock": 20814599,
+  "proxies": {
+    "Oracle": "0x051713fd66845a13bf23baca008c5c22c27ccb58",
+    "StPROS": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+    "YieldVaultFactory": "0xc9fb7dc52b0fb92c417d481442d2641637483881",
+    "BridgeVault": "0xf1df1cb080256f48e8702c24149136e4a6dec25e",
+    "SlpDistributor": "0xf772b375f93650f798bf724ce7a9a45c9e7a579f",
+    "YieldVault": "0x36f3d19dda7ed1428e3014ae6f2a75d70393b7e6"
+  },
+  "implementations": {
+    "SlpDistributor": "0x05a224a9cdd84cfca21866ae50fa0cd663e3752f",
+    "YieldVault": "0xd42fef079a694fc3f6259a614ae271cba2d5ee65",
+    "YieldVaultFactory": "0xfe34322dcd367b6cc3067a034e8f64b488bfbae9",
+    "Oracle": "0x09c5ec5eb4e717c3c472d8c89812b7fad32929b5",
+    "StPROS": "0xfd59860894e01773e9780b0d1dfae4ca2b56708d",
+    "BridgeVault": "0xa7d36cb9da47ba5123f9070fba4bb5239c58387e"
+  },
+  "governance": {
+    "timelock": "0xc30db0543412c6881a543390d2c21fbbff42805b",
+    "proxyAdmin": "0x4238ea4adfa2bd6a5fc9b5e245dc1900cf0258aa",
+    "beacon": "0x8618bfb59de57c6bff52638bf0c56f04cc58ed88",
+    "govSafe": "0x3658e00f5ddb9fa0c7e9820e8d16c3c17eab73ca",
+    "canSafe": "0xb3c8a7f291e128e5d1ff3e2aa09fe8a9b38fce76",
+    "guardianSafe": "0xa046988889871c6c7abc69e63cccf9adb3e57ef5"
+  },
+  "releaseAssertions": "0x10fdbced4a5d5d3cad54b690105f77556263e97c",
+  "actors": {
+    "keeper": "0x8736e68f37c1156e09445ac2d395a139e58fcab4",
+    "reporter": "0xd0c44d3079e97ff285dd7a3e4e0246320a9487e5",
+    "treasury": "0x3754fd5ec997c07ca528bb0bdcb0b4f5b93605df"
+  },
+  "slpDestinations": [
+    "0xec1d6163e05b3f5d0fb8f354881f6c8b793ad612",
+    "0xc53d2c9dd1e488e23ff77e219ca68d8138f90c2c",
+    "0xf1df1cb080256f48e8702c24149136e4a6dec25e",
+    "0xd0c44d3079e97ff285dd7a3e4e0246320a9487e5"
+  ],
+  "asset": {
+    "WPROS": "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0"
+  },
+  "outOfScope": {
+    "YieldVaultFactory_test": "0xbc3a9090bbf303d7c49ff8f3a7e9f48679b42d00",
+    "YieldVault_test": "0xc775dfaa7565f2aca5ddf5dd6837ceb846de591b"
+  }
+}

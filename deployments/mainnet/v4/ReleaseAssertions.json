@@ -1,0 +1,1235 @@
+{
+  "address": "0x10fdbced4a5d5d3cad54b690105f77556263e97c",
+  "chainId": 1672,
+  "transaction": {
+    "hash": "0xd54a226a090b66573a007a74f47b3d678d7d4291f93ad99e3594af38549bf6e8",
+    "nonce": 40,
+    "origin": "0x8ce84e9fa0101d317d8956d73610ad3e0e219d41"
+  },
+  "receipt": {
+    "blockHash": "0x8ff7148549ebfe5d3d395c1684c4ae87ca241ff915de505f860809d07a1eb275",
+    "blockNumber": 20755861,
+    "transactionIndex": 0,
+    "status": 1,
+    "gasUsed": 3277515
+  },
+  "runtimeKeccak": "0x633ffa1f29fa35a786c2f1fc98f378cdb49480769a29067f88dd383e9bd729d3",
+  "deploymentSource": "research mainnet-releaseassertions-20261020 (2648dfa)",
+  "verifiedAt": {
+    "block": 20814599,
+    "blockHash": "0x622932d7706c1c059c2122c881e78fd02c0f32a78a43bdb3b1202d0719825c46"
+  },
+  "contractName": "ReleaseAssertions",
+  "sourceName": "project/contracts/release/ReleaseAssertions.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "check",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        }
+      ],
+      "name": "ReleaseCheckFailed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ADMIN",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "CANCELLER",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "EXECUTOR",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "OPERATOR",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "PROPOSER",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "timelock",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "timelockHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "minDelay",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "gov",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "can",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "guardian",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "ops",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "deployer",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "proxyAdmin",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "proxyAdminHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "inventoryHash",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "role",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "account",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "expected",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct ReleaseAssertions.RoleCheck[]",
+              "name": "roles",
+              "type": "tuple[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "proxy",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "owner",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "implementation",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "implementationHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "guarded",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "paused",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct ReleaseAssertions.ProxyCheck[]",
+              "name": "proxies",
+              "type": "tuple[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "factory",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "beacon",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "implementation",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "implementationHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "hardened",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "creationClosed",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct ReleaseAssertions.BeaconCheck[]",
+              "name": "beacons",
+              "type": "tuple[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "vault",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "factory",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "round",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "termsHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "phase",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "hardened",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "retired",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "governed",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "residualRecovery",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct ReleaseAssertions.VaultCheck[]",
+              "name": "vaults",
+              "type": "tuple[]"
+            }
+          ],
+          "internalType": "struct ReleaseAssertions.Common",
+          "name": "e",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "oracle",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "stpros",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "bridge",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "distributor",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "reporter",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "treasury",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "keeper",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "commissionPpm",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "aprPpm",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "maxUpdateAmount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "interval",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "unbondingPeriod",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "maxWithdrawCount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "mainnetV1",
+              "type": "bool"
+            },
+            {
+              "internalType": "address[]",
+              "name": "destinations",
+              "type": "address[]"
+            }
+          ],
+          "internalType": "struct ReleaseAssertions.Core",
+          "name": "c",
+          "type": "tuple"
+        }
+      ],
+      "name": "assertCoreR4",
+      "outputs": [],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "timelock",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "timelockHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "minDelay",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "gov",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "can",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "guardian",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "ops",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "deployer",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "proxyAdmin",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "proxyAdminHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "inventoryHash",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "role",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "account",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "expected",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct ReleaseAssertions.RoleCheck[]",
+              "name": "roles",
+              "type": "tuple[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "proxy",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "owner",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "implementation",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "implementationHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "guarded",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "paused",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct ReleaseAssertions.ProxyCheck[]",
+              "name": "proxies",
+              "type": "tuple[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "factory",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "beacon",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "implementation",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "implementationHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "hardened",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "creationClosed",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct ReleaseAssertions.BeaconCheck[]",
+              "name": "beacons",
+              "type": "tuple[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "vault",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "factory",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "round",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "termsHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "phase",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "hardened",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "retired",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "governed",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "residualRecovery",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct ReleaseAssertions.VaultCheck[]",
+              "name": "vaults",
+              "type": "tuple[]"
+            }
+          ],
+          "internalType": "struct ReleaseAssertions.Common",
+          "name": "e",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "pendingOperation",
+          "type": "bytes32"
+        }
+      ],
+      "name": "assertHandoff",
+      "outputs": [],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "timelock",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "timelockHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "minDelay",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "gov",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "can",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "guardian",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "ops",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "deployer",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "proxyAdmin",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "proxyAdminHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "inventoryHash",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "role",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "account",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "expected",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct ReleaseAssertions.RoleCheck[]",
+              "name": "roles",
+              "type": "tuple[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "proxy",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "owner",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "implementation",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "implementationHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "guarded",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "paused",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct ReleaseAssertions.ProxyCheck[]",
+              "name": "proxies",
+              "type": "tuple[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "factory",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "beacon",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "implementation",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "implementationHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "hardened",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "creationClosed",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct ReleaseAssertions.BeaconCheck[]",
+              "name": "beacons",
+              "type": "tuple[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "vault",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "factory",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "round",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "termsHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "phase",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "hardened",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "retired",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "governed",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "residualRecovery",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct ReleaseAssertions.VaultCheck[]",
+              "name": "vaults",
+              "type": "tuple[]"
+            }
+          ],
+          "internalType": "struct ReleaseAssertions.Common",
+          "name": "e",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "oracle",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "stpros",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "bridge",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "distributor",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "reporter",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "treasury",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "keeper",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "commissionPpm",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "aprPpm",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "maxUpdateAmount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "interval",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "unbondingPeriod",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "maxWithdrawCount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "mainnetV1",
+              "type": "bool"
+            },
+            {
+              "internalType": "address[]",
+              "name": "destinations",
+              "type": "address[]"
+            }
+          ],
+          "internalType": "struct ReleaseAssertions.Core",
+          "name": "c",
+          "type": "tuple"
+        }
+      ],
+      "name": "assertR4",
+      "outputs": [],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "timelock",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "timelockHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "minDelay",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "gov",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "can",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "guardian",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "ops",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "deployer",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "proxyAdmin",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "proxyAdminHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "inventoryHash",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "role",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "account",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "expected",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct ReleaseAssertions.RoleCheck[]",
+              "name": "roles",
+              "type": "tuple[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "proxy",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "owner",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "implementation",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "implementationHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "guarded",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "paused",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct ReleaseAssertions.ProxyCheck[]",
+              "name": "proxies",
+              "type": "tuple[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "factory",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "beacon",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "implementation",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "implementationHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "hardened",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "creationClosed",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct ReleaseAssertions.BeaconCheck[]",
+              "name": "beacons",
+              "type": "tuple[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "vault",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "factory",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "round",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "termsHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "phase",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "hardened",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "retired",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "governed",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "residualRecovery",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct ReleaseAssertions.VaultCheck[]",
+              "name": "vaults",
+              "type": "tuple[]"
+            }
+          ],
+          "internalType": "struct ReleaseAssertions.Common",
+          "name": "e",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "pendingOperation",
+          "type": "bytes32"
+        }
+      ],
+      "name": "assertTestnetRecoveryHandoff",
+      "outputs": [],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "vault",
+          "type": "address"
+        }
+      ],
+      "name": "roundTermsHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  },
+  "canonicalRuntimeKeccak": "0x633ffa1f29fa35a786c2f1fc98f378cdb49480769a29067f88dd383e9bd729d3",
+  "artifact": {
+    "producedBy": "tools/ci/canonical.py (cache/native-r4/ReleaseAssertions/artifact.json)",
+    "reference": "tools/ci/r4-reference.json",
+    "abiSha256": "720fb9dd47e9671a0561b88b6ce1ccd29de29115b335d8ac57f70b14465b8f79",
+    "deployedBytecodeSha256": "f44f194f4c45c9b61c025484db8ed258cdaadadf45c14a1e4045e8f03a8b9080",
+    "creationBytecodeSha256": "f46f2559c899531f26784f4e5bc76236302eb2f51a883a80aa0ed34149768a9e"
+  },
+  "argsData": "0x"
+}

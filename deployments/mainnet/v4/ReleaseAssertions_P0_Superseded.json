@@ -1,0 +1,26 @@
+{
+  "address": "0x18505d547aec0aad1c138994a4297d2d210360fc",
+  "chainId": 1672,
+  "transaction": {
+    "hash": "0x9ca0a5eff945b1c70d77e531ac00755b9aa425109a7f19f1a93a5c53ed06fd79",
+    "nonce": 38,
+    "origin": "0x8ce84e9fa0101d317d8956d73610ad3e0e219d41"
+  },
+  "receipt": {
+    "blockHash": "0x3aca74bb24ccf79647a6d923424e52de55f6b794c70c3ff32d1be61ec8e8f683",
+    "blockNumber": 20736614,
+    "transactionIndex": 0,
+    "status": 1,
+    "gasUsed": 3262351
+  },
+  "runtimeKeccak": "0x11671edee21ee24f2651e0c39d6e946bf76c02feb60208ea8691a530138ef547",
+  "deploymentSource": "research P-0 (P-0 step 6; 415d416 records, d8dcf6d verification)",
+  "verifiedAt": {
+    "block": 20814599,
+    "blockHash": "0x622932d7706c1c059c2122c881e78fd02c0f32a78a43bdb3b1202d0719825c46"
+  },
+  "contractName": "ReleaseAssertions",
+  "status": "SUPERSEDED: P-0 step 6, two-Factory shape; cannot assert the V4 single-Factory release; replaced by ReleaseAssertions 0x10fdbced4a5d5d3cad54b690105f77556263e97c; kept as a record",
+  "abi": null,
+  "expectedRuntimeKeccak": "0x11671edee21ee24f2651e0c39d6e946bf76c02feb60208ea8691a530138ef547"
+}

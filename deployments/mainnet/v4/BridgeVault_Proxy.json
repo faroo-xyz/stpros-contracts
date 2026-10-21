@@ -1,0 +1,172 @@
+{
+  "address": "0xf1df1cb080256f48e8702c24149136e4a6dec25e",
+  "chainId": 1672,
+  "transaction": {
+    "hash": "0x60859253122773db6e7b780fe913cf61210132f9f12db47cd6608000fe1c884f",
+    "nonce": 39,
+    "origin": "0x8ce84e9fa0101d317d8956d73610ad3e0e219d41"
+  },
+  "receipt": {
+    "blockHash": "0xa0f33cf576cb454565084fb2a43193972be51884cbe4f746caf68cd4b6cb62e1",
+    "blockNumber": 20736618,
+    "transactionIndex": 0,
+    "status": 1,
+    "gasUsed": 910528
+  },
+  "runtimeKeccak": "0xe5e3693157141608a301682c8c228c0277eac7efc0b98b57f874ca49752b5fd8",
+  "deploymentSource": "research P-0 (P-0 step 7; 415d416 records, d8dcf6d verification)",
+  "verifiedAt": {
+    "block": 20814599,
+    "blockHash": "0x622932d7706c1c059c2122c881e78fd02c0f32a78a43bdb3b1202d0719825c46"
+  },
+  "contractName": "TransparentUpgradeableProxy",
+  "sourceName": "solc_0.8/openzeppelin/proxy/transparent/TransparentUpgradeableProxy.sol (OZ v4, the recorded legacy build)",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_logic",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "admin_",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_data",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "previousAdmin",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newAdmin",
+          "type": "address"
+        }
+      ],
+      "name": "AdminChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "beacon",
+          "type": "address"
+        }
+      ],
+      "name": "BeaconUpgraded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "implementation",
+          "type": "address"
+        }
+      ],
+      "name": "Upgraded",
+      "type": "event"
+    },
+    {
+      "stateMutability": "payable",
+      "type": "fallback"
+    },
+    {
+      "inputs": [],
+      "name": "admin",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "admin_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newAdmin",
+          "type": "address"
+        }
+      ],
+      "name": "changeAdmin",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "implementation",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "implementation_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newImplementation",
+          "type": "address"
+        }
+      ],
+      "name": "upgradeTo",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newImplementation",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "upgradeToAndCall",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "stateMutability": "payable",
+      "type": "receive"
+    }
+  ],
+  "expectedRuntimeKeccak": "0xe5e3693157141608a301682c8c228c0277eac7efc0b98b57f874ca49752b5fd8",
+  "argsData": "0x000000000000000000000000a7d36cb9da47ba5123f9070fba4bb5239c58387e0000000000000000000000004238ea4adfa2bd6a5fc9b5e245dc1900cf0258aa00000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000084fb162e03000000000000000000000000c30db0543412c6881a543390d2c21fbbff42805b0000000000000000000000006b0a44c64190279f7034b77c13a566e914fe5ec40000000000000000000000000000000000000000000000000000000000000001000000000000000000000000a046988889871c6c7abc69e63cccf9adb3e57ef500000000000000000000000000000000000000000000000000000000"
+}
