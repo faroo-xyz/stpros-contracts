@@ -4,7 +4,8 @@
 
 This document explains who controls the Faroo contracts on Pharos Mainnet, what each role can and cannot do, how
 governance transactions are executed, and which limits apply. It describes the **state after the V4 upgrade of
-2026-10-21**, read from chain at block 20,815,667 unless another block is given. Current parameter values are in
+2026-10-21**, read from chain at block 20,815,667 unless another block is given. The Timelock delay section includes
+the separately verified 2026-10-27 switch to 86,400 seconds. Current parameter values are in
 [PARAMETERS.md](PARAMETERS.md); emergency and custody procedures are in [RECOVERY.md](RECOVERY.md); the procedure for
 future upgrades is in [UPGRADES.md](UPGRADES.md).
 
@@ -19,7 +20,7 @@ flowchart LR
     GOV["GOV Safe<br/>3 of 5"]
     CAN["CAN Safe<br/>3 of 5"]
     GRD["Guardian Safe<br/>2 of 5"]
-    TL["TimelockController<br/>delay 600 s"]
+    TL["TimelockController<br/>delay 86,400 s"]
     PA["ProxyAdmin (OZ v4)"]
     CORE["StPROS, Oracle, BridgeVault,<br/>SlpDistributor, YieldVaultFactory"]
     BCN["Vault beacon"]
@@ -117,6 +118,10 @@ Rules for every Timelock operation:
 - Governance calls are prepared as reviewed, unsigned calldata. The repository tooling cannot sign or send
   transactions ([UPGRADES.md](UPGRADES.md)).
 
+Safe transaction packages are archived in [governance/](../governance/README.md).
+Entries distinguish original preparation metadata from verified execution records; check the package status and
+fresh chain state before use.
+
 ### Actions executed directly, without the Timelock
 
 These permissions act immediately, in a single transaction by their holder. They do not pass through the Timelock and
@@ -133,14 +138,19 @@ do not appear in its events.
 
 ### Timelock delay
 
-The current delay is **600 seconds**, chosen by the owner for the V4 configuration phase. During this phase every
-governance operation, including an upgrade, needs only 600 seconds of notice. This is a disclosed governance risk.
+The minimum delay is **86,400 seconds (24 hours)** following the 2026-10-27 switch.
+The GOV Safe scheduled a Timelock self-call to `updateDelay(86400)` using the previous
+600-second delay, then executed the same operation after it became Ready. Both
+transactions succeeded, and the operation is Done. The exact transactions, file
+hashes and pinned read-only verification are preserved in the
+[executed Safe archive](../governance/mainnet/20261027-delay-1day/README.md).
 
-The owner's policy is to raise the delay to **86,400 seconds (24 hours)** once configuration is complete. That needs a
-separate owner authorization and a Timelock operation calling `updateDelay(86400)` on the Timelock itself, scheduled
-with the current delay. After it executes, `getMinDelay()` must return 86,400 and no operation scheduled with the short
-delay may remain pending. Nothing switches automatically, and no Safe or account can change the delay outside the
-Timelock. At block 20,815,667, `getMinDelay()` returned 600.
+The V4 configuration phase used 600 seconds; at block 20,815,667, `getMinDelay()`
+returned 600. Nothing switched automatically. The separate operation raised the
+delay, and a new schedule with a delay below 86,400 seconds is now refused.
+Previously scheduled operations retain their original Ready times, so the
+post-execution history check also confirmed that no action-bearing operation
+remained pending. Re-read the current getter before preparing a new operation.
 
 ### Role separation
 

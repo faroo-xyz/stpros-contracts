@@ -8,7 +8,8 @@ returns them, who can change them and what they mean. Other documents link here 
 - **Source of values.** Read-only `eth_call` at **block 20,815,667** (2026-10-21 07:29:17 UTC) on
   `https://rpc.pharos.xyz`. They agree with the executed upgrade record
   [`V4_UpgradeReceipt.json`](../deployments/mainnet/v4/V4_UpgradeReceipt.json). Re-read the getters before relying on a
-  value: governance can change mutable parameters.
+  value: governance can change mutable parameters. The governance delay below has a separate
+  2026-10-27 execution verification linked from its row.
 - **"Timelock"** in *Mutable by* means a call scheduled by the GOV Safe on the TimelockController and executed after the
   Timelock delay ([GOVERNANCE.md](GOVERNANCE.md)). A **constant** can change only through a contract upgrade, which also
   goes through the Timelock.
@@ -143,7 +144,7 @@ values for each round with `openNextRound`. They apply to round 8 only.
 
 | Parameter | Current value | Source (getter) | Mutable by | Notes |
 |---|---|---|---|---|
-| Timelock minimum delay | 600 seconds | `TimelockController.getMinDelay()` | The Timelock itself: `updateDelay(uint256)`, scheduled by GOV and executed after the current delay | Configuration phase value. Raising it to 86,400 seconds (24 h) requires a separate owner authorization; it had not been done at block 20,815,667. See [GOVERNANCE.md](GOVERNANCE.md#timelock-delay) |
+| Timelock minimum delay | 86,400 seconds (24 h) | `TimelockController.getMinDelay()` | The Timelock itself: `updateDelay(uint256)`, scheduled by GOV and executed after the current delay | Raised from 600 seconds by the separately executed 2026-10-27 Timelock operation. See the [execution record](../governance/mainnet/20261027-delay-1day/README.md) and [GOVERNANCE.md](GOVERNANCE.md#timelock-delay) |
 | Guardian of all core contracts | `0xa046988889871c6c7abc69e63cccf9adb3e57ef5` | `guardian()` on each contract | Timelock: `setGuardian(address)` per contract | Pause only |
 | Owner of all core contracts and the ProxyAdmin | TimelockController | `owner()` | Two-step `transferOwnership` / `acceptOwnership`, through the Timelock | `renounceOwnership` is disabled on the core contracts |
 
@@ -157,5 +158,5 @@ different values for these items. They are superseded on mainnet:
 | Waiting period for new requests | 7 days ("unchanged") | 1 day (set in the upgrade transaction) |
 | Operational APR rule | 2 × expected gross APR | 3 × expected gross APR: 30 % for 10 % expected |
 | Report interval | at least 1 hour (contract minimum) | 20 hours |
-| Timelock delay | 48 hours in the earliest plan | 600 seconds now; 86,400 seconds later, after a separate authorization |
+| Timelock delay | 48 hours in the earliest plan | 600 seconds during configuration; raised to 86,400 seconds by a separate operation on 2026-10-27 |
 | Historical test factory and its vault | Retired in the release | Left out of V4 by owner decision; not upgraded and not retired ([GOVERNANCE.md](GOVERNANCE.md#out-of-scope-legacy-contracts)) |

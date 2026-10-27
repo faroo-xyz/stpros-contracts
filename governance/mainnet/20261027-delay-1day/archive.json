@@ -1,0 +1,31 @@
+{
+  "status": "UNSIGNED_PREPARATION_ONLY",
+  "chainId": 1672,
+  "archivedOn": "2026-10-27",
+  "taskId": "BD-NINGBO-STPROS-TIMELOCK-1DAY",
+  "sourceHead": "3f925b8421096cb64bd84e6bbe9e19c3d98145f5",
+  "govSafe": "0x3658e00f5ddb9fa0c7e9820e8d16c3c17eab73ca",
+  "timelock": "0xc30db0543412c6881a543390d2c21fbbff42805b",
+  "currentDelayAtPreparation": 600,
+  "newDelay": 86400,
+  "operationId": "0x9d22e0c9d0150ec6414dab01bb79eef24158e29cc2bb4a92676b4ba16c33c44b",
+  "salt": "0x78503ef29ded754a95655c23da0b5267b1861f514628c844a35e5b7117e9eb7c",
+  "predecessor": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "files": {
+    "01-schedule.safe.json": "d4fc43527864e242a8a27d12014b87ad79906acc552570b18bb25955f196b3d7",
+    "02-execute.safe.json": "d16b21a26e6244c8e1e9f51d3a449c1d3fd5c0ae1e31fe0cbd58ea11e1479524"
+  },
+  "provenance": "faroo-contracts-reserch/architecture-hardening/governance-delay-20261027/",
+  "evidenceAtPreparation": {
+    "fullScanBlock": 21389389,
+    "freshCheckBlock": 21389688,
+    "localForkChecksPassed": 11,
+    "independentAuthenticatedGC03": "NOT RUN",
+    "safeSignerManifestAndQueue": "INCOMPLETE"
+  },
+  "signed": false,
+  "submittedToSafe": false,
+  "broadcast": false,
+  "recordScope": "Original preparation snapshot; subsequent execution is recorded separately",
+  "executionRecord": "execution-verification.json"
+}

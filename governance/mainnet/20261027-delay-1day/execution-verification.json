@@ -1,0 +1,125 @@
+{
+  "status": "EXECUTED_AND_POSTCHECKED",
+  "checkedAtUTC": "2026-10-27T14:17:25.042005+00:00",
+  "chainId": 1672,
+  "rpc": "https://rpc.pharos.xyz",
+  "checkedBlock": 21409020,
+  "checkedBlockHash": "0x4c5bbcdfee681007f3d253de840ced18836a82d1e0c05e92c480ac81dfd5ab22",
+  "govSafe": "0x3658e00f5ddb9fa0c7e9820e8d16c3c17eab73ca",
+  "timelock": "0xc30db0543412c6881a543390d2c21fbbff42805b",
+  "operationId": "0x9d22e0c9d0150ec6414dab01bb79eef24158e29cc2bb4a92676b4ba16c33c44b",
+  "steps": [
+    {
+      "stage": "schedule",
+      "file": "01-schedule.safe.json",
+      "sha256": "d4fc43527864e242a8a27d12014b87ad79906acc552570b18bb25955f196b3d7",
+      "transactionHash": "0xc2f4576f98d0cb5c3174df79e1300e377f0cbcf94e69cdc03c341b3f4a9e2f5e",
+      "block": 21395039,
+      "blockHash": "0xfc46069a3bff6b44d63d0fe60bbd74ac28df644338bde4f8a0aeb17378270633",
+      "blockTimestamp": 1793096552,
+      "safeTxHash": "0xd808cb39af7c5e6dc522c244adab982f0ef98de2f8ecab94e55dcb14ebf04ceb",
+      "safeNonceBefore": 20,
+      "safeNonceAfter": 21,
+      "receiptStatus": 1,
+      "safeExecutionSuccess": true,
+      "outerSafeTarget": "0xC30dB0543412c6881A543390d2c21FbBFf42805b",
+      "outerSafeOperation": 0,
+      "transactionBuilderCalls": 1,
+      "allOrderedCallsMatchOnchain": "PASS"
+    },
+    {
+      "stage": "execute",
+      "file": "02-execute.safe.json",
+      "sha256": "d16b21a26e6244c8e1e9f51d3a449c1d3fd5c0ae1e31fe0cbd58ea11e1479524",
+      "transactionHash": "0x38274c2922cd88eeb47b45ef90f0908a039dc9a3e7c4de9cc9cdd3a490d1fa5e",
+      "block": 21406401,
+      "blockHash": "0x617cfc157831ab0208238d0a0bf80caa563aa21c1fefd252195611e8184bc79e",
+      "blockTimestamp": 1793107853,
+      "safeTxHash": "0xf10e8136fda45c64bc897893c1b62d39a545c39a7bf5eeaf5c8d15a0ae687054",
+      "safeNonceBefore": 21,
+      "safeNonceAfter": 22,
+      "receiptStatus": 1,
+      "safeExecutionSuccess": true,
+      "outerSafeTarget": "0xC30dB0543412c6881A543390d2c21FbBFf42805b",
+      "outerSafeOperation": 0,
+      "transactionBuilderCalls": 1,
+      "allOrderedCallsMatchOnchain": "PASS"
+    }
+  ],
+  "elapsedSeconds": 11301,
+  "postState": {
+    "minDelay": 86400,
+    "switchState": "Done",
+    "pending": [],
+    "shortScheduleRefused": true
+  },
+  "checkAfter": [],
+  "minDelayChangeEvent": {
+    "oldDuration": 600,
+    "newDuration": 86400,
+    "transactionHash": "0x38274c2922cd88eeb47b45ef90f0908a039dc9a3e7c4de9cc9cdd3a490d1fa5e"
+  },
+  "shortScheduleEthCall": {
+    "status": "REFUSED",
+    "error": "TimelockInsufficientDelay",
+    "provided": 600,
+    "required": 86400
+  },
+  "history": {
+    "baselineBlock": 21389389,
+    "baselineHash": "0x731de31280d7d40830135d693aaf7f90af88cdc26b994409d0679eb98011e9dc",
+    "baselineLogsSha256": "64896f863f7742a6c7217df1a6568e6de0491a0c8dbe4ced3f196efff2c2614f",
+    "scannedFrom": 21389390,
+    "scannedThrough": 21409020,
+    "maxBlocksPerRequest": 1000,
+    "tailLogCount": 4,
+    "operationCount": 2,
+    "pending": [],
+    "independentAuthenticatedGC03": "NOT RUN",
+    "literalAllOperationIds": "NOT_CLAIMED"
+  },
+  "historicalV4Recheck": {
+    "status": "PASS",
+    "operationId": "0x6918b2948262402d63bce93439012cbff5a451430e7dcf4c8f13d6da46f2c959",
+    "operationDone": true,
+    "steps": [
+      {
+        "stage": "handoff",
+        "file": "REVIEW-ONLY-mainnet-v4-handoff.safe.json",
+        "sha256": "ec371c940c56055a047916ba76193d36ff641bd75ad039a4d67a903c8c32768e",
+        "transactionHash": "0x8649402fccf056bf523ba53cec87ac4425ed466347460eb4069345ce80097add",
+        "block": 20812661,
+        "blockHash": "0x9d86cef06d7fb39a766d468f70cf2e12e7df8fef6da2fee57db0f9c27313d967",
+        "blockTimestamp": 1792564991,
+        "safeTxHash": "0x5c3ad54d9afd8388076a970384ed9157f7e3c4d6f36d984151c0af7b63365930",
+        "safeNonceBefore": 18,
+        "safeNonceAfter": 19,
+        "receiptStatus": 1,
+        "safeExecutionSuccess": true,
+        "outerSafeTarget": "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
+        "outerSafeOperation": 1,
+        "transactionBuilderCalls": 8,
+        "allOrderedCallsMatchOnchain": "PASS"
+      },
+      {
+        "stage": "upgrade",
+        "file": "REVIEW-ONLY-mainnet-v4-upgrade.safe.json",
+        "sha256": "490a76483e3396eb95ff92984aad9da1a75af5638f6ab116f746b19fdde63dfb",
+        "transactionHash": "0xac1fd830e147cae17262763fee24e81cc27d06149bba897deb55c2cf1bf31e1b",
+        "block": 20813316,
+        "blockHash": "0xa4922beed48a867bc6311f1aba5e2d6e832e2c30e30d6adfa9df32f64ce889c0",
+        "blockTimestamp": 1792565616,
+        "safeTxHash": "0xabacae533eb4cb9165a714cc73994be79090f624c78fe98648fb5cfa7b1ae738",
+        "safeNonceBefore": 19,
+        "safeNonceAfter": 20,
+        "receiptStatus": 1,
+        "safeExecutionSuccess": true,
+        "outerSafeTarget": "0xC30dB0543412c6881A543390d2c21FbBFf42805b",
+        "outerSafeOperation": 0,
+        "transactionBuilderCalls": 1,
+        "allOrderedCallsMatchOnchain": "PASS"
+      }
+    ]
+  },
+  "scope": "Read-only public RPC, exact ordered payloads and receipt/state checks; does not retrospectively certify release approvals."
+}
